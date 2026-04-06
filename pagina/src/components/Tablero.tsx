@@ -5,11 +5,18 @@ interface RankingRow { id: number; nickname: string; posicion: number; puntos: n
 export default function Tablero() {
   const [ranking, setRanking] = useState<RankingRow[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchRanking = async (): Promise<void> => {
-    setLoading(true);
-    try { const res = await fetch(`${API_URL}/api/ranking`); const data = await res.json(); if (data.success) setRanking(data.data); }
-    catch (_) {} finally { setLoading(false); }
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch(`${API_URL}/api/ranking`);
+      const data = await res.json();
+      if (data.success) setRanking(data.data);
+      else setError(data.error || "Error al cargar ranking");
+    } catch (e) {
+      setError("No se pudo conectar con la API");
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchRanking(); }, []);
@@ -27,6 +34,9 @@ export default function Tablero() {
           opacity: loading ? 0.6 : 1, transition: "opacity 0.2s",
         }}>Refresh</button>
       </div>
+      {loading && <p style={{ color: "#84878F", fontSize: "0.85rem" }}>Cargando ranking...</p>}
+      {error && <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>{error}</p>}
+      {!loading && !error && ranking.length === 0 && <p style={{ color: "#84878F", fontSize: "0.85rem", textAlign: "center", padding: "2rem 0" }}>No hay datos de ranking disponibles</p>}
       {ranking.length > 0 && (
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
           <thead>
