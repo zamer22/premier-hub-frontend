@@ -1,5 +1,5 @@
 import { useState } from "react";
-const API_URL: string = "http://localhost:4000";
+const API_URL: string = "https://api.zamer-o.com";
 interface SimResult { resultado: string; probabilidades: { pierde_local: number; empate: number; gana_local: number }; }
 interface Simulacion { id_simulacion: number; status: string; resultado: SimResult | null; cambios: any; partido_data: any; }
 

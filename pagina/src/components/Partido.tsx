@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-const API_URL: string = "http://localhost:4000";
+const API_URL: string = "https://api.zamer-o.com";
 
 interface ApiMatch {
   fixture: { id: number; date: string; status: { short: string; long: string } };
