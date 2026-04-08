@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-const API_URL: string = "http://localhost:4000";
+const API_URL: string = "https://api.zamer-o.com";
 
 interface Producto { id_producto: number; nombre: string; costo: string; tipo: string; stock: number; es_nuevo: boolean; equipo: string | null; imagen: string | null; }
 
