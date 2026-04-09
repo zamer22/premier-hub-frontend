@@ -3,7 +3,8 @@ import { useState } from "react";
 interface LoginPageProps {
   onLoginSuccess: (user: any) => void;
 }
-// iconos de ojo para show y hide (me ayudo chat a hacerlos)
+
+// iconos de ojo para show y hide
 const EyeOpen = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#84878F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -28,10 +29,23 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  // --- NUEVA LÓGICA DE SUBMIT ---
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLoginSuccess({ nickname: username || email, email });
+
+    if (isRegister) {
+      // Registro: entra directo usando el username y el email
+      onLoginSuccess({ nickname: username, email });
+    } else {
+      // Login hardcodeado
+      if (email === "admin@premierhub.com" && password === "1234") {
+        onLoginSuccess({ nickname: "Prueba1", email });
+      } else {
+        alert("Credenciales incorrectas. Usa admin@premierhub.com / 1234");
+      }
+    }
   };
+  // ------------------------------
 
   const handleGoogle = () => {
     onLoginSuccess({ nickname: "Google User", email: "google@test.com" });
