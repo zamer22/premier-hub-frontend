@@ -117,7 +117,7 @@ export default function Partido() {
       {/* Proximos */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-          <div style={{ width: "4px", height: "20px", background: "#263a55", borderRadius: "2px" }} />
+          <div style={{ width: "4px", height: "20px", background: "#E90052", borderRadius: "2px" }} />
           <h3 style={{ color: "#263a55", fontSize: "1rem" }}>Proximos Partidos</h3>
         </div>
         {proximos.length === 0 && <p style={{ fontSize: "0.85rem", color: "#84878F" }}>Sin proximos partidos</p>}

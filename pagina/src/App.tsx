@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Tablero from "./components/Tablero";
 import Partido from "./components/Partido";
 import Simulador from "./components/Simulador";
@@ -16,7 +16,14 @@ const TABS: { key: Section; label: string }[] = [
 ];
 
 export default function App() {
-  const [tab, setTab] = useState<Section>("tablero");
+  const [tab, setTab] = useState<Section>(() => {
+    const savedTab = localStorage.getItem("activeTab") as Section | null;
+    return savedTab ?? "tablero";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("activeTab", tab);
+  }, [tab]);
 
   return (
     <div style={{ minHeight: "100vh", background: "#f5f6f8" }}>
