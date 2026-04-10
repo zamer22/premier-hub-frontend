@@ -1,37 +1,21 @@
-import { useEffect, useState } from "react";
 import Tablero from "./components/Tablero";
 import Partido from "./components/Partido";
 import Simulador from "./components/Simulador";
 import Tienda from "./components/Tienda";
-import Noticias from "./components/NoticiasLanding";
+import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 
-type Section =
-  | "tablero"
-  | "partido"
-  | "noticias"
-  | "tienda"
-  | "vr-arena"
-  | "simulador";
+type Section = "tablero" | "partido" | "noticias" | "tienda" | "vr-arena" | "simulador";
 
-const TABS: { key: Section; label: string }[] = [
-  { key: "tablero", label: "Tablero" },
-  { key: "partido", label: "Partido" },
-  { key: "tienda", label: "Tienda" },
-  { key: "simulador", label: "Simulador" },
-  { key: "noticias", label: "Noticias" },
-  { key: "vr-arena", label: "VR Arena" },
+const TABS: { key: Section; label: string; path: string }[] = [
+  { key: "tablero", label: "Tablero", path: "/tablero" },
+  { key: "partido", label: "Partido", path: "/partido" },
+  { key: "tienda", label: "Tienda", path: "/tienda" },
+  { key: "simulador", label: "Simulador", path: "/simulador" },
+  { key: "noticias", label: "Noticias", path: "/noticias" },
+  { key: "vr-arena", label: "VR Arena", path: "/vr-arena" },
 ];
 
 export default function App() {
-  const [tab, setTab] = useState<Section>(() => {
-    const savedTab = localStorage.getItem("activeTab") as Section | null;
-    return savedTab ?? "tablero";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("activeTab", tab);
-  }, [tab]);
-
   return (
     <div style={{ minHeight: "100vh", background: "#f5f6f8" }}>
       <nav
@@ -56,28 +40,32 @@ export default function App() {
         >
           PREMIER<span style={{ color: "#fff" }}>HUB</span>
         </span>
+
         {TABS.map((t) => (
-          <button
+          <NavLink
             key={t.key}
-            onClick={() => setTab(t.key)}
-            style={{
-              background: tab === t.key ? "rgba(233,0,82,0.15)" : "none",
+            to={t.path}
+            style={({ isActive }: { isActive: boolean }) => ({
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              background: isActive ? "rgba(233,0,82,0.15)" : "none",
               border: "none",
               cursor: "pointer",
               fontSize: "0.85rem",
               padding: "0.5rem 1rem",
               borderRadius: "6px",
-              color: tab === t.key ? "#fff" : "#84878F",
-              fontWeight: tab === t.key ? 700 : 500,
-              borderBottom:
-                tab === t.key ? "2px solid #871d54" : "2px solid transparent",
+              color: isActive ? "#fff" : "#84878F",
+              fontWeight: isActive ? 700 : 500,
+              borderBottom: isActive ? "2px solid #871d54" : "2px solid transparent",
               transition: "all 0.2s ease",
-            }}
+            })}
           >
             {t.label}
-          </button>
+          </NavLink>
         ))}
       </nav>
+
       <div
         style={{
           padding: "2rem",
@@ -86,24 +74,45 @@ export default function App() {
           animation: "fadeIn 0.3s ease",
         }}
       >
-        {tab === "tablero" && <Tablero />}
-        {tab === "partido" && <Partido />}
-        {tab === "simulador" && <Simulador />}
-        {tab === "tienda" && <Tienda />}
-        {tab === "noticias" && <Noticias />}
-        {tab === "vr-arena" && (
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "12px",
-              padding: "3rem",
-              textAlign: "center",
-              color: "#84878F",
-            }}
-          >
-            VR Arena - Proximamente
-          </div>
-        )}
+        <Routes>
+          <Route path="/" element={<Navigate to="/tablero" replace />} />
+          <Route path="/tablero" element={<Tablero />} />
+          <Route path="/partido" element={<Partido />} />
+          <Route path="/simulador" element={<Simulador />} />
+          <Route path="/tienda" element={<Tienda />} />
+          <Route
+            path="/noticias"
+            element={
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: "12px",
+                  padding: "3rem",
+                  textAlign: "center",
+                  color: "#84878F",
+                }}
+              >
+                Noticias - Proximamente
+              </div>
+            }
+          />
+          <Route
+            path="/vr-arena"
+            element={
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: "12px",
+                  padding: "3rem",
+                  textAlign: "center",
+                  color: "#84878F",
+                }}
+              >
+                VR Arena - Proximamente
+              </div>
+            }
+          />
+        </Routes>
       </div>
     </div>
   );
