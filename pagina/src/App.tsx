@@ -1,9 +1,9 @@
 import { useState } from "react";
-import Tablero from "./components/Tablero";
-import Partido from "./components/Partido";
-import Simulador from "./components/Simulador";
-import Tienda from "./components/Tienda";
-import Noticias from "./components/NoticiasLanding";
+import Tablero from "./pages/Tablero";
+import Partido from "./pages/Partido";
+import Simulador from "./pages/Simulador";
+import Tienda from "./pages/Tienda";
+import Noticias from "./pages/NoticiasLanding";
 
 type Section =
   | "tablero"
@@ -84,20 +84,8 @@ export default function App() {
         {tab === "simulador" && <Simulador />}
         {tab === "tienda" && <Tienda />}
         {tab === "noticias" && <Noticias />}
-        {tab === "vr-arena" && (
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "12px",
-              padding: "3rem",
-              textAlign: "center",
-              color: "#84878F",
-            }}
-          >
-            VR Arena - Proximamente
+        {tab === "vr-arena" && <div>VR Arena - Proximamente</div>}
           </div>
-        )}
-      </div>
     </div>
   );
 }
