@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-const API_URL: string = "https://api.zamer-o.com";
+const API_URL: string = "http://localhost:4000";
 
 interface ApiMatch {
   fixture: { id: number; date: string; status: { short: string; long: string } };
@@ -34,8 +34,9 @@ export default function Partido() {
         if (p.success) setProximos(p.data.slice(0, 5));
         if (r.success) setResultados(r.data.slice(0, 5));
         if (s.success && Array.isArray(s.data)) setStandings(s.data);
-      } catch (_) {
-        setError("Error cargando datos");
+      } catch (err) {
+        console.error("Error cargando datos:", err);
+        setError(`Error cargando datos: ${err instanceof Error ? err.message : String(err)}`);
       }
       setLoading(false);
     };
