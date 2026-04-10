@@ -18,18 +18,18 @@ const TABS: { key: Section; label: string }[] = [
 
 export default function App() {
   const [user, setUser] = useState<any>(() => {
-    const saved = localStorage.getItem("user");
+    const saved = localStorage.getItem("ph_user");
     return saved ? JSON.parse(saved) : null;
   });
   const [tab, setTab] = useState<Section>("tablero");
 
   const handleLoginSuccess = (u: any) => {
-    localStorage.setItem("user", JSON.stringify(u));
+    localStorage.setItem("ph_user", JSON.stringify(u));
     setUser(u);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("ph_user");
     setUser(null);
   };
 
@@ -60,7 +60,7 @@ export default function App() {
         ))}
 
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "1rem" }}>
-          {/* Badge del usuario con borde azul claro */}
+          {/* Badge usuario — muestra dinero si existe */}
           <div style={{
             display: "flex", alignItems: "center", gap: "0.5rem",
             border: "1.5px solid #7eb8d4",
@@ -75,6 +75,11 @@ export default function App() {
             <span style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
               {user.nickname || user.email}
             </span>
+            {user.dinero !== undefined && (
+              <span style={{ color: "#E90052", fontSize: "0.75rem", fontWeight: 700, marginLeft: "0.25rem" }}>
+                💰 {Number(user.dinero).toLocaleString()}
+              </span>
+            )}
           </div>
 
           <button onClick={handleLogout} style={{
