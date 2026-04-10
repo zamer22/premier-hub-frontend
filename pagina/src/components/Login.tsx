@@ -4,7 +4,8 @@ interface LoginPageProps {
   onLoginSuccess: (user: any) => void;
 }
 
-// iconos de ojo para show y hide
+const API_URL: string = "https://api.zamer-o.com";
+
 const EyeOpen = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#84878F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -28,27 +29,69 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // --- NUEVA LÓGICA DE SUBMIT ---
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isRegister) {
-      // Registro: entra directo usando el username y el email
-      onLoginSuccess({ nickname: username, email });
+      if (password !== confirmPassword) {
+        alert("Las contraseñas no coinciden");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/api/auth/registro`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            correo: email,
+            nombre_usuario: username,
+            nickname: username,
+            contrasena: password,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          onLoginSuccess(data.user);
+        } else {
+          alert(data.error || "Error al registrarse");
+        }
+      } catch {
+        alert("No se pudo conectar con el servidor");
+      } finally {
+        setLoading(false);
+      }
+
     } else {
-      // Login hardcodeado
-      if (email === "admin@premierhub.com" && password === "1234") {
-        onLoginSuccess({ nickname: "Prueba1", email });
-      } else {
-        alert("Credenciales incorrectas. Usa admin@premierhub.com / 1234");
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            correo: email,
+            contrasena: password,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          onLoginSuccess(data.user);
+        } else {
+          alert(data.error || "Credenciales incorrectas");
+        }
+      } catch {
+        alert("No se pudo conectar con el servidor");
+      } finally {
+        setLoading(false);
       }
     }
   };
-  // ------------------------------
 
   const handleGoogle = () => {
-    onLoginSuccess({ nickname: "Google User", email: "google@test.com" });
+    // TODO: conectar Supabase OAuth
+    alert("Google login próximamente");
   };
 
   return (
@@ -131,8 +174,8 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
               </p>
             )}
 
-            <button type="submit" style={s.mainBtn}>
-              {isRegister ? "Registrarse" : "Iniciar sesión"}
+            <button type="submit" style={{ ...s.mainBtn, opacity: loading ? 0.7 : 1 }} disabled={loading}>
+              {loading ? "Cargando..." : isRegister ? "Registrarse" : "Iniciar sesión"}
             </button>
 
             <div style={s.divider}>
