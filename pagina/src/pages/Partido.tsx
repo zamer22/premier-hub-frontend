@@ -14,6 +14,7 @@ interface Standing {
   rank: number;
   team: { name: string; logo: string };
   points: number;
+  form?: string;
   all: {
     played: number;
     win: number;
@@ -64,6 +65,42 @@ export default function Partido() {
     });
   };
 
+  const renderLastFive = (form?: string) => {
+    if (!form) return <span className="partido__form-empty">-</span>;
+
+    const results = form.slice(-5).split("");
+
+    return (
+      <div className="partido__form">
+        {results.map((result, index) => {
+          let className = "partido__form-badge partido__form-badge--neutral";
+          let symbol = "•";
+          let label = "Sin dato";
+
+          if (result === "W") {
+            className = "partido__form-badge partido__form-badge--win";
+            symbol = "✓";
+            label = "Victoria";
+          } else if (result === "D") {
+            className = "partido__form-badge partido__form-badge--draw";
+            symbol = "–";
+            label = "Empate";
+          } else if (result === "L") {
+            className = "partido__form-badge partido__form-badge--loss";
+            symbol = "✕";
+            label = "Derrota";
+          }
+
+          return (
+            <span key={`${result}-${index}`} className={className} title={label}>
+              {symbol}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   const MatchCard = ({ m }: { m: ApiMatch }) => (
     <div className="partido__match-card">
       <div className="partido__match-side">
@@ -82,7 +119,7 @@ export default function Partido() {
     </div>
   );
 
-  if (loading) return <p className="partido__loading">Cargando datos de la Premier League...</p>;
+  if (loading) return <p className="partido__loading">Cargando datos...</p>;
   if (error) return <p className="partido__error">{error}</p>;
 
   return (
@@ -98,28 +135,35 @@ export default function Partido() {
             <table className="partido__table">
               <thead>
                 <tr className="partido__table-head-row">
-                  {["#", "Equipo", "PJ", "G", "E", "P", "GF", "GC", "DG", "Pts"].map((h) => (
-                    <th key={h} className="partido__th">
-                      {h}
-                    </th>
-                  ))}
+                  {["#", "Equipo", "PJ", "G", "E", "P", "GF", "GC", "DG", "Últimos 5", "Pts"].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className={h === "Últimos 5" ? "partido__th partido__th--form" : "partido__th"}
+                      >
+                        {h}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
               <tbody>
-                {standings.slice(0, 10).map((s, i) => (
+                {standings.map((s, i) => (
                   <tr
                     key={s.rank}
                     className={i % 2 === 0 ? "partido__tr--even" : "partido__tr--odd"}
                   >
                     <td className="partido__td partido__td--rank">{s.rank}</td>
 
-                    <td className="partido__team-cell">
-                      <img
-                        src={s.team.logo}
-                        alt={s.team.name}
-                        className="partido__team-logo--small"
-                      />
-                      <span className="partido__team-name">{s.team.name}</span>
+                    <td className="partido__td">
+                      <div className="partido__team-cell">
+                        <img
+                          src={s.team.logo}
+                          alt={s.team.name}
+                          className="partido__team-logo--small"
+                        />
+                        <span className="partido__team-name">{s.team.name}</span>
+                      </div>
                     </td>
 
                     <td className="partido__td">{s.all.played}</td>
@@ -140,6 +184,10 @@ export default function Partido() {
                     >
                       {s.goalsDiff > 0 ? "+" : ""}
                       {s.goalsDiff}
+                    </td>
+
+                    <td className="partido__td partido__td--form">
+                      {renderLastFive(s.form)}
                     </td>
 
                     <td className="partido__td partido__points">{s.points}</td>
