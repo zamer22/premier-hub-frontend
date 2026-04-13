@@ -195,7 +195,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 style={{ color: "#E90052", fontWeight: 700, cursor: "pointer" }}
                 onClick={() => setIsRegister(!isRegister)}
               >
-                {isRegister ? "inicia sesión aquí" : "regístrate aquí"}
+                {isRegister ? "inicia sesión aquí" : "Regístrate aquí"}
               </span>
             </p>
           </form>
