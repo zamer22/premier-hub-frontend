@@ -716,3 +716,358 @@
     overflow-y: visible;
   }
 }
+
+/* partidos en vivo y asi */
+
+/* =============================================
+   PARTIDOS VIVO — agregar al final de Partido.css
+   ============================================= */
+
+/* Layout raíz — override del grid de .partido para esta vista */
+.pv_root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Header */
+.pv_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pv_live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pv_live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e90052;
+}
+
+/* Scoreboard */
+.pv_scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.pv_logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.pv_score-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pv_stadium-tag {
+  background: #263a55;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pv_score-big {
+  font-size: 2rem;
+  font-weight: 800;
+  padding: 0.6rem 2rem;
+}
+
+.pv_minute-accent {
+  color: #e90052;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Grid principal */
+.pv_grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Tabs */
+.pv_tabs {
+  display: flex;
+  margin-bottom: 1.25rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+.pv_tab {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-right: 1px solid #eee;
+  cursor: pointer;
+  background: #fff;
+  color: #84878f;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.pv_tab--active {
+  background: #e90052;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Cancha */
+.pv_pitch {
+  background: #2d7a4f;
+  border-radius: 10px;
+  height: 220px;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.pv_pitch-midline {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.pv_pitch-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.pv_pitch-area {
+  position: absolute;
+  left: 28%;
+  right: 28%;
+  height: 22%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.pv_pitch-area--top { top: 5%; }
+.pv_pitch-area--bottom { bottom: 5%; }
+
+.pv_dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Alineaciones */
+.pv_lineup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pv_lineup-title {
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.pv_lineup-title--home { color: #263a55; }
+.pv_lineup-title--away { color: #e90052; }
+
+.pv_player-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.8rem;
+}
+
+.pv_player-num {
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-weight: 700;
+  font-size: 0.7rem;
+  min-width: 22px;
+  text-align: center;
+  color: #fff;
+}
+
+.pv_player-num--home { background: #263a55; }
+.pv_player-num--away { background: #e90052; }
+
+/* Estadísticas */
+.pv_prob-box {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pv_prob-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #263a55;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.pv_prob-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.pv_prob-home { font-weight: 700; color: #263a55; }
+.pv_prob-away { font-weight: 700; color: #e90052; }
+
+.pv_prob-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pv_prob-bar--home { background: #263a55; }
+.pv_prob-bar--draw { background: #84878f; }
+.pv_prob-bar--away { background: #e90052; }
+
+.pv_stats-section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #84878f;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.pv_stat-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.85rem;
+}
+
+.pv_stat-home { font-weight: 600; color: #263a55; }
+.pv_stat-label { color: #84878f; font-size: 0.75rem; text-align: center; min-width: 110px; }
+.pv_stat-away { font-weight: 600; color: #e90052; text-align: right; }
+
+/* H2H */
+.pv_h2h-row {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pv_h2h-row--bordered { border-bottom: 1px solid #f0f0f0; }
+
+.pv_h2h-date { min-width: 65px; padding-top: 0.4rem; }
+
+.pv_h2h-divider {
+  width: 1px;
+  background: #eee;
+  flex-shrink: 0;
+}
+
+.pv_h2h-matches {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pv_h2h-team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pv_h2h-goal {
+  border-radius: 6px;
+  padding: 0.15rem 0.6rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  min-width: 28px;
+  text-align: center;
+}
+
+.pv_h2h-goal--winner { background: #263a55; color: #fff; }
+.pv_h2h-goal--loser { background: transparent; color: #84878f; }
+
+/* Panel sustituciones */
+.pv_subs-panel {
+  padding: 1.25rem;
+}
+
+.pv_subs-selector {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  background: #f5f6f8;
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.pv_subs-btn {
+  flex: 1;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.pv_subs-btn--active { background: #263a55; }
+
+.pv_subs-num {
+  background: #f0f0f0;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .pv_grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pv_scoreboard {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
