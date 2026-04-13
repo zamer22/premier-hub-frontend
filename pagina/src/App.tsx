@@ -27,6 +27,14 @@ function getTabFromUrl(): Section {
   return VALID_TABS.includes(p) ? p : "tablero";
 }
 
+function getSectionFromLocation(pathname: string): Section {
+  if (pathname === "/") {
+    return getTabFromUrl();
+  }
+
+  return getSectionFromPath(pathname);
+}
+
 function getSectionFromPath(pathname: string): Section {
   const section = pathname.replace(/^\/+/, "").split("/")[0];
   const match = TABS.find((tab) => tab.key === section);
@@ -78,17 +86,45 @@ function UserIcon() {
 }
 
 export default function App() {
-  const [tab,            setTabState]      = useState<Section>(getTabFromUrl);
+  const [pathname,       setPathname]      = useState(() => window.location.pathname);
+  const [tab,            setTabState]      = useState<Section>(() =>
+    getSectionFromLocation(window.location.pathname),
+  );
   const [user,           setUser]          = useState<any>(null);
   const [oauthNuevo,     setOauthNuevo]    = useState<{ correo: string; nombre: string } | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
+  const syncLocationState = () => {
+    const nextPathname = window.location.pathname;
+    setPathname(nextPathname);
+    setTabState(getSectionFromLocation(nextPathname));
+  };
+
   const setTab = (next: Section) => {
     const url = new URL(window.location.href);
-    url.searchParams.set("tab", next);
-    window.history.replaceState(null, "", url.toString());
-    setTabState(next);
+
+    if (next === "tablero") {
+      url.pathname = "/";
+      url.searchParams.delete("tab");
+    } else if (next === "noticias") {
+      url.pathname = "/noticias";
+      url.searchParams.delete("tab");
+    } else {
+      url.pathname = "/";
+      url.searchParams.set("tab", next);
+    }
+
+    window.history.pushState({}, "", url.toString());
+    syncLocationState();
   };
+
+  useEffect(() => {
+    window.addEventListener("popstate", syncLocationState);
+
+    return () => {
+      window.removeEventListener("popstate", syncLocationState);
+    };
+  }, []);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -145,6 +181,8 @@ export default function App() {
   }
 
   if (!user) return <Login onLoginSuccess={(u) => setUser(u)} />;
+
+  const isNewsDetailRoute = /^\/noticias\/\d+\/?$/.test(pathname);
 
   /* ── App ── */
   return (
@@ -215,7 +253,8 @@ export default function App() {
             onSaldoChange={(s: number) => setUser({ ...user, dinero: s })}
           />
         )}
-        {tab === "noticias"  && <Noticias />}
+        {tab === "noticias"  && !isNewsDetailRoute && <Noticias />}
+        {tab === "noticias"  && isNewsDetailRoute && <Noticia />}
         {tab === "vr-arena"  && (
           <div className="flex flex-col items-center justify-center mt-24 gap-3">
             <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">VR ARENA</span>
