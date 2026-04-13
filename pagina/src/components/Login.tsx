@@ -4,7 +4,7 @@ interface LoginPageProps {
   onLoginSuccess: (user: any) => void;
 }
 
-const API_URL: string = "https://api.zamer-o.com";
+const API_URL: string = "http://localhost:4000";
 
 const EyeOpen = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#84878F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
