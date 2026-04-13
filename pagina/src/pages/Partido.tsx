@@ -26,72 +26,78 @@ interface Standing {
   goalsDiff: number;
 }
 
-const LIVE_MATCHES_MOCK: LiveMatch[] = [
-  {
-    id: 1,
-    league: "Premier League",
-    minute: "67'",
-    stadium: "Anfield",
-    status: "Segundo tiempo",
-    homeTeam: {
-      name: "Liverpool",
-      logo: "https://media.api-sports.io/football/teams/40.png",
-      score: 2,
-    },
-    awayTeam: {
-      name: "Chelsea",
-      logo: "https://media.api-sports.io/football/teams/49.png",
-      score: 1,
-    },
-  },
-  {
-    id: 2,
-    league: "Premier League",
-    minute: "34'",
-    stadium: "Emirates Stadium",
-    status: "Primer tiempo",
-    homeTeam: {
-      name: "Arsenal",
-      logo: "https://media.api-sports.io/football/teams/42.png",
-      score: 1,
-    },
-    awayTeam: {
-      name: "Tottenham",
-      logo: "https://media.api-sports.io/football/teams/47.png",
-      score: 0,
-    },
-  },
-];
+interface LiveMatchApi {
+  id: number;
+  league: string;
+  minute: string;
+  stadium: string;
+  status: string;
+  home_name: string;
+  home_logo: string;
+  home_score: number;
+  away_name: string;
+  away_logo: string;
+  away_score: number;
+}
 
 export default function Partido() {
   const [proximos, setProximos] = useState<ApiMatch[]>([]);
   const [resultados, setResultados] = useState<ApiMatch[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
+  const [enVivo, setEnVivo] = useState<LiveMatch[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedLiveMatch, setSelectedLiveMatch] = useState<LiveMatch | null>(null);
-  const enVivo = LIVE_MATCHES_MOCK;
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [p, r, s] = await Promise.all([
+        const [p, r, s, l] = await Promise.all([
           fetch(`${API_URL}/api/partidos/proximos`).then((r) => r.json()),
           fetch(`${API_URL}/api/partidos/resultados`).then((r) => r.json()),
           fetch(`${API_URL}/api/partidos/standings`).then((r) => r.json()),
+          fetch(`${API_URL}/api/partidos/live`).then((r) => r.json()),
         ]);
 
         if (p.success) setProximos(p.data.slice(0, 5));
         if (r.success) setResultados(r.data.slice(0, 5));
         if (s.success && Array.isArray(s.data)) setStandings(s.data);
+
+        if (l.success && Array.isArray(l.data)) {
+          const mappedLive: LiveMatch[] = l.data.map((m: LiveMatchApi) => ({
+            id: m.id,
+            league: m.league,
+            minute: m.minute,
+            stadium: m.stadium,
+            status: m.status,
+            homeTeam: {
+              name: m.home_name,
+              logo: m.home_logo,
+              score: m.home_score ?? 0,
+            },
+            awayTeam: {
+              name: m.away_name,
+              logo: m.away_logo,
+              score: m.away_score ?? 0,
+            },
+          }));
+
+          setEnVivo(mappedLive);
+        } else {
+          setEnVivo([]);
+        }
       } catch (err) {
         console.error("Error cargando datos:", err);
         setError(`Error cargando datos: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     load();
+
+    const interval = setInterval(load, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const formatDate = (d: string): string => {
@@ -223,12 +229,13 @@ export default function Partido() {
                     <td className="partido_td">{s.all.goals.against}</td>
 
                     <td
-                      className={`partido_td ${s.goalsDiff > 0
+                      className={`partido_td ${
+                        s.goalsDiff > 0
                           ? "partido_goal-diff--positive"
                           : s.goalsDiff < 0
                             ? "partido_goal-diff--negative"
                             : "partido_goal-diff--neutral"
-                        }`}
+                      }`}
                     >
                       {s.goalsDiff > 0 ? "+" : ""}
                       {s.goalsDiff}
