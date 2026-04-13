@@ -1,4 +1,4 @@
-import { useEffect, useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Tablero    from "./pages/Tablero";
 import Partido    from "./pages/Partido";
 import Simulador  from "./pages/Simulador";
