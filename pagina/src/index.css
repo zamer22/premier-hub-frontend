@@ -1,4 +1,65 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #f5f6f8; color: #1a1a2e; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@import "tailwindcss";
+
+/* ── Design tokens ── */
+@theme {
+  --color-navy:     #263a55;
+  --color-crimson:  #E90052;
+  --color-bordeaux: #871d54;
+  --color-muted:    #84878F;
+  --color-surface:  #f5f6f8;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #f5f6f8;
+  color: #1a1a2e;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+  Tailwind v4 preflight strips browser defaults from headings, lists, images, etc.
+  Restore these for the existing components that rely on them (they use inline styles
+  for sizes but not for the tag-level defaults Tailwind removes).
+*/
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: revert;
+    font-size: revert;
+    line-height: revert;
+    margin: revert;
+  }
+  p { margin: revert; }
+  ol, ul, menu { list-style: revert; padding: revert; }
+  img, svg, video { display: revert; }
+  button { font-family: inherit; cursor: pointer; }
+  a { color: revert; text-decoration: revert; }
+  table { border-collapse: collapse; }
+  input, select, textarea { font-family: inherit; }
+}
+
+/* ── Global animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+.animate-fade-in  { animation: fadeIn  0.3s ease both; }
+.animate-slide-up { animation: slideUp 0.3s ease both; }
