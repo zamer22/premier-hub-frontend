@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "../estilos/Partido.css";
+import PartidosVivo, { type LiveMatch } from "./PartidosVivo";
 
 const API_URL: string = "http://localhost:4000";
 
@@ -25,12 +26,51 @@ interface Standing {
   goalsDiff: number;
 }
 
+const LIVE_MATCHES_MOCK: LiveMatch[] = [
+  {
+    id: 1,
+    league: "Premier League",
+    minute: "67'",
+    stadium: "Anfield",
+    status: "Segundo tiempo",
+    homeTeam: {
+      name: "Liverpool",
+      logo: "https://media.api-sports.io/football/teams/40.png",
+      score: 2,
+    },
+    awayTeam: {
+      name: "Chelsea",
+      logo: "https://media.api-sports.io/football/teams/49.png",
+      score: 1,
+    },
+  },
+  {
+    id: 2,
+    league: "Premier League",
+    minute: "34'",
+    stadium: "Emirates Stadium",
+    status: "Primer tiempo",
+    homeTeam: {
+      name: "Arsenal",
+      logo: "https://media.api-sports.io/football/teams/42.png",
+      score: 1,
+    },
+    awayTeam: {
+      name: "Tottenham",
+      logo: "https://media.api-sports.io/football/teams/47.png",
+      score: 0,
+    },
+  },
+];
+
 export default function Partido() {
   const [proximos, setProximos] = useState<ApiMatch[]>([]);
   const [resultados, setResultados] = useState<ApiMatch[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLiveMatch, setSelectedLiveMatch] = useState<LiveMatch | null>(null);
+  const enVivo = LIVE_MATCHES_MOCK;
 
   useEffect(() => {
     const load = async () => {
@@ -66,27 +106,27 @@ export default function Partido() {
   };
 
   const renderLastFive = (form?: string) => {
-    if (!form) return <span className="partido__form-empty">-</span>;
+    if (!form) return <span className="partido_form-empty">-</span>;
 
     const results = form.slice(-5).split("");
 
     return (
-      <div className="partido__form">
+      <div className="partido_form">
         {results.map((result, index) => {
-          let className = "partido__form-badge partido__form-badge--neutral";
+          let className = "partido_form-badge partido_form-badge--neutral";
           let symbol = "•";
           let label = "Sin dato";
 
           if (result === "W") {
-            className = "partido__form-badge partido__form-badge--win";
+            className = "partido_form-badge partido_form-badge--win";
             symbol = "✓";
             label = "Victoria";
           } else if (result === "D") {
-            className = "partido__form-badge partido__form-badge--draw";
+            className = "partido_form-badge partido_form-badge--draw";
             symbol = "–";
             label = "Empate";
           } else if (result === "L") {
-            className = "partido__form-badge partido__form-badge--loss";
+            className = "partido_form-badge partido_form-badge--loss";
             symbol = "✕";
             label = "Derrota";
           }
@@ -102,44 +142,53 @@ export default function Partido() {
   };
 
   const MatchCard = ({ m }: { m: ApiMatch }) => (
-    <div className="partido__match-card">
-      <div className="partido__match-side">
-        <img src={m.teams.home.logo} alt={m.teams.home.name} className="partido__team-logo" />
-        <span className="partido__match-team">{m.teams.home.name}</span>
+    <div className="partido_match-card">
+      <div className="partido_match-side">
+        <img src={m.teams.home.logo} alt={m.teams.home.name} className="partido_team-logo" />
+        <span className="partido_match-team">{m.teams.home.name}</span>
       </div>
 
-      <div className="partido__match-score">
+      <div className="partido_match-score">
         {m.goals.home !== null ? `${m.goals.home} - ${m.goals.away}` : "vs"}
       </div>
 
-      <div className="partido__match-side partido__match-side--away">
-        <span className="partido__match-team">{m.teams.away.name}</span>
-        <img src={m.teams.away.logo} alt={m.teams.away.name} className="partido__team-logo" />
+      <div className="partido_match-side partido_match-side--away">
+        <span className="partido_match-team">{m.teams.away.name}</span>
+        <img src={m.teams.away.logo} alt={m.teams.away.name} className="partido_team-logo" />
       </div>
     </div>
   );
 
-  if (loading) return <p className="partido__loading">Cargando datos...</p>;
-  if (error) return <p className="partido__error">{error}</p>;
+  if (selectedLiveMatch) {
+    return (
+      <PartidosVivo
+        match={selectedLiveMatch}
+        onBack={() => setSelectedLiveMatch(null)}
+      />
+    );
+  }
+
+  if (loading) return <p className="partido_loading">Cargando datos...</p>;
+  if (error) return <p className="partido_error">{error}</p>;
 
   return (
     <div className="partido">
-      <div className="partido__standings">
-        <div className="partido__section-header">
-          <div className="partido__accent" />
-          <h2 className="partido__title">Tabla de Posiciones</h2>
+      <div className="partido_standings">
+        <div className="partido_section-header">
+          <div className="partido_accent" />
+          <h2 className="partido_title">Tabla de Posiciones</h2>
         </div>
 
         {standings.length > 0 ? (
-          <div className="partido__table-wrapper">
-            <table className="partido__table">
+          <div className="partido_table-wrapper">
+            <table className="partido_table">
               <thead>
-                <tr className="partido__table-head-row">
+                <tr className="partido_table-head-row">
                   {["#", "Equipo", "PJ", "G", "E", "P", "GF", "GC", "DG", "Últimos 5", "Pts"].map(
                     (h) => (
                       <th
                         key={h}
-                        className={h === "Últimos 5" ? "partido__th partido__th--form" : "partido__th"}
+                        className={h === "Últimos 5" ? "partido_th partido_th--form" : "partido_th"}
                       >
                         {h}
                       </th>
@@ -151,83 +200,137 @@ export default function Partido() {
                 {standings.map((s, i) => (
                   <tr
                     key={s.rank}
-                    className={i % 2 === 0 ? "partido__tr--even" : "partido__tr--odd"}
+                    className={i % 2 === 0 ? "partido_tr--even" : "partido_tr--odd"}
                   >
-                    <td className="partido__td partido__td--rank">{s.rank}</td>
+                    <td className="partido_td partido_td--rank">{s.rank}</td>
 
-                    <td className="partido__td">
-                      <div className="partido__team-cell">
+                    <td className="partido_td">
+                      <div className="partido_team-cell">
                         <img
                           src={s.team.logo}
                           alt={s.team.name}
-                          className="partido__team-logo--small"
+                          className="partido_team-logo--small"
                         />
-                        <span className="partido__team-name">{s.team.name}</span>
+                        <span className="partido_team-name">{s.team.name}</span>
                       </div>
                     </td>
 
-                    <td className="partido__td">{s.all.played}</td>
-                    <td className="partido__td">{s.all.win}</td>
-                    <td className="partido__td">{s.all.draw}</td>
-                    <td className="partido__td">{s.all.lose}</td>
-                    <td className="partido__td">{s.all.goals.for}</td>
-                    <td className="partido__td">{s.all.goals.against}</td>
+                    <td className="partido_td">{s.all.played}</td>
+                    <td className="partido_td">{s.all.win}</td>
+                    <td className="partido_td">{s.all.draw}</td>
+                    <td className="partido_td">{s.all.lose}</td>
+                    <td className="partido_td">{s.all.goals.for}</td>
+                    <td className="partido_td">{s.all.goals.against}</td>
 
                     <td
-                      className={`partido__td ${
-                        s.goalsDiff > 0
-                          ? "partido__goal-diff--positive"
+                      className={`partido_td ${s.goalsDiff > 0
+                          ? "partido_goal-diff--positive"
                           : s.goalsDiff < 0
-                          ? "partido__goal-diff--negative"
-                          : "partido__goal-diff--neutral"
-                      }`}
+                            ? "partido_goal-diff--negative"
+                            : "partido_goal-diff--neutral"
+                        }`}
                     >
                       {s.goalsDiff > 0 ? "+" : ""}
                       {s.goalsDiff}
                     </td>
 
-                    <td className="partido__td partido__td--form">
+                    <td className="partido_td partido_td--form">
                       {renderLastFive(s.form)}
                     </td>
 
-                    <td className="partido__td partido__points">{s.points}</td>
+                    <td className="partido_td partido_points">{s.points}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <p className="partido__empty partido__empty--center">Sin datos de posiciones</p>
+          <p className="partido_empty partido_empty--center">Sin datos de posiciones</p>
         )}
       </div>
 
-      <div>
-        <div className="partido__section-header partido__section-header--small">
-          <div className="partido__accent" />
-          <h3 className="partido__subtitle">Proximos Partidos</h3>
+      <div className="partido_live-section">
+        <div className="partido_section-header partido_section-header--small">
+          <div className="partido_accent" />
+          <h3 className="partido_subtitle">Partidos en Vivo</h3>
         </div>
 
-        {proximos.length === 0 && <p className="partido__empty">Sin proximos partidos</p>}
+        {enVivo.length === 0 && (
+          <p className="partido_empty">No hay partidos en vivo</p>
+        )}
+
+        <div className="partido_live-list">
+          {enVivo.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              className="partido_live-card"
+              onClick={() => setSelectedLiveMatch(m)}
+            >
+              <div className="partido_live-card-top">
+                <span className="partido_live-badge">EN VIVO</span>
+                <span className="partido_live-minute">{m.minute}</span>
+              </div>
+
+              <p className="partido_live-league">{m.league}</p>
+
+              <div className="partido_live-card-match">
+                <div className="partido_live-team">
+                  <img
+                    src={m.homeTeam.logo}
+                    alt={m.homeTeam.name}
+                    className="partido_live-team-logo"
+                  />
+                  <span>{m.homeTeam.name}</span>
+                </div>
+
+                <div className="partido_live-score">
+                  {m.homeTeam.score} - {m.awayTeam.score}
+                </div>
+
+                <div className="partido_live-team">
+                  <img
+                    src={m.awayTeam.logo}
+                    alt={m.awayTeam.name}
+                    className="partido_live-team-logo"
+                  />
+                  <span>{m.awayTeam.name}</span>
+                </div>
+              </div>
+
+              <p className="partido_live-stadium">{m.stadium}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="partido_section-header partido_section-header--small">
+          <div className="partido_accent" />
+          <h3 className="partido_subtitle">Proximos Partidos</h3>
+        </div>
+
+        {proximos.length === 0 && <p className="partido_empty">Sin proximos partidos</p>}
 
         {proximos.map((m) => (
           <div key={m.fixture.id}>
-            <p className="partido__match-date">{formatDate(m.fixture.date)}</p>
+            <p className="partido_match-date">{formatDate(m.fixture.date)}</p>
             <MatchCard m={m} />
           </div>
         ))}
       </div>
 
       <div>
-        <div className="partido__section-header partido__section-header--small">
-          <div className="partido__accent" />
-          <h3 className="partido__subtitle">Resultados Recientes</h3>
+        <div className="partido_section-header partido_section-header--small">
+          <div className="partido_accent" />
+          <h3 className="partido_subtitle">Resultados Recientes</h3>
         </div>
 
-        {resultados.length === 0 && <p className="partido__empty">Sin resultados recientes</p>}
+        {resultados.length === 0 && <p className="partido_empty">Sin resultados recientes</p>}
 
         {resultados.map((m) => (
           <div key={m.fixture.id}>
-            <p className="partido__match-date">{formatDate(m.fixture.date)}</p>
+            <p className="partido_match-date">{formatDate(m.fixture.date)}</p>
             <MatchCard m={m} />
           </div>
         ))}
