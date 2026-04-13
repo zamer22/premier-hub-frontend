@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState, useEffect } from "react";
 import Tablero    from "./pages/Tablero";
 import Partido    from "./pages/Partido";
 import Simulador  from "./pages/Simulador";
@@ -6,6 +6,7 @@ import Tienda     from "./pages/Tienda";
 import Noticias   from "./pages/NoticiasLanding";
 import Login      from "./pages/Login";
 import ElegirNickname from "./pages/ElegirNickname";
+import Noticia from "./pages/Noticia";
 
 type Section = "tablero" | "partido" | "noticias" | "tienda" | "vr-arena" | "simulador";
 
@@ -24,6 +25,56 @@ const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
 function getTabFromUrl(): Section {
   const p = new URLSearchParams(window.location.search).get("tab") as Section;
   return VALID_TABS.includes(p) ? p : "tablero";
+}
+
+function getSectionFromPath(pathname: string): Section {
+  const section = pathname.replace(/^\/+/, "").split("/")[0];
+  const match = TABS.find((tab) => tab.key === section);
+
+  return match?.key || "tablero";
+}
+
+function getPathForSection(section: Section): string {
+  return section === "tablero" ? "/" : `/${section}`;
+}
+
+function CrownIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="app-icon"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 18h16" />
+      <path d="m5 18 1.7-8 5.3 4 5.3-4L19 18" />
+      <path d="M8 7.2a1 1 0 1 1 0-.1" />
+      <path d="M12 4.2a1 1 0 1 1 0-.1" />
+      <path d="M16 7.2a1 1 0 1 1 0-.1" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="app-icon"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+      <path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" />
+    </svg>
+  );
 }
 
 export default function App() {
