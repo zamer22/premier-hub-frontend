@@ -31,14 +31,12 @@ function getSectionFromLocation(pathname: string): Section {
   if (pathname === "/") {
     return getTabFromUrl();
   }
-
   return getSectionFromPath(pathname);
 }
 
 function getSectionFromPath(pathname: string): Section {
   const section = pathname.replace(/^\/+/, "").split("/")[0];
   const match = TABS.find((tab) => tab.key === section);
-
   return match?.key || "tablero";
 }
 
@@ -102,7 +100,6 @@ export default function App() {
 
   const setTab = (next: Section) => {
     const url = new URL(window.location.href);
-
     if (next === "tablero") {
       url.pathname = "/";
       url.searchParams.delete("tab");
@@ -113,14 +110,12 @@ export default function App() {
       url.pathname = "/";
       url.searchParams.set("tab", next);
     }
-
     window.history.pushState({}, "", url.toString());
     syncLocationState();
   };
 
   useEffect(() => {
     window.addEventListener("popstate", syncLocationState);
-
     return () => {
       window.removeEventListener("popstate", syncLocationState);
     };
@@ -211,14 +206,12 @@ export default function App() {
             }}
           >
             {t.label}
-            {/* Active indicator */}
             {tab === t.key && (
               <span
                 className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full"
                 style={{ background: "linear-gradient(90deg, #E90052, #871d54)" }}
               />
             )}
-            {/* Hover background */}
             <span className="absolute inset-0 rounded opacity-0 hover:opacity-100 transition-opacity duration-150"
               style={{ background: "rgba(255,255,255,0.04)" }} />
           </button>
