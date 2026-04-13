@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
+=======
+import { useState, useEffect } from "react";
+>>>>>>> emilio
 import Tablero    from "./pages/Tablero";
 import Partido    from "./pages/Partido";
 import Simulador  from "./pages/Simulador";
@@ -6,7 +10,10 @@ import Tienda     from "./pages/Tienda";
 import Noticias   from "./pages/NoticiasLanding";
 import Login      from "./pages/Login";
 import ElegirNickname from "./pages/ElegirNickname";
+<<<<<<< HEAD
 import Noticia from "./pages/Noticia";
+=======
+>>>>>>> emilio
 
 type Section = "tablero" | "partido" | "noticias" | "tienda" | "vr-arena" | "simulador";
 
