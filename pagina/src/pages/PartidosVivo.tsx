@@ -567,7 +567,7 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
             {match.homeTeam.score} - {match.awayTeam.score}
           </div>
           <span style={S.scoreMinute}>{match.minute}</span>
-          <div style={S.stadiumTag}>📍 {match.stadium}</div>
+          <div style={S.stadiumTag}> {match.stadium}</div>
         </div>
 
         <div style={S.teamBlock}>
