@@ -52,6 +52,27 @@ interface H2HRow {
 const API_URL = "http://localhost:4000";
 const TABS = ["Alineaciones", "Estadísticas", "H2H"];
 
+const STATS_ES: Record<string, string> = {
+  "Shots on Goal":      "Tiros a puerta",
+  "Shots off Goal":     "Tiros fuera",
+  "Total Shots":        "Tiros totales",
+  "Blocked Shots":      "Tiros bloqueados",
+  "Shots insidebox":    "Tiros dentro del área",
+  "Shots outsidebox":   "Tiros fuera del área",
+  "Fouls":              "Faltas",
+  "Corner Kicks":       "Tiros de esquina",
+  "Offsides":           "Fueras de juego",
+  "Ball Possession":    "Posesión del balón",
+  "Yellow Cards":       "Tarjetas amarillas",
+  "Red Cards":          "Tarjetas rojas",
+  "Goalkeeper Saves":   "Atajadas",
+  "Total passes":       "Pases totales",
+  "Passes accurate":    "Pases precisos",
+  "Passes %":           "Precisión de pases",
+  "expected_goals":     "Goles esperados (xG)",
+  "goals_prevented":    "Goles evitados",
+};
+
 const Shirt = ({ color, x, y }: { color: string; x: string; y: string }) => (
   <div
     style={{
@@ -111,7 +132,6 @@ const S = {
     padding: "0.28rem 0.6rem",
     borderRadius: 999,
   },
-  liveMin: { color: "#263a55", fontWeight: 700, fontSize: "0.85rem" },
 
   scoreboard: {
     background: "#fff",
@@ -154,9 +174,9 @@ const S = {
   scoreBox: {
     background: "#1a2d42",
     borderRadius: 12,
-    padding: "0.6rem 2rem",
+    padding: "0.8rem 2.5rem",
     color: "#fff",
-    fontSize: "2rem",
+    fontSize: "2.8rem",
     fontWeight: 800,
   },
   scoreMinute: { color: "#e90052", fontWeight: 700, fontSize: "0.9rem" },
@@ -523,6 +543,7 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
 
   return (
     <div style={S.root}>
+      {/* HEADER — sin minuto */}
       <div style={S.header}>
         <button type="button" onClick={onBack} style={S.backBtn}>
           ← Volver
@@ -531,10 +552,10 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
         <div style={S.liveChip}>
           <div style={S.liveDot} />
           <span style={S.liveBadge}>EN VIVO</span>
-          <span style={S.liveMin}>{match.minute}</span>
         </div>
       </div>
 
+      {/* SCOREBOARD — orden: score → minuto → estadio */}
       <div style={S.scoreboard}>
         <div style={S.teamBlock}>
           <img src={match.homeTeam.logo} alt={match.homeTeam.name} style={S.teamLogo} />
@@ -542,11 +563,11 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
         </div>
 
         <div style={S.scoreCenter}>
-          <div style={S.stadiumTag}>📍 {match.stadium}</div>
           <div style={S.scoreBox}>
             {match.homeTeam.score} - {match.awayTeam.score}
           </div>
           <span style={S.scoreMinute}>{match.minute}</span>
+          <div style={S.stadiumTag}>📍 {match.stadium}</div>
         </div>
 
         <div style={S.teamBlock}>
@@ -656,7 +677,7 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
                           minWidth: 120,
                         }}
                       >
-                        {s.label}
+                        {STATS_ES[s.label] ?? s.label}
                       </span>
                       <span
                         style={{
