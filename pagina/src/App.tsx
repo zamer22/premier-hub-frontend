@@ -27,17 +27,27 @@ function getTabFromUrl(): Section {
   return VALID_TABS.includes(p) ? p : "tablero";
 }
 
-function getSectionFromLocation(pathname: string): Section {
-  if (pathname === "/") {
-    return getTabFromUrl();
-  }
-  return getSectionFromPath(pathname);
-}
-
 function getSectionFromPath(pathname: string): Section {
   const section = pathname.replace(/^\/+/, "").split("/")[0];
   const match = TABS.find((tab) => tab.key === section);
   return match?.key || "tablero";
+}
+
+function getInitialTab(): Section {
+  const pathname = window.location.pathname;
+  const search = window.location.search;
+
+  // Si la URL tiene info de ruta/tab, úsala
+  if (pathname !== "/" || search.includes("tab=")) {
+    if (pathname === "/") return getTabFromUrl();
+    return getSectionFromPath(pathname);
+  }
+
+  // Si no hay nada en la URL, revisar localStorage
+  const saved = localStorage.getItem("premier_tab") as Section;
+  if (saved && VALID_TABS.includes(saved)) return saved;
+
+  return "tablero";
 }
 
 function getPathForSection(section: Section): string {
@@ -85,9 +95,7 @@ function UserIcon() {
 
 export default function App() {
   const [pathname,       setPathname]      = useState(() => window.location.pathname);
-  const [tab,            setTabState]      = useState<Section>(() =>
-    getSectionFromLocation(window.location.pathname),
-  );
+  const [tab,            setTabState]      = useState<Section>(getInitialTab);
   const [user,           setUser]          = useState<any>(null);
   const [oauthNuevo,     setOauthNuevo]    = useState<{ correo: string; nombre: string } | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
@@ -95,10 +103,14 @@ export default function App() {
   const syncLocationState = () => {
     const nextPathname = window.location.pathname;
     setPathname(nextPathname);
-    setTabState(getSectionFromLocation(nextPathname));
+    const next = nextPathname === "/"
+      ? getTabFromUrl()
+      : getSectionFromPath(nextPathname);
+    setTabState(next);
   };
 
   const setTab = (next: Section) => {
+    localStorage.setItem("premier_tab", next);
     const url = new URL(window.location.href);
     if (next === "tablero") {
       url.pathname = "/";
@@ -181,11 +193,11 @@ export default function App() {
 
   /* ── App ── */
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface" style={{ paddingTop: "60px" }}>
 
       {/* ── Navbar ── */}
       <nav className="flex items-center h-[60px] px-8 bg-navy gap-0.5"
-        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.18)" }}>
+        style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, boxShadow: "0 2px 12px rgba(0,0,0,0.18)" }}>
 
         {/* Logo */}
         <span className="font-extrabold text-[1.25rem] tracking-tight select-none mr-10"
