@@ -194,8 +194,8 @@
 
 .noticias-article__hero,
 .noticias-article__fallback {
-  width: min(100%, 1180px);
-  min-height: 480px;
+  width: 100%;
+  min-height: 560px;
   margin: 0 auto;
   border-radius: 28px;
 }
@@ -395,10 +395,10 @@
 }
 
 .noticias-article__header {
-  width: min(100%, 820px);
+  width: min(100%, 1180px);
   margin: 0 auto;
   display: grid;
-  gap: 1rem;
+  gap: 1.15rem;
 }
 
 .noticias-article__meta {
@@ -410,27 +410,35 @@
 }
 
 .noticias-article__title {
-  font-size: clamp(2.3rem, 4vw, 4.2rem);
+  width: 100%;
+  font-size: clamp(2.8rem, 4.8vw, 5rem);
   line-height: 1.03;
   font-weight: 800;
   letter-spacing: -0.04em;
+  text-align: left;
 }
 
 .noticias-article__summary {
-  font-size: 1.28rem;
-  line-height: 1.72;
+  width: 100%;
+  font-size: 1.4rem;
+  line-height: 1.78;
   max-width: 100%;
   margin: 0;
+  text-align: left;
 }
 
 .noticias-article__facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-evenly;
+  gap: 1rem;
+  width: 100%;
   margin-top: 0.4rem;
 }
 
 .noticias-article__fact {
+  flex: 1 1 0;
+  max-width: 320px;
   border: 1px solid var(--noticias-border);
   border-radius: 18px;
   background: #ffffff;
@@ -455,7 +463,7 @@
 }
 
 .noticias-article__content {
-  width: min(100%, 780px);
+  width: min(100%, 1180px);
   margin: 0 auto;
   display: grid;
   gap: 1.2rem;
@@ -497,6 +505,15 @@ button.noticias-load-more {
   .noticias-article__facts {
     grid-template-columns: 1fr;
   }
+
+  .noticias-article__facts {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .noticias-article__fact {
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 720px) {
@@ -515,11 +532,15 @@ button.noticias-load-more {
     grid-template-columns: 1fr;
   }
 
-  .noticias-card__title {
-    font-size: 1.08rem;
+  .noticias-article__title {
+    font-size: 2.2rem;
   }
 
   .noticias-article__summary {
+    font-size: 1.08rem;
+  }
+
+  .noticias-card__title {
     font-size: 1.08rem;
   }
 
