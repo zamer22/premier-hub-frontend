@@ -1,4 +1,4 @@
-export const API_URL = "http://localhost:4000";
+const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
 export const DEFAULT_FILTER = "Todos los equipos";
 
 
