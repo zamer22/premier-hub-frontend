@@ -52,6 +52,27 @@ interface H2HRow {
 const API_URL = "http://localhost:4000";
 const TABS = ["Alineaciones", "Estadísticas", "H2H"];
 
+const STATS_ES: Record<string, string> = {
+  "Shots on Goal":      "Tiros a puerta",
+  "Shots off Goal":     "Tiros fuera",
+  "Total Shots":        "Tiros totales",
+  "Blocked Shots":      "Tiros bloqueados",
+  "Shots insidebox":    "Tiros dentro del área",
+  "Shots outsidebox":   "Tiros fuera del área",
+  "Fouls":              "Faltas",
+  "Corner Kicks":       "Tiros de esquina",
+  "Offsides":           "Fueras de juego",
+  "Ball Possession":    "Posesión del balón",
+  "Yellow Cards":       "Tarjetas amarillas",
+  "Red Cards":          "Tarjetas rojas",
+  "Goalkeeper Saves":   "Atajadas",
+  "Total passes":       "Pases totales",
+  "Passes accurate":    "Pases precisos",
+  "Passes %":           "Precisión de pases",
+  "expected_goals":     "Goles esperados (xG)",
+  "goals_prevented":    "Goles evitados",
+};
+
 const Shirt = ({ color, x, y }: { color: string; x: string; y: string }) => (
   <div
     style={{
@@ -546,7 +567,7 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
             {match.homeTeam.score} - {match.awayTeam.score}
           </div>
           <span style={S.scoreMinute}>{match.minute}</span>
-          <div style={S.stadiumTag}> {match.stadium}</div>
+          <div style={S.stadiumTag}>📍 {match.stadium}</div>
         </div>
 
         <div style={S.teamBlock}>
@@ -656,7 +677,7 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
                           minWidth: 120,
                         }}
                       >
-                        {s.label}
+                        {STATS_ES[s.label] ?? s.label}
                       </span>
                       <span
                         style={{
