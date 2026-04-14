@@ -111,7 +111,6 @@ const S = {
     padding: "0.28rem 0.6rem",
     borderRadius: 999,
   },
-  liveMin: { color: "#263a55", fontWeight: 700, fontSize: "0.85rem" },
 
   scoreboard: {
     background: "#fff",
@@ -154,9 +153,9 @@ const S = {
   scoreBox: {
     background: "#1a2d42",
     borderRadius: 12,
-    padding: "0.6rem 2rem",
+    padding: "0.8rem 2.5rem",
     color: "#fff",
-    fontSize: "2rem",
+    fontSize: "2.8rem",
     fontWeight: 800,
   },
   scoreMinute: { color: "#e90052", fontWeight: 700, fontSize: "0.9rem" },
@@ -523,6 +522,7 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
 
   return (
     <div style={S.root}>
+      {/* HEADER — sin minuto */}
       <div style={S.header}>
         <button type="button" onClick={onBack} style={S.backBtn}>
           ← Volver
@@ -531,10 +531,10 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
         <div style={S.liveChip}>
           <div style={S.liveDot} />
           <span style={S.liveBadge}>EN VIVO</span>
-          <span style={S.liveMin}>{match.minute}</span>
         </div>
       </div>
 
+      {/* SCOREBOARD — orden: score → minuto → estadio */}
       <div style={S.scoreboard}>
         <div style={S.teamBlock}>
           <img src={match.homeTeam.logo} alt={match.homeTeam.name} style={S.teamLogo} />
@@ -542,11 +542,11 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
         </div>
 
         <div style={S.scoreCenter}>
-          <div style={S.stadiumTag}>📍 {match.stadium}</div>
           <div style={S.scoreBox}>
             {match.homeTeam.score} - {match.awayTeam.score}
           </div>
           <span style={S.scoreMinute}>{match.minute}</span>
+          <div style={S.stadiumTag}> {match.stadium}</div>
         </div>
 
         <div style={S.teamBlock}>
