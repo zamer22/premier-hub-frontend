@@ -2,7 +2,7 @@ import { useState } from "react";
 import Login from "./Login";
 
 /* Reemplaza este ID con el de cualquier video de YouTube de highlights PL */
-const YT_VIDEO_ID = "pQpSuHjHCZo";
+const YT_VIDEO_ID = "Fi5OWvIii-8";
 
 interface LandingProps {
   onLoginSuccess: (user: any) => void;
@@ -338,14 +338,13 @@ export default function Landing({ onLoginSuccess }: LandingProps) {
             onClick={() => setShowLogin(true)}
             style={{
               padding: "1.05rem 3.5rem",
-              background: "linear-gradient(135deg, #E90052, #871d54)",
+              background: "#E90052",
               color: "#fff", border: "none", borderRadius: "14px", fontSize: "1.05rem",
               fontWeight: 800, cursor: "pointer",
-              boxShadow: "0 10px 36px rgba(233,0,82,0.4)",
-              transition: "transform 0.2s, box-shadow 0.2s",
+              transition: "opacity 0.2s, transform 0.2s",
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px) scale(1.02)"; e.currentTarget.style.boxShadow = "0 16px 48px rgba(233,0,82,0.55)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0) scale(1)"; e.currentTarget.style.boxShadow = "0 10px 36px rgba(233,0,82,0.4)"; }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             Comenzar ahora →
           </button>
@@ -361,7 +360,7 @@ export default function Landing({ onLoginSuccess }: LandingProps) {
           <span style={{ color: "rgba(255,255,255,0.4)" }}>HUB</span>
         </span>
         <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.7rem", marginTop: "0.5rem" }}>
-          Fan project · No afiliado con la Premier League Official
+          Una página de fans para fans
         </p>
       </footer>
 
