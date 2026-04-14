@@ -42,9 +42,18 @@ export interface NewsApiResponse {
   error?: string;
 }
 
+type NewsCacheSnapshot = {
+  news: NewsItem[];
+  error: string | null;
+  cachedAt: number;
+};
+
 const PREVIEW_MAX_LENGTH = 220;
 const PREVIEW_MIN_LENGTH = 120;
 const DUPLICATE_LEAD_WORDS = 6;
+const FRONTEND_NEWS_CACHE_KEY = "premierhub_news_cache_v1";
+const FRONTEND_NEWS_CACHE_TTL_MS = 1000 * 60 * 15;
+let memoryNewsCache: NewsCacheSnapshot | null = null;
 
 const INLINE_NOISE_PATTERNS = [
   /\b[A-ZÁÉÍÓÚÜÑ.'\s]+Actualizado\s+\d{2}\/\d{2}\/\d{4}\s*-\s*\d{2}:\d{2}[A-Z]+\b/giu,
@@ -509,6 +518,70 @@ export function buildRelatedNews(
 
 
 // Función para jalar las noticias desde el API, normalizarlas y manejar errores
+function isNewsCacheFresh(cachedAt: number): boolean {
+  return Date.now() - cachedAt <= FRONTEND_NEWS_CACHE_TTL_MS;
+}
+
+function writeNewsCache(snapshot: NewsCacheSnapshot): void {
+  memoryNewsCache = snapshot;
+
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      FRONTEND_NEWS_CACHE_KEY,
+      JSON.stringify(snapshot),
+    );
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function readStoredNewsCache(): NewsCacheSnapshot | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(FRONTEND_NEWS_CACHE_KEY);
+
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<NewsCacheSnapshot>;
+
+    if (!parsed || !Array.isArray(parsed.news) || typeof parsed.cachedAt !== "number") {
+      return null;
+    }
+
+    return {
+      news: parsed.news as NewsItem[],
+      error: typeof parsed.error === "string" ? parsed.error : null,
+      cachedAt: parsed.cachedAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function getCachedNewsSnapshot(): NewsCacheSnapshot | null {
+  if (memoryNewsCache && isNewsCacheFresh(memoryNewsCache.cachedAt)) {
+    return memoryNewsCache;
+  }
+
+  const stored = readStoredNewsCache();
+
+  if (stored && isNewsCacheFresh(stored.cachedAt)) {
+    memoryNewsCache = stored;
+    return stored;
+  }
+
+  return null;
+}
+
 export async function fetchNews(signal?: AbortSignal): Promise<{
   news: NewsItem[];
   error: string | null;
@@ -529,12 +602,19 @@ export async function fetchNews(signal?: AbortSignal): Promise<{
     };
   }
 
-  return {
+  const result = {
     news: json.data
       .map((item, index) => normalizeNewsItem(item, index))
       .filter((item): item is NewsItem => item !== null),
     error: null,
   };
+
+  writeNewsCache({
+    ...result,
+    cachedAt: Date.now(),
+  });
+
+  return result;
 }
 
 
