@@ -17,7 +17,6 @@ interface Listado {
   nombre: string; tipo: string; imagen: string | null; equipo: string | null;
   vendedor_nickname: string; fecha_creacion: string;
 }
-interface Temporada { id_temporada: number; nombre: string; fecha_fin: string; }
 
 interface TiendaProps {
   user: { id_usuario: number; nickname: string; dinero: number; [k: string]: any };
@@ -96,13 +95,6 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   }, [user.id_usuario]);
 
 
-  const refreshSaldo = useCallback(async () => {
-    try {
-      const r = await fetch(`${API_URL}/api/tienda/saldo/${user.id_usuario}`);
-      const d = await r.json();
-      if (d.success) onSaldoChange(Number(d.dinero) || 0);
-    } catch { /* ignore */ }
-  }, [user.id_usuario, onSaldoChange]);
 
   // Reset filtros al cambiar de tab
   useEffect(() => {
@@ -418,7 +410,6 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       {/* Modal: detalle de producto */}
       {productModal && (() => {
         const isOwned = ownedIds.has(productModal.id_producto);
-        const isPerfilItem = productModal.categoria === "perfil" || !productModal.categoria;
         const isRealItem = productModal.categoria === "real";
         const canBuyModal = isRealItem
           ? !isOwned && productModal.stock > 0 && Number(productModal.costo) <= saldo
