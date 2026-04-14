@@ -214,7 +214,7 @@ export default function App() {
 
   const isNewsDetailRoute = /^\/noticias\/\d+\/?$/.test(pathname);
 
-  /* ── App ── */
+
   return (
     <div className="min-h-screen bg-surface" style={{ paddingTop: "60px" }}>
 
