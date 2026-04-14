@@ -1,19 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "../estilos/EstiloNoticiasLanding.css";
 import {
   DEFAULT_FILTER,
+  PREMIER_TEAM_OPTIONS,
   NewsItem,
   fetchNews,
   formatRelative,
   getCachedNewsSnapshot,
+  mergeNewsItems,
   navigateTo,
+  setCachedNewsSnapshot,
   truncateText,
 } from "./noticiasShared";
 
-const GRID_BATCH_SIZE = 3;
+const INITIAL_NEWS_LIMIT = 7;
+const LOAD_MORE_NEWS_LIMIT = 6;
+const SEARCH_DEBOUNCE_MS = 300;
 
-
-// Componente para mostrar la imagen de la noticia, con un fallback si no hay imagen disponible
 function NewsImage({
   image,
   alt,
@@ -25,23 +28,32 @@ function NewsImage({
   className: string;
   fallbackClassName: string;
 }) {
-  if (!image) {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [image]);
+
+  if (!image || hasError) {
     return <div className={fallbackClassName}>Premier League</div>;
   }
 
-  return <img src={image} alt={alt} className={className} />;
+  return (
+    <img
+      src={image}
+      alt={alt}
+      className={className}
+      onError={() => setHasError(true)}
+    />
+  );
 }
 
-
-// Componente para mostrar el badge del equipo asociado a la noticia, o un valor por defecto si no hay equipo asociado
 function TeamBadge({ team }: { team: string | null }) {
   return (
     <span className="noticias-team-badge">{team || "Premier League"}</span>
   );
 }
 
-
-// Componente de noticia, con su imagen, título, fuente y tiempo de lectura
 function NewsCard({
   item,
   onOpen,
@@ -85,29 +97,73 @@ function NewsCard({
   );
 }
 
-
 export default function NoticiasLanding() {
   const cachedNewsSnapshot = getCachedNewsSnapshot();
+  const initialCachedSnapshotRef = useRef(cachedNewsSnapshot);
   const [news, setNews] = useState<NewsItem[]>(() => cachedNewsSnapshot?.news || []);
   const [loading, setLoading] = useState(() => !cachedNewsSnapshot);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(() => cachedNewsSnapshot?.error || null);
-  const [search, setSearch] = useState("");
-  const [teamFilter, setTeamFilter] = useState(DEFAULT_FILTER);
-  const [visibleGridCount, setVisibleGridCount] = useState(GRID_BATCH_SIZE);
+  const [search, setSearch] = useState(() => cachedNewsSnapshot?.search || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(() => cachedNewsSnapshot?.search || "");
+  const [teamFilter, setTeamFilter] = useState(
+    () => cachedNewsSnapshot?.teamFilter || DEFAULT_FILTER,
+  );
+  const [hasMore, setHasMore] = useState(() => cachedNewsSnapshot?.hasMore ?? false);
+  const skipInitialFetchRef = useRef(Boolean(cachedNewsSnapshot));
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [search]);
 
   useEffect(() => {
     const controller = new AbortController();
+    const shouldReuseCachedSnapshot =
+      skipInitialFetchRef.current &&
+      (initialCachedSnapshotRef.current?.teamFilter || DEFAULT_FILTER) === teamFilter &&
+      (initialCachedSnapshotRef.current?.search || "") === debouncedSearch;
 
-    const loadNews = async (): Promise<void> => {
+    if (shouldReuseCachedSnapshot) {
+      skipInitialFetchRef.current = false;
+      return () => {
+        controller.abort();
+      };
+    }
+
+    skipInitialFetchRef.current = false;
+
+    const loadFirstPage = async (): Promise<void> => {
       try {
-        if (!cachedNewsSnapshot) {
-          setLoading(true);
-        }
+        setLoading(true);
         setError(null);
 
-        const result = await fetchNews(controller.signal);
+        const result = await fetchNews(
+          {
+            offset: 0,
+            limit: INITIAL_NEWS_LIMIT,
+            team: teamFilter === DEFAULT_FILTER ? null : teamFilter,
+            search: debouncedSearch,
+          },
+          controller.signal,
+        );
+
         setNews(result.news);
+        setHasMore(result.hasMore);
         setError(result.error);
+        setCachedNewsSnapshot({
+          news: result.news,
+          error: result.error,
+          hasMore: result.hasMore,
+          page: result.page,
+          search: debouncedSearch,
+          teamFilter,
+        });
       } catch (requestError) {
         if (
           requestError instanceof DOMException &&
@@ -118,6 +174,7 @@ export default function NoticiasLanding() {
 
         console.error(requestError);
         setNews([]);
+        setHasMore(false);
         setError("Error conectando con API");
       } finally {
         if (!controller.signal.aborted) {
@@ -126,63 +183,70 @@ export default function NoticiasLanding() {
       }
     };
 
-    void loadNews();
+    void loadFirstPage();
 
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [debouncedSearch, teamFilter]);
 
   const teamOptions = useMemo(() => {
-    const uniqueTeams = Array.from(
-      new Set(news.flatMap((item) => item.teams)),
-    ).sort((left, right) => left.localeCompare(right, "es-MX"));
+    const options: string[] = [...PREMIER_TEAM_OPTIONS];
 
-    return [DEFAULT_FILTER, ...uniqueTeams];
-  }, [news]);
-
-  useEffect(() => {
-    if (teamFilter !== DEFAULT_FILTER && !teamOptions.includes(teamFilter)) {
-      setTeamFilter(DEFAULT_FILTER);
+    if (teamFilter !== DEFAULT_FILTER && !options.some((option) => option === teamFilter)) {
+      options.push(teamFilter);
     }
-  }, [teamFilter, teamOptions]);
 
-  useEffect(() => {
-    setVisibleGridCount(GRID_BATCH_SIZE);
-  }, [search, teamFilter]);
-
-  const filteredNews = useMemo(() => {
-    const searchTerm = search.trim().toLowerCase();
-
-    return news.filter((item) => {
-      const matchesTeam =
-        teamFilter === DEFAULT_FILTER || item.teams.includes(teamFilter);
-      const haystack = [
-        item.title,
-        item.headline,
-        item.summary,
-        item.content,
-        item.source,
-        item.teams.join(" "),
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch =
-        searchTerm.length === 0 || haystack.includes(searchTerm);
-
-      return matchesTeam && matchesSearch;
-    });
-  }, [news, search, teamFilter]);
-
-  const featuredNews = filteredNews[0] ?? null;
-  const gridNews = filteredNews.slice(1);
-  const visibleGridNews = gridNews.slice(0, visibleGridCount);
-  const hasMoreGridNews = visibleGridNews.length < gridNews.length;
+    return [DEFAULT_FILTER, ...options];
+  }, [teamFilter]);
 
   const openNews = (item: NewsItem) => {
     navigateTo(`/noticias/${item.id}`);
   };
+
+  const handleLoadMore = async (): Promise<void> => {
+    if (loading || loadingMore || !hasMore) {
+      return;
+    }
+
+    try {
+      setLoadingMore(true);
+      setError(null);
+
+      const result = await fetchNews({
+        offset: news.length,
+        limit: LOAD_MORE_NEWS_LIMIT,
+        team: teamFilter === DEFAULT_FILTER ? null : teamFilter,
+        search: debouncedSearch,
+      });
+
+      const mergedNews = mergeNewsItems(news, result.news);
+      const nextHasMore = result.news.length > 0 ? result.hasMore : false;
+
+      setNews(mergedNews);
+      setHasMore(nextHasMore);
+      setError(result.error);
+      setCachedNewsSnapshot({
+        news: mergedNews,
+        error: result.error,
+        hasMore: nextHasMore,
+        page: result.page,
+        search: debouncedSearch,
+        teamFilter,
+      });
+    } catch (requestError) {
+      console.error(requestError);
+      setError("Error cargando mas noticias desde la API");
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const featuredNews = news[0] ?? null;
+  const gridNews = news.slice(1);
+  const completeGridCount =
+    gridNews.length >= 3 ? gridNews.length - (gridNews.length % 3) : gridNews.length;
+  const visibleGridNews = gridNews.slice(0, completeGridCount);
 
   if (loading) {
     return (
@@ -276,28 +340,25 @@ export default function NoticiasLanding() {
             </div>
           </button>
 
-          {gridNews.length > 0 && (
-            <>
-              <div className="noticias-grid">
-                {visibleGridNews.map((item) => (
-                  <NewsCard key={item.id} item={item} onOpen={openNews} />
-                ))}
-              </div>
+          {visibleGridNews.length > 0 && (
+            <div className="noticias-grid">
+              {visibleGridNews.map((item) => (
+                <NewsCard key={item.id} item={item} onOpen={openNews} />
+              ))}
+            </div>
+          )}
 
-              {hasMoreGridNews && (
-                <div className="noticias-load-more-wrap">
-                  <button
-                    type="button"
-                    className="noticias-load-more"
-                    onClick={() =>
-                      setVisibleGridCount((current) => current + GRID_BATCH_SIZE)
-                    }
-                  >
-                    Cargar mas
-                  </button>
-                </div>
-              )}
-            </>
+          {hasMore && (
+            <div className="noticias-load-more-wrap">
+              <button
+                type="button"
+                className="noticias-load-more"
+                onClick={() => void handleLoadMore()}
+                disabled={loadingMore}
+              >
+                {loadingMore ? "Cargando..." : "Cargar mas"}
+              </button>
+            </div>
           )}
         </>
       ) : (
