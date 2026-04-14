@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 
-/* ─── Tipos ──────────────────────────────────────────────── */
 export interface LiveMatch {
   id: number;
   league: string;
@@ -31,12 +30,28 @@ interface StatRow {
   away_value: string;
 }
 
-const API_URL = "http://localhost:4000";
+interface H2HRow {
+  fixture_id: number;
+  date: string;
+  league: string;
+  status: string;
+  home: {
+    id: number;
+    name: string;
+    logo: string;
+    goals: number;
+  };
+  away: {
+    id: number;
+    name: string;
+    logo: string;
+    goals: number;
+  };
+}
 
-/* ─── Tabs ──────────────────────────────────────────────── */
+const API_URL = "http://localhost:4000";
 const TABS = ["Alineaciones", "Estadísticas", "H2H"];
 
-/* ─── Sub-componentes ────────────────────────────────────── */
 const Shirt = ({ color, x, y }: { color: string; x: string; y: string }) => (
   <div
     style={{
@@ -63,7 +78,6 @@ const Shirt = ({ color, x, y }: { color: string; x: string; y: string }) => (
   </div>
 );
 
-/* ─── Estilos ───────────────────────────────────────────── */
 const S = {
   root: {
     fontFamily: "'Inter', 'Segoe UI', sans-serif",
@@ -72,7 +86,6 @@ const S = {
     padding: "1.25rem",
     boxSizing: "border-box" as const,
   },
-
   header: {
     display: "flex",
     justifyContent: "space-between",
@@ -154,14 +167,12 @@ const S = {
     gap: "1rem",
     alignItems: "start",
   },
-
   panel: {
     background: "#fff",
     borderRadius: 14,
     padding: "1.25rem",
     boxShadow: "0 1px 6px rgba(0,0,0,0.07)",
   },
-
   tabsWrapper: {
     display: "flex",
     marginBottom: "1.25rem",
@@ -371,30 +382,51 @@ const S = {
     fontSize: "0.9rem",
     padding: "0.75rem 0",
   },
+  error: {
+    color: "#b91c1c",
+    fontSize: "0.9rem",
+    padding: "0.75rem 0",
+    fontWeight: 600,
+  },
 };
 
-/* ─── Componente principal ───────────────────────────────── */
 export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
   const [tab, setTab] = useState("Alineaciones");
   const [equipoSust, setEquipoSust] = useState<"home" | "away">("home");
+
   const [lineups, setLineups] = useState<LineupRow[]>([]);
   const [stats, setStats] = useState<StatRow[]>([]);
+  const [h2h, setH2H] = useState<H2HRow[]>([]);
+
   const [loadingLineups, setLoadingLineups] = useState(true);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [loadingH2H, setLoadingH2H] = useState(true);
+
+  const [lineupsError, setLineupsError] = useState("");
+  const [statsError, setStatsError] = useState("");
+  const [h2hError, setH2HError] = useState("");
 
   useEffect(() => {
     const loadLineups = async () => {
       try {
         setLoadingLineups(true);
+        setLineupsError("");
+
         const res = await fetch(`${API_URL}/api/partidos/live/${match.id}/lineups`);
+        if (!res.ok) {
+          throw new Error(`Error HTTP ${res.status} al cargar alineaciones`);
+        }
+
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
           setLineups(json.data);
         } else {
           setLineups([]);
+          setLineupsError("La respuesta de alineaciones no vino en el formato esperado.");
         }
-      } catch {
+      } catch (error: any) {
         setLineups([]);
+        setLineupsError(error?.message || "No se pudieron cargar las alineaciones.");
       } finally {
         setLoadingLineups(false);
       }
@@ -403,36 +435,85 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
     const loadStats = async () => {
       try {
         setLoadingStats(true);
+        setStatsError("");
+
         const res = await fetch(`${API_URL}/api/partidos/live/${match.id}/stats`);
+        if (!res.ok) {
+          throw new Error(`Error HTTP ${res.status} al cargar estadísticas`);
+        }
+
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
           setStats(json.data);
         } else {
           setStats([]);
+          setStatsError("La respuesta de estadísticas no vino en el formato esperado.");
         }
-      } catch {
+      } catch (error: any) {
         setStats([]);
+        setStatsError(error?.message || "No se pudieron cargar las estadísticas.");
       } finally {
         setLoadingStats(false);
       }
     };
 
-    loadLineups();
-    loadStats();
-  }, [match.id]);
+    const loadH2H = async () => {
+      try {
+        setLoadingH2H(true);
+        setH2HError("");
+
+        const res = await fetch(`${API_URL}/api/partidos/live/${match.id}/h2h`);
+        if (!res.ok) {
+          throw new Error(`Error HTTP ${res.status} al cargar H2H`);
+        }
+
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setH2H(json.data);
+        } else {
+          setH2H([]);
+          setH2HError("La respuesta de H2H no vino en el formato esperado.");
+        }
+      } catch (error: any) {
+        setH2H([]);
+        setH2HError(error?.message || "No se pudo cargar el H2H.");
+      } finally {
+        setLoadingH2H(false);
+      }
+    };
+
+    if (match?.id) {
+      loadLineups();
+      loadStats();
+      loadH2H();
+    } else {
+      setLineups([]);
+      setStats([]);
+      setH2H([]);
+      setLineupsError("No llegó el id del partido.");
+      setStatsError("No llegó el id del partido.");
+      setH2HError("No llegó el id del partido.");
+      setLoadingLineups(false);
+      setLoadingStats(false);
+      setLoadingH2H(false);
+    }
+  }, [match]);
 
   const homeStarters = useMemo(
     () => lineups.filter((p) => p.team === "home" && !p.is_sub),
     [lineups]
   );
+
   const awayStarters = useMemo(
     () => lineups.filter((p) => p.team === "away" && !p.is_sub),
     [lineups]
   );
+
   const homeSubs = useMemo(
     () => lineups.filter((p) => p.team === "home" && p.is_sub),
     [lineups]
   );
+
   const awaySubs = useMemo(
     () => lineups.filter((p) => p.team === "away" && p.is_sub),
     [lineups]
@@ -446,6 +527,7 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
         <button type="button" onClick={onBack} style={S.backBtn}>
           ← Volver
         </button>
+
         <div style={S.liveChip}>
           <div style={S.liveDot} />
           <span style={S.liveBadge}>EN VIVO</span>
@@ -520,6 +602,8 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
 
               {loadingLineups ? (
                 <p style={S.empty}>Cargando alineaciones...</p>
+              ) : lineupsError ? (
+                <p style={S.error}>{lineupsError}</p>
               ) : lineups.length === 0 ? (
                 <p style={S.empty}>No hay alineaciones disponibles para este partido.</p>
               ) : (
@@ -533,6 +617,7 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
                       </div>
                     ))}
                   </div>
+
                   <div>
                     <p style={S.lineupTitle("#e90052")}>{match.awayTeam.name}</p>
                     {awayStarters.map((j, idx) => (
@@ -551,6 +636,8 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
             <div>
               {loadingStats ? (
                 <p style={S.empty}>Cargando estadísticas...</p>
+              ) : statsError ? (
+                <p style={S.error}>{statsError}</p>
               ) : stats.length === 0 ? (
                 <p style={S.empty}>No hay estadísticas disponibles para este partido.</p>
               ) : (
@@ -589,7 +676,77 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
 
           {tab === "H2H" && (
             <div>
-              <p style={S.empty}>Historial H2H no disponible por ahora.</p>
+              {loadingH2H ? (
+                <p style={S.empty}>Cargando historial...</p>
+              ) : h2hError ? (
+                <p style={S.error}>{h2hError}</p>
+              ) : h2h.length === 0 ? (
+                <p style={S.empty}>No hay historial disponible para estos equipos.</p>
+              ) : (
+                <>
+                  <p style={S.statsLabel}>Últimos enfrentamientos</p>
+
+                  {h2h.map((item, idx) => (
+                    <div
+                      key={`${item.fixture_id}-${idx}`}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 6,
+                        padding: "0.75rem 0",
+                        borderBottom: "1px solid #f0f0f0",
+                      }}
+                    >
+                      <span style={{ color: "#9ca3af", fontSize: "0.78rem" }}>
+                        {new Date(item.date).toLocaleDateString("es-MX", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}{" "}
+                        · {item.league}
+                      </span>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr auto 1fr",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <img
+                            src={item.home.logo}
+                            alt={item.home.name}
+                            style={{ width: 22, height: 22, objectFit: "contain" }}
+                          />
+                          <span>{item.home.name}</span>
+                        </div>
+
+                        <strong style={{ color: "#263a55" }}>
+                          {item.home.goals} - {item.away.goals}
+                        </strong>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <span>{item.away.name}</span>
+                          <img
+                            src={item.away.logo}
+                            alt={item.away.name}
+                            style={{ width: 22, height: 22, objectFit: "contain" }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -600,16 +757,24 @@ export default function PartidosVivo({ match, onBack }: PartidosVivoProps) {
           </div>
 
           <div style={S.subsSelector}>
-            <button onClick={() => setEquipoSust("home")} style={S.subsBtn(equipoSust === "home")}>
+            <button
+              onClick={() => setEquipoSust("home")}
+              style={S.subsBtn(equipoSust === "home")}
+            >
               <img src={match.homeTeam.logo} alt="" style={S.subsLogoSmall} />
             </button>
-            <button onClick={() => setEquipoSust("away")} style={S.subsBtn(equipoSust === "away")}>
+            <button
+              onClick={() => setEquipoSust("away")}
+              style={S.subsBtn(equipoSust === "away")}
+            >
               <img src={match.awayTeam.logo} alt="" style={S.subsLogoSmall} />
             </button>
           </div>
 
           {loadingLineups ? (
             <p style={S.empty}>Cargando banca...</p>
+          ) : lineupsError ? (
+            <p style={S.error}>{lineupsError}</p>
           ) : sustituciones.length === 0 ? (
             <p style={S.empty}>No hay suplentes disponibles.</p>
           ) : (
