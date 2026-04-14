@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
 =======
 import { useState, useEffect } from "react";
 >>>>>>> emilio
+=======
+import { useEffect, useState } from "react";
+>>>>>>> 1086f9aa1cf8bfef59ed033d686f13d9614f95bb
 import Tablero    from "./pages/Tablero";
 import Partido    from "./pages/Partido";
 import Simulador  from "./pages/Simulador";
@@ -11,9 +15,13 @@ import Noticias   from "./pages/NoticiasLanding";
 import Login      from "./pages/Login";
 import ElegirNickname from "./pages/ElegirNickname";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import Noticia from "./pages/Noticia";
 =======
 >>>>>>> emilio
+=======
+import Noticia from "./pages/Noticia";
+>>>>>>> 1086f9aa1cf8bfef59ed033d686f13d9614f95bb
 
 type Section = "tablero" | "partido" | "noticias" | "tienda" | "vr-arena" | "simulador";
 
