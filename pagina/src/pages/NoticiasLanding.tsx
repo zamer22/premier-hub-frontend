@@ -5,6 +5,7 @@ import {
   NewsItem,
   fetchNews,
   formatRelative,
+  getCachedNewsSnapshot,
   navigateTo,
   truncateText,
 } from "./noticiasShared";
@@ -86,9 +87,10 @@ function NewsCard({
 
 
 export default function NoticiasLanding() {
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const cachedNewsSnapshot = getCachedNewsSnapshot();
+  const [news, setNews] = useState<NewsItem[]>(() => cachedNewsSnapshot?.news || []);
+  const [loading, setLoading] = useState(() => !cachedNewsSnapshot);
+  const [error, setError] = useState<string | null>(() => cachedNewsSnapshot?.error || null);
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState(DEFAULT_FILTER);
   const [visibleGridCount, setVisibleGridCount] = useState(GRID_BATCH_SIZE);
@@ -98,7 +100,9 @@ export default function NoticiasLanding() {
 
     const loadNews = async (): Promise<void> => {
       try {
-        setLoading(true);
+        if (!cachedNewsSnapshot) {
+          setLoading(true);
+        }
         setError(null);
 
         const result = await fetchNews(controller.signal);
