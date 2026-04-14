@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "../estilos/Partido.css";
 import PartidosVivo, { type LiveMatch } from "./PartidosVivo";
 
-const API_URL: string = "http://localhost:4000";
+const API_URL: string = import.meta.env.DEV ? "http://localhost:4000" : "https://api.zamer-o.com";
 
 interface ApiMatch {
   fixture: { id: number; date: string; status: { short: string; long: string } };
@@ -178,6 +178,7 @@ export default function Partido() {
   if (error) return <p className="partido_error">{error}</p>;
 
   return (
+    <div>
     <div className="partido">
       <div className="partido_standings">
         <div className="partido_section-header">
@@ -342,6 +343,7 @@ export default function Partido() {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 }
