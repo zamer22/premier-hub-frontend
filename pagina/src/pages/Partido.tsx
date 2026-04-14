@@ -233,8 +233,8 @@ export default function Partido() {
                         s.goalsDiff > 0
                           ? "partido_goal-diff--positive"
                           : s.goalsDiff < 0
-                            ? "partido_goal-diff--negative"
-                            : "partido_goal-diff--neutral"
+                          ? "partido_goal-diff--negative"
+                          : "partido_goal-diff--neutral"
                       }`}
                     >
                       {s.goalsDiff > 0 ? "+" : ""}
@@ -314,10 +314,10 @@ export default function Partido() {
       <div>
         <div className="partido_section-header partido_section-header--small">
           <div className="partido_accent" />
-          <h3 className="partido_subtitle">Proximos Partidos</h3>
+          <h3 className="partido_subtitle">Próximos Partidos</h3>
         </div>
 
-        {proximos.length === 0 && <p className="partido_empty">Sin proximos partidos</p>}
+        {proximos.length === 0 && <p className="partido_empty">Sin próximos partidos</p>}
 
         {proximos.map((m) => (
           <div key={m.fixture.id}>
