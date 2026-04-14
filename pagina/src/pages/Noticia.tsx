@@ -6,6 +6,7 @@ import {
   buildRelatedNews,
   fetchNews,
   formatFullDate,
+  getCachedNewsSnapshot,
   getNewsIdFromPath,
   navigateTo,
 } from "./noticiasShared";
@@ -74,9 +75,10 @@ function RelatedCard({
 
 
 export default function Noticia() {
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const cachedNewsSnapshot = getCachedNewsSnapshot();
+  const [news, setNews] = useState<NewsItem[]>(() => cachedNewsSnapshot?.news || []);
+  const [loading, setLoading] = useState(() => !cachedNewsSnapshot);
+  const [error, setError] = useState<string | null>(() => cachedNewsSnapshot?.error || null);
   const [newsId, setNewsId] = useState<number | null>(() =>
     getNewsIdFromPath(window.location.pathname),
   );
@@ -98,7 +100,9 @@ export default function Noticia() {
 
     const loadNews = async (): Promise<void> => {
       try {
-        setLoading(true);
+        if (!cachedNewsSnapshot) {
+          setLoading(true);
+        }
         setError(null);
 
         const result = await fetchNews(controller.signal);
