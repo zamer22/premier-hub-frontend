@@ -140,11 +140,12 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       });
       const data = await res.json();
       if (data.success) {
-        onSaldoChange(Number(data.saldo) || 0);
+        const nuevoSaldo = data.saldo != null && !isNaN(Number(data.saldo)) ? Number(data.saldo) : saldo;
+        onSaldoChange(nuevoSaldo);
         setProductos(prev => prev.map(p => p.id_producto === id_producto ? { ...p, stock: p.stock - 1 } : p));
         setConfirmAction(null);
         setProductModal(null);
-        setSuccessMsg(`¡${nombre} es tuyo! Tu nuevo saldo es ${Number(data.saldo).toLocaleString()} pts.`);
+        setSuccessMsg(`¡${nombre} es tuyo! Tu nuevo saldo es ${nuevoSaldo.toLocaleString()} pts.`);
       } else { setConfirmAction(null); showToast(data.error, false); }
     } catch { setConfirmAction(null); showToast("Error de conexion", false); }
   };
@@ -171,10 +172,12 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       });
       const data = await res.json();
       if (data.success) {
-        onSaldoChange(Number(data.saldo) || 0);
+        const rawSaldo = data.saldo ?? data.nuevo_saldo;
+        const nuevoSaldo = rawSaldo != null && !isNaN(Number(rawSaldo)) ? Number(rawSaldo) : saldo;
+        onSaldoChange(nuevoSaldo);
         setListados(prev => prev.filter(l => l.id_listado !== id_listado));
         setConfirmAction(null);
-        setSuccessMsg(`¡${nombre} comprado en marketplace! Tu nuevo saldo es ${Number(data.saldo).toLocaleString()} pts.`);
+        setSuccessMsg(`¡${nombre} comprado en marketplace! Tu nuevo saldo es ${nuevoSaldo.toLocaleString()} pts.`);
       } else { setConfirmAction(null); showToast(data.error, false); }
     } catch { setConfirmAction(null); showToast("Error de conexion", false); }
   };
