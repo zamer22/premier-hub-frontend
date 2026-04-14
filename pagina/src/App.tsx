@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import Tablero from "./pages/Tablero";
-import Partido from "./pages/Partido";
-import Simulador from "./pages/Simulador";
-import Tienda from "./pages/Tienda";
+import Partido    from "./pages/Partido";
+import Tienda     from "./pages/Tienda";
 import Noticias from "./pages/NoticiasLanding";
-import Login from "./pages/Login";
 import ElegirNickname from "./pages/ElegirNickname";
 import Noticia from "./pages/Noticia";
+import Landing from "./pages/Landing";
 
 type Section =
   | "tablero"
@@ -17,26 +15,28 @@ type Section =
   | "simulador";
 
 const TABS: { key: Section; label: string }[] = [
-  { key: "tablero", label: "Tablero" },
-  { key: "partido", label: "Partido" },
-  { key: "tienda", label: "Tienda" },
+  { key: "partido",   label: "Partido"   },
+  { key: "tablero",   label: "Tablero"   },
   { key: "simulador", label: "Simulador" },
-  { key: "noticias", label: "Noticias" },
-  { key: "vr-arena", label: "VR Arena" },
+  { key: "vr-arena",  label: "VR Arena"  },
+  { key: "tienda",    label: "Tienda"    },
+  { key: "noticias",  label: "Noticias"  },
 ];
+
+const PROXIMAMENTE: Section[] = ["tablero", "simulador", "vr-arena"];
 
 const VALID_TABS = TABS.map((t) => t.key);
 const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
 
 function getTabFromUrl(): Section {
   const p = new URLSearchParams(window.location.search).get("tab") as Section;
-  return VALID_TABS.includes(p) ? p : "tablero";
+  return VALID_TABS.includes(p) ? p : "partido";
 }
 
 function getSectionFromPath(pathname: string): Section {
   const section = pathname.replace(/^\/+/, "").split("/")[0];
   const match = TABS.find((tab) => tab.key === section);
-  return match?.key || "tablero";
+  return match?.key || "partido";
 }
 
 function getInitialTab(): Section {
@@ -53,7 +53,7 @@ function getInitialTab(): Section {
   const saved = localStorage.getItem("premier_tab") as Section;
   if (saved && VALID_TABS.includes(saved)) return saved;
 
-  return "tablero";
+  return "partido";
 }
 
 function getPathForSection(section: Section): string {
@@ -118,10 +118,7 @@ export default function App() {
   const setTab = (next: Section) => {
     localStorage.setItem("premier_tab", next);
     const url = new URL(window.location.href);
-    if (next === "tablero") {
-      url.pathname = "/";
-      url.searchParams.delete("tab");
-    } else if (next === "noticias") {
+    if (next === "noticias") {
       url.pathname = "/noticias";
       url.searchParams.delete("tab");
     } else {
@@ -183,6 +180,8 @@ export default function App() {
       method: "POST",
       credentials: "include",
     }).catch(() => {});
+    localStorage.removeItem("premier_tab");
+    window.history.replaceState({}, "", "/");
     setUser(null);
   };
 
@@ -211,7 +210,7 @@ export default function App() {
     );
   }
 
-  if (!user) return <Login onLoginSuccess={(u) => setUser(u)} />;
+  if (!user) return <Landing onLoginSuccess={(u) => setUser(u)} />;
 
   const isNewsDetailRoute = /^\/noticias\/\d+\/?$/.test(pathname);
 
@@ -260,18 +259,17 @@ export default function App() {
 
         {/* User section */}
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-white/80 text-[0.82rem] font-medium">
-            {user.nickname}
-          </span>
-          <span
-            className="text-white text-[0.75rem] font-bold px-3 py-1 rounded"
-            style={{ background: "linear-gradient(135deg, #E90052, #871d54)" }}
-          >
-            {Number(user.dinero).toLocaleString()} pts
-          </span>
+          <span className="text-white/55 text-[0.82rem] font-medium">{user.nickname}</span>
           <button
             onClick={logout}
-            className="text-white/30 text-[0.72rem] font-medium hover:text-white/60 transition-colors duration-150 border-0 bg-transparent cursor-pointer"
+            style={{
+              padding: "0.3rem 0.9rem", border: "1px solid rgba(255,255,255,0.22)",
+              borderRadius: "6px", background: "transparent",
+              color: "rgba(255,255,255,0.55)", fontSize: "0.75rem", fontWeight: 600,
+              cursor: "pointer", transition: "border-color 0.15s, color 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.5)"; e.currentTarget.style.color = "rgba(255,255,255,0.9)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.22)"; e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
           >
             Salir
           </button>
@@ -280,21 +278,19 @@ export default function App() {
 
       {/* ── Contenido ── */}
       <div className="px-8 py-6 max-w-[1400px] mx-auto animate-fade-in">
-        {tab === "tablero" && <Tablero />}
-        {tab === "partido" && <Partido />}
-        {tab === "simulador" && <Simulador />}
-        {tab === "tienda" && (
+        {tab === "partido"   && <Partido />}
+        {tab === "tienda"    && (
           <Tienda
             user={user}
             onSaldoChange={(s: number) => setUser({ ...user, dinero: s })}
           />
         )}
-        {tab === "noticias" && !isNewsDetailRoute && <Noticias />}
-        {tab === "noticias" && isNewsDetailRoute && <Noticia />}
-        {tab === "vr-arena" && (
+        {tab === "noticias"  && !isNewsDetailRoute && <Noticias />}
+        {tab === "noticias"  && isNewsDetailRoute  && <Noticia />}
+        {PROXIMAMENTE.includes(tab) && (
           <div className="flex flex-col items-center justify-center mt-24 gap-3">
             <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">
-              VR ARENA
+              {TABS.find(t => t.key === tab)?.label.toUpperCase()}
             </span>
             <span className="text-muted text-sm">Próximamente</span>
           </div>

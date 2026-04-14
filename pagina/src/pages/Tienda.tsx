@@ -34,15 +34,14 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const [misItems, setMisItems] = useState<InventarioItem[]>([]);
   const [listados, setListados] = useState<Listado[]>([]);
   const [misListados, setMisListados] = useState<Listado[]>([]);
-  const [temporada, setTemporada] = useState<Temporada | null>(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
   const [marketView, setMarketView] = useState<MarketView>("explorar");
   const [publishingItem, setPublishingItem] = useState<{ item: InventarioItem; precio: string } | null>(null);
   const [busqueda, setBusqueda] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
+  const [filtroPerfilTipo, setFiltroPerfilTipo] = useState<string>("todos");
   const [productModal, setProductModal] = useState<Producto | null>(null);
-  const [eventosProductos, setEventosProductos] = useState<Producto[]>([]);
 
   type ConfirmAction =
     | { kind: "buy-product"; producto: Producto }
@@ -51,7 +50,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const saldo = Number(user.dinero);
+  const saldo = Number(user.dinero) || 0;
   const showToast = (msg: string, ok: boolean) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 3000); };
 
   // Bloquear scroll del body cuando hay un modal abierto
@@ -71,13 +70,6 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     } catch { /* ignore */ } finally { setLoading(false); }
   }, []);
 
-  const fetchTemporada = useCallback(async () => {
-    try {
-      const r = await fetch(`${API_URL}/api/tienda/temporada-activa`);
-      const d = await r.json();
-      if (d.success) setTemporada(d.data);
-    } catch { /* ignore */ }
-  }, []);
 
   const fetchMisItems = useCallback(async () => {
     try {
@@ -103,19 +95,12 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     } catch { /* ignore */ }
   }, [user.id_usuario]);
 
-  const fetchEventos = useCallback(async () => {
-    try {
-      const r = await fetch(`${API_URL}/api/tienda/productos-v2?categoria=evento`);
-      const d = await r.json();
-      if (d.success) setEventosProductos(d.data);
-    } catch { /* ignore */ }
-  }, []);
 
   const refreshSaldo = useCallback(async () => {
     try {
       const r = await fetch(`${API_URL}/api/tienda/saldo/${user.id_usuario}`);
       const d = await r.json();
-      if (d.success) onSaldoChange(Number(d.dinero));
+      if (d.success) onSaldoChange(Number(d.dinero) || 0);
     } catch { /* ignore */ }
   }, [user.id_usuario, onSaldoChange]);
 
@@ -123,10 +108,11 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   useEffect(() => {
     setBusqueda("");
     setFiltroTipo("todos");
-    if (subTab === "perfil") { fetchProductos("perfil"); fetchTemporada(); fetchEventos(); }
+    setFiltroPerfilTipo("todos");
+    if (subTab === "perfil") { fetchProductos("perfil"); fetchMisItems(); }
     else if (subTab === "real") { fetchProductos("real"); }
     else { fetchListados(); fetchMisItems(); fetchMisListados(); }
-  }, [subTab, fetchProductos, fetchTemporada, fetchListados, fetchMisItems, fetchMisListados, fetchEventos]);
+  }, [subTab, fetchProductos, fetchListados, fetchMisItems, fetchMisListados]);
 
   const TIPOS = ["todos", "jersey", "balonazo", "ropa", "accesorio"];
 
@@ -137,13 +123,13 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     return matchBusqueda && matchTipo;
   });
 
+  const ownedIds = new Set(misItems.map(i => i.id_producto));
+
   const matchBq = (texto: string) => texto.toLowerCase().includes(busqueda.toLowerCase());
-  const perfilGeneral = productos.filter(p => !p.temporada_nombre &&
-    (matchBq(p.nombre) || matchBq(p.equipo ?? "")));
-  const perfilTemporada = productos.filter(p => !!p.temporada_nombre &&
-    (matchBq(p.nombre) || matchBq(p.equipo ?? "")));
-  const eventosFiltrados = eventosProductos.filter(p =>
-    matchBq(p.nombre) || matchBq(p.equipo ?? ""));
+  const matchPerfilTipo = (p: Producto) => filtroPerfilTipo === "todos" || p.tipo === filtroPerfilTipo;
+  const perfilTipos = ["todos", ...Array.from(new Set(productos.map(p => p.tipo)))];
+  const perfilFiltrados = productos.filter(p =>
+    (matchBq(p.nombre) || matchBq(p.equipo ?? "")) && matchPerfilTipo(p));
 
   const listadosFiltrados = listados.filter(l => {
     const matchBusqueda = l.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -162,7 +148,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       });
       const data = await res.json();
       if (data.success) {
-        onSaldoChange(Number(data.saldo));
+        onSaldoChange(Number(data.saldo) || 0);
         setProductos(prev => prev.map(p => p.id_producto === id_producto ? { ...p, stock: p.stock - 1 } : p));
         setConfirmAction(null);
         setProductModal(null);
@@ -193,7 +179,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       });
       const data = await res.json();
       if (data.success) {
-        onSaldoChange(Number(data.saldo));
+        onSaldoChange(Number(data.saldo) || 0);
         setListados(prev => prev.filter(l => l.id_listado !== id_listado));
         setConfirmAction(null);
         setSuccessMsg(`¡${nombre} comprado en marketplace! Tu nuevo saldo es ${Number(data.saldo).toLocaleString()} pts.`);
@@ -240,11 +226,14 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     } catch { showToast("Error de conexion", false); }
   };
 
-  const tipoLabel = (tipo: string) =>
-    tipo === "jersey" ? "Jersey" : tipo === "balonazo" ? "Balón" : tipo === "ropa" ? "Ropa" : "Accesorio";
+  const tipoLabel = (tipo: string) => {
+    const map: Record<string, string> = {
+      jersey: "Jersey", balonazo: "Balón", ropa: "Ropa", accesorio: "Accesorio",
+      banner: "Banner", marco: "Marco", foto_perfil: "Foto de Perfil", avatar: "Avatar",
+    };
+    return map[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1).replace(/_/g, " ");
+  };
 
-  const diasRestantes = (fechaFin: string) =>
-    Math.max(0, Math.ceil((new Date(fechaFin).getTime() - Date.now()) / 86_400_000));
 
   /* ── Product card (reused across sub-tabs) ── */
   const ProductCard = ({ p, onBuy, badge }: { p: Producto; onBuy: () => void; badge?: string }) => (
@@ -271,7 +260,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         }}>{badge}</span>
       )}
       <div style={{
-        height: "140px", background: p.imagen ? `url(${p.imagen}) center/cover` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
+        height: "140px", background: p.imagen ? `#f5f6f8 url(${p.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         {!p.imagen && <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>{tipoLabel(p.tipo)}</span>}
@@ -314,7 +303,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; }}
     >
       <div style={{
-        height: "120px", background: l.imagen ? `url(${l.imagen}) center/cover` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
+        height: "120px", background: l.imagen ? `#f5f6f8 url(${l.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
         {!l.imagen && <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>{tipoLabel(l.tipo)}</span>}
@@ -367,7 +356,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
               placeholder="Ej: 500" autoFocus />
             <div style={{ display: "flex", gap: "0.6rem" }}>
               <button onClick={() => setPublishingItem(null)} style={{ flex: 1, padding: "0.65rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" }}>Cancelar</button>
-              <button onClick={prepararPublicacion} style={{ flex: 1, padding: "0.65rem", borderRadius: "8px", border: "none", background: "linear-gradient(135deg, #E90052, #871d54)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>Continuar</button>
+              <button onClick={prepararPublicacion} style={{ flex: 1, padding: "0.65rem", borderRadius: "8px", border: "none", background: "#E90052", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>Continuar</button>
             </div>
           </div>
         </div>
@@ -378,9 +367,6 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9002 }}>
           <div style={{ background: "#fff", borderRadius: "14px", padding: "1.75rem", width: "380px", maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}
             onClick={(e) => e.stopPropagation()}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "#fff3cd", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.9rem" }}>
-              <span style={{ fontSize: "1.3rem" }}>⚠️</span>
-            </div>
             <h3 style={{ color: "#263a55", fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.4rem" }}>¿Confirmar acción?</h3>
             {confirmAction.kind === "buy-product" && (
               <p style={{ color: "#84878F", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>
@@ -403,7 +389,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                 if (confirmAction.kind === "buy-product") comprar(confirmAction.producto.id_producto, confirmAction.producto.nombre);
                 else if (confirmAction.kind === "buy-listing") comprarMarketplace(confirmAction.listado.id_listado, confirmAction.listado.nombre);
                 else publicar();
-              }} style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "none", background: "linear-gradient(135deg, #E90052, #871d54)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>
+              }} style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "none", background: "#E90052", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>
                 {confirmAction.kind === "publish" ? "Publicar" : "Confirmar compra"}
               </button>
             </div>
@@ -430,37 +416,71 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       )}
 
       {/* Modal: detalle de producto */}
-      {productModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9000, padding: "1rem" }}
-          onClick={() => setProductModal(null)}>
-          <div style={{ background: "#fff", borderRadius: "16px", width: "480px", maxWidth: "100%", overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.45)" }}
-            onClick={(e) => e.stopPropagation()}>
-            <div style={{ height: "240px", background: productModal.imagen ? `url(${productModal.imagen}) center/cover` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {!productModal.imagen && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.8rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase" }}>{tipoLabel(productModal.tipo)}</span>}
-              {productModal.es_nuevo && <span style={{ position: "absolute", top: "12px", left: "12px", background: "#E90052", color: "#fff", fontSize: "0.68rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>NUEVO</span>}
-              <button onClick={() => setProductModal(null)} style={{ position: "absolute", top: "10px", right: "10px", background: "rgba(0,0,0,0.45)", border: "none", color: "#fff", width: "28px", height: "28px", borderRadius: "50%", cursor: "pointer", fontSize: "0.9rem", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-            </div>
-            <div style={{ padding: "1.25rem 1.5rem" }}>
-              <h3 style={{ color: "#263a55", fontSize: "1.2rem", fontWeight: 800, marginBottom: "0.2rem" }}>{productModal.nombre}</h3>
-              <p style={{ color: "#84878F", fontSize: "0.82rem", marginBottom: "0.2rem" }}>{tipoLabel(productModal.tipo)}{productModal.equipo ? ` · ${productModal.equipo}` : ""}</p>
-              {productModal.temporada_nombre && <p style={{ fontSize: "0.75rem", color: "#871d54", fontWeight: 600, marginBottom: "0.2rem" }}>Temporada: {productModal.temporada_nombre}</p>}
-              <p style={{ fontSize: "0.75rem", color: productModal.stock === 0 ? "#dc2626" : "#84878F", marginBottom: "1rem" }}>{productModal.stock === 0 ? "Sin stock" : `${productModal.stock} disponibles`}</p>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #f0f0f0", paddingTop: "0.9rem" }}>
-                <div>
-                  <p style={{ fontSize: "0.68rem", color: "#84878F", textTransform: "uppercase", fontWeight: 600, marginBottom: "0.05rem" }}>Precio</p>
-                  <span style={{ fontSize: "1.45rem", fontWeight: 900, color: "#263a55" }}>{Number(productModal.costo).toLocaleString()}</span>
-                  <span style={{ fontSize: "0.82rem", color: "#84878F", marginLeft: "0.25rem" }}>pts</span>
+      {productModal && (() => {
+        const isOwned = ownedIds.has(productModal.id_producto);
+        const isPerfilItem = productModal.categoria === "perfil" || !productModal.categoria;
+        const isRealItem = productModal.categoria === "real";
+        const canBuyModal = isRealItem
+          ? !isOwned && productModal.stock > 0 && Number(productModal.costo) <= saldo
+          : !isOwned && Number(productModal.costo) <= saldo;
+        const imgBg = productModal.temporada_nombre ? "#1e1e3a" : isRealItem ? "#f5f6f8" : "#eef0f2";
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9000, padding: "1rem" }}
+            onClick={() => setProductModal(null)}>
+            <div style={{ background: "#fff", borderRadius: "16px", width: "480px", maxWidth: "100%", overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.45)" }}
+              onClick={(e) => e.stopPropagation()}>
+              {/* Image */}
+              <div style={{ height: "240px", background: productModal.imagen ? `${imgBg} url(${productModal.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {!productModal.imagen && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.8rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase" }}>{tipoLabel(productModal.tipo)}</span>}
+                {/* Badges top-left */}
+                <div style={{ position: "absolute", top: "12px", left: "12px", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                  {productModal.es_nuevo && <span style={{ background: "#E90052", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>NUEVO</span>}
+                  {isOwned && <span style={{ background: "#16a34a", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>EN TU PERFIL</span>}
                 </div>
-                <button disabled={productModal.stock <= 0 || Number(productModal.costo) > saldo}
-                  onClick={() => { setProductModal(null); setConfirmAction({ kind: "buy-product", producto: productModal }); }}
-                  style={{ padding: "0.65rem 1.75rem", border: "none", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: productModal.stock > 0 && Number(productModal.costo) <= saldo ? "pointer" : "not-allowed", background: productModal.stock > 0 && Number(productModal.costo) <= saldo ? "linear-gradient(135deg, #E90052, #871d54)" : "#e0e0e0", color: productModal.stock > 0 && Number(productModal.costo) <= saldo ? "#fff" : "#999" }}>
-                  {productModal.stock === 0 ? "Sin stock" : Number(productModal.costo) > saldo ? "Saldo insuficiente" : "Comprar ahora"}
-                </button>
+                <button onClick={() => setProductModal(null)} style={{ position: "absolute", top: "10px", right: "10px", background: "rgba(0,0,0,0.45)", border: "none", color: "#fff", width: "28px", height: "28px", borderRadius: "50%", cursor: "pointer", fontSize: "0.9rem", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+              </div>
+              {/* Info */}
+              <div style={{ padding: "1.25rem 1.5rem" }}>
+                <h3 style={{ color: "#263a55", fontSize: "1.2rem", fontWeight: 800, marginBottom: "0.3rem" }}>{productModal.nombre}</h3>
+                {/* Meta pills */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.85rem" }}>
+                  <span style={{ background: "#f0f2f5", color: "#263a55", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{tipoLabel(productModal.tipo)}</span>
+                  {productModal.equipo && <span style={{ background: "#f0f2f5", color: "#263a55", fontSize: "0.68rem", fontWeight: 600, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>{productModal.equipo}</span>}
+                  {productModal.temporada_nombre && <span style={{ background: "rgba(135,29,84,0.1)", color: "#871d54", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>Temporada: {productModal.temporada_nombre}</span>}
+                  {productModal.categoria === "evento" && <span style={{ background: "rgba(233,0,82,0.1)", color: "#E90052", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>DROP EXCLUSIVO</span>}
+                </div>
+                {/* Stock info */}
+                <div style={{ background: "#f8f9fa", borderRadius: "8px", padding: "0.6rem 0.85rem", marginBottom: "0.9rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p style={{ fontSize: "0.65rem", color: "#84878F", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.1rem" }}>Stock</p>
+                    {isRealItem
+                      ? <p style={{ fontSize: "0.82rem", color: productModal.stock === 0 ? "#dc2626" : "#263a55", fontWeight: 600 }}>{productModal.stock === 0 ? "Sin stock" : `${productModal.stock} disponibles`}</p>
+                      : <p style={{ fontSize: "0.82rem", color: "#871d54", fontWeight: 700 }}>Objeto único por usuario</p>
+                    }
+                  </div>
+                  {isOwned && (
+                    <div style={{ background: "#dcfce7", color: "#16a34a", fontSize: "0.72rem", fontWeight: 700, padding: "0.25rem 0.7rem", borderRadius: "6px" }}>Ya lo tienes</div>
+                  )}
+                </div>
+                {/* Price + buy */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #f0f0f0", paddingTop: "0.9rem" }}>
+                  <div>
+                    <p style={{ fontSize: "0.68rem", color: "#84878F", textTransform: "uppercase", fontWeight: 600, marginBottom: "0.05rem" }}>Precio</p>
+                    <span style={{ fontSize: "1.45rem", fontWeight: 900, color: "#263a55" }}>{Number(productModal.costo).toLocaleString()}</span>
+                    <span style={{ fontSize: "0.82rem", color: "#84878F", marginLeft: "0.25rem" }}>pts</span>
+                  </div>
+                  <button
+                    disabled={!canBuyModal}
+                    onClick={() => { if (canBuyModal) { setProductModal(null); setConfirmAction({ kind: "buy-product", producto: productModal }); } }}
+                    style={{ padding: "0.65rem 1.75rem", border: "none", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: canBuyModal ? "pointer" : "not-allowed", background: canBuyModal ? "#E90052" : "#e0e0e0", color: canBuyModal ? "#fff" : "#999" }}>
+                    {isOwned ? "Ya tienes este" : isRealItem && productModal.stock === 0 ? "Sin stock" : Number(productModal.costo) > saldo ? "Saldo insuficiente" : "Comprar ahora"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </>,
     document.body
   );
@@ -469,6 +489,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     <>
       {modals}
       <div>
+
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
         <div>
@@ -552,163 +573,81 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       {/* ── Sub-tab: Objetos de Perfil ── */}
       {subTab === "perfil" && (
         <div>
-          {/* Search bar */}
-          <div style={{ position: "relative", maxWidth: "480px", marginBottom: "2.5rem" }}>
-            <span style={{ position: "absolute", left: "0.85rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.85rem", pointerEvents: "none" }}>&#x2315;</span>
-            <input
-              type="text"
-              placeholder="Buscar en toda la tienda..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              style={{ width: "100%", padding: "0.7rem 0.9rem 0.7rem 2.4rem", borderRadius: "10px", border: "1.5px solid #e0e0e0", fontSize: "0.88rem", background: "#fff", boxSizing: "border-box", outline: "none", color: "#263a55" }}
-            />
+          {/* Search + filters */}
+          <div style={{ display: "flex", gap: "0.75rem", marginBottom: "2rem", flexWrap: "wrap", alignItems: "center" }}>
+            <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
+              <span style={{ position: "absolute", left: "0.85rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.85rem", pointerEvents: "none" }}>&#x2315;</span>
+              <input
+                type="text"
+                placeholder="Buscar en toda la tienda..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                style={{ width: "100%", padding: "0.7rem 0.9rem 0.7rem 2.4rem", borderRadius: "10px", border: "1.5px solid #e0e0e0", fontSize: "0.88rem", background: "#fff", boxSizing: "border-box", outline: "none", color: "#263a55" }}
+              />
+            </div>
+            {perfilTipos.length > 1 && (
+              <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                {perfilTipos.map(tipo => (
+                  <button key={tipo} onClick={() => setFiltroPerfilTipo(tipo)}
+                    style={{
+                      padding: "0.4rem 0.85rem", borderRadius: "20px", border: "1px solid",
+                      borderColor: filtroPerfilTipo === tipo ? "#263a55" : "#e0e0e0",
+                      background: filtroPerfilTipo === tipo ? "#263a55" : "#fff",
+                      color: filtroPerfilTipo === tipo ? "#fff" : "#84878F",
+                      fontSize: "0.78rem", fontWeight: filtroPerfilTipo === tipo ? 700 : 400,
+                      cursor: "pointer", transition: "all 0.15s ease",
+                    }}>
+                    {tipo === "todos" ? "Todos" : tipoLabel(tipo)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {loading && <p style={{ color: "#84878F" }}>Cargando...</p>}
 
-          {/* ─── Sección 1: Catálogo General (Apple / Nike) ─── */}
-          {perfilGeneral.length > 0 && (
-            <section style={{ marginBottom: "3.5rem" }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "1.5rem", paddingBottom: "0.75rem", borderBottom: "1px solid #f0f0f0" }}>
-                <h3 style={{ fontSize: "1.15rem", fontWeight: 900, color: "#263a55", letterSpacing: "-0.02em", margin: 0 }}>Catálogo General</h3>
-                <span style={{ fontSize: "0.75rem", color: "#84878F", fontWeight: 500 }}>{perfilGeneral.length} artículos</span>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1.25rem" }}>
-                {perfilGeneral.map(p => (
-                  <div
-                    key={p.id_producto}
-                    onClick={() => setProductModal(p)}
-                    style={{ background: "#fff", borderRadius: "16px", overflow: "hidden", cursor: "pointer", transition: "transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s", boxShadow: "0 2px 8px rgba(0,0,0,0.07)" }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.03)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.13)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.07)"; }}
-                  >
-                    <div style={{ height: "180px", position: "relative", background: p.imagen ? `url(${p.imagen}) center/cover` : "linear-gradient(135deg, #f5f6f8 0%, #e9ecef 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {!p.imagen && <span style={{ color: "#263a55", opacity: 0.18, fontSize: "1.2rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em" }}>{tipoLabel(p.tipo)}</span>}
-                      {p.es_nuevo && <span style={{ position: "absolute", top: "10px", left: "10px", background: "#E90052", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800, letterSpacing: "0.05em" }}>NUEVO</span>}
-                    </div>
-                    <div style={{ padding: "1rem 1.1rem" }}>
-                      <p style={{ fontSize: "0.72rem", color: "#84878F", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.25rem" }}>{tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}</p>
-                      <p style={{ fontWeight: 700, fontSize: "0.92rem", color: "#263a55", marginBottom: "0.7rem", lineHeight: 1.3 }}>{p.nombre}</p>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <div>
-                          <span style={{ fontSize: "1.05rem", fontWeight: 900, color: "#263a55" }}>{Number(p.costo).toLocaleString()}</span>
-                          <span style={{ fontSize: "0.72rem", color: "#84878F", marginLeft: "0.25rem" }}>pts</span>
-                        </div>
-                        <button
-                          onClick={e => { e.stopPropagation(); setConfirmAction({ kind: "buy-product", producto: p }); }}
-                          disabled={p.stock <= 0 || Number(p.costo) > saldo}
-                          style={{ padding: "0.4rem 0.95rem", background: "transparent", color: p.stock > 0 && Number(p.costo) <= saldo ? "#263a55" : "#ccc", border: `1.5px solid ${p.stock > 0 && Number(p.costo) <= saldo ? "#263a55" : "#ccc"}`, borderRadius: "6px", fontSize: "0.78rem", fontWeight: 700, cursor: p.stock > 0 && Number(p.costo) <= saldo ? "pointer" : "not-allowed", transition: "all 0.15s" }}
-                        >
-                          {p.stock === 0 ? "Agotado" : "Comprar"}
-                        </button>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1.25rem" }}>
+            {perfilFiltrados.map(p => {
+              const owned = ownedIds.has(p.id_producto);
+              const canBuy = !owned && Number(p.costo) <= saldo;
+              return (
+                <div
+                  key={p.id_producto}
+                  onClick={() => setProductModal(p)}
+                  style={{ background: "#fff", borderRadius: "14px", overflow: "hidden", cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s", boxShadow: "0 2px 8px rgba(0,0,0,0.07)" }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.07)"; }}
+                >
+                  <div style={{ height: "160px", position: "relative", background: p.imagen ? `#eef0f2 url(${p.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {!p.imagen && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.1rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em" }}>{tipoLabel(p.tipo)}</span>}
+                    {owned
+                      ? <span style={{ position: "absolute", top: "10px", left: "10px", background: "#16a34a", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800 }}>EN TU PERFIL</span>
+                      : p.es_nuevo && <span style={{ position: "absolute", top: "10px", left: "10px", background: "#E90052", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800 }}>NUEVO</span>
+                    }
+                  </div>
+                  <div style={{ padding: "0.9rem 1rem" }}>
+                    <p style={{ fontSize: "0.7rem", color: "#84878F", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.2rem" }}>{tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}</p>
+                    <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#263a55", marginBottom: "0.65rem", lineHeight: 1.3 }}>{p.nombre}</p>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <span style={{ fontSize: "1rem", fontWeight: 900, color: "#263a55" }}>{Number(p.costo).toLocaleString()}</span>
+                        <span style={{ fontSize: "0.72rem", color: "#84878F", marginLeft: "0.25rem" }}>pts</span>
                       </div>
+                      <button
+                        onClick={e => { e.stopPropagation(); if (canBuy) setConfirmAction({ kind: "buy-product", producto: p }); }}
+                        disabled={!canBuy}
+                        style={{ padding: "0.38rem 0.85rem", background: canBuy ? "#E90052" : "#e9ecef", color: canBuy ? "#fff" : "#aaa", border: "none", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 700, cursor: canBuy ? "pointer" : "not-allowed" }}
+                      >
+                        {owned ? "Ya tienes este" : "Comprar"}
+                      </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* ─── Sección 2: Temporada Activa (Fortnite) ─── */}
-          {perfilTemporada.length > 0 && (
-            <section style={{ marginBottom: "3.5rem" }}>
-              {temporada && (
-                <div style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 55%, #1a1a2e 100%)", borderRadius: "16px", padding: "1.5rem 2rem", marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid rgba(245,158,11,0.2)" }}>
-                  <div>
-                    <p style={{ fontSize: "0.68rem", color: "rgba(245,158,11,0.75)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "0.35rem" }}>Temporada Activa</p>
-                    <h3 style={{ fontSize: "1.35rem", fontWeight: 900, color: "#fff", marginBottom: "0.2rem", letterSpacing: "-0.01em" }}>{temporada.nombre}</h3>
-                    <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.4)" }}>Items de edición limitada — desaparecen al terminar</p>
-                  </div>
-                  <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "2rem" }}>
-                    <p style={{ fontSize: "0.65rem", color: "rgba(245,158,11,0.7)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.2rem" }}>Termina en</p>
-                    <p style={{ fontSize: "2.2rem", fontWeight: 900, color: "#f59e0b", lineHeight: 1, letterSpacing: "-0.02em" }}>{diasRestantes(temporada.fecha_fin)}</p>
-                    <p style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.35)", marginTop: "0.1rem" }}>días</p>
                   </div>
                 </div>
-              )}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1.25rem" }}>
-                {perfilTemporada.map(p => (
-                  <div
-                    key={p.id_producto}
-                    onClick={() => setProductModal(p)}
-                    style={{ background: "#1a1a2e", borderRadius: "12px", overflow: "hidden", cursor: "pointer", borderTop: "3px solid #f59e0b", transition: "transform 0.2s, box-shadow 0.2s", boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(245,158,11,0.18)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.25)"; }}
-                  >
-                    <div style={{ height: "160px", position: "relative", background: p.imagen ? `url(${p.imagen}) center/cover` : "linear-gradient(135deg, #2d2d5e 0%, #1a1a2e 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 45%, rgba(26,26,46,0.85) 100%)" }} />
-                      {!p.imagen && <span style={{ color: "rgba(245,158,11,0.28)", fontSize: "1.1rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em" }}>{tipoLabel(p.tipo)}</span>}
-                      <span style={{ position: "absolute", top: "10px", right: "10px", background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.35)", color: "#f59e0b", fontSize: "0.58rem", padding: "0.15rem 0.45rem", borderRadius: "4px", fontWeight: 800, letterSpacing: "0.06em" }}>TEMPORADA</span>
-                    </div>
-                    <div style={{ padding: "0.8rem 1rem" }}>
-                      <p style={{ fontSize: "0.7rem", color: "rgba(245,158,11,0.65)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.2rem" }}>{tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}</p>
-                      <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#fff", marginBottom: "0.6rem", lineHeight: 1.3 }}>{p.nombre}</p>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: "1rem", fontWeight: 900, color: "#f59e0b" }}>{Number(p.costo).toLocaleString()} pts</span>
-                        <button
-                          onClick={e => { e.stopPropagation(); setConfirmAction({ kind: "buy-product", producto: p }); }}
-                          disabled={p.stock <= 0 || Number(p.costo) > saldo}
-                          style={{ padding: "0.38rem 0.85rem", background: p.stock > 0 && Number(p.costo) <= saldo ? "#f59e0b" : "rgba(255,255,255,0.08)", color: p.stock > 0 && Number(p.costo) <= saldo ? "#1a1a2e" : "rgba(255,255,255,0.25)", border: "none", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 800, cursor: p.stock > 0 && Number(p.costo) <= saldo ? "pointer" : "not-allowed" }}
-                        >
-                          {p.stock === 0 ? "Agotado" : "Obtener"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+              );
+            })}
+          </div>
 
-          {/* ─── Sección 3: Drops Exclusivos (Eventos) ─── */}
-          {eventosFiltrados.length > 0 && (
-            <section style={{ marginBottom: "3.5rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem", paddingBottom: "0.75rem", borderBottom: "1px solid rgba(233,0,82,0.12)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                  <div style={{ width: "3px", height: "1.15rem", background: "#E90052", borderRadius: "2px" }} />
-                  <h3 style={{ fontSize: "1.15rem", fontWeight: 900, color: "#263a55", letterSpacing: "-0.02em", margin: 0 }}>Drops Exclusivos</h3>
-                </div>
-                <span style={{ fontSize: "0.68rem", color: "#E90052", fontWeight: 800, background: "rgba(233,0,82,0.08)", padding: "0.18rem 0.55rem", borderRadius: "4px", letterSpacing: "0.04em", textTransform: "uppercase" }}>No regresan</span>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1.25rem" }}>
-                {eventosFiltrados.map(p => (
-                  <div
-                    key={p.id_producto}
-                    onClick={() => setProductModal(p)}
-                    style={{ background: "#0f0f1e", borderRadius: "12px", overflow: "hidden", cursor: "pointer", border: "1px solid rgba(233,0,82,0.18)", transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s", boxShadow: "0 2px 10px rgba(0,0,0,0.35)" }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(233,0,82,0.55)"; e.currentTarget.style.boxShadow = "0 0 22px rgba(233,0,82,0.14), 0 8px 24px rgba(0,0,0,0.35)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(233,0,82,0.18)"; e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.35)"; e.currentTarget.style.transform = "translateY(0)"; }}
-                  >
-                    <div style={{ height: "160px", position: "relative", background: p.imagen ? `url(${p.imagen}) center/cover` : "linear-gradient(135deg, #1a0a14 0%, #0f0f1e 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 45%, rgba(15,15,30,0.92) 100%)" }} />
-                      {!p.imagen && <span style={{ color: "rgba(233,0,82,0.2)", fontSize: "1.1rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em" }}>{tipoLabel(p.tipo)}</span>}
-                      <div style={{ position: "absolute", top: "8px", left: "8px", display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
-                        <span style={{ background: "#E90052", color: "#fff", fontSize: "0.58rem", padding: "0.15rem 0.45rem", borderRadius: "3px", fontWeight: 800, letterSpacing: "0.05em" }}>EXCLUSIVO</span>
-                        <span style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.4)", color: "#f59e0b", fontSize: "0.58rem", padding: "0.15rem 0.45rem", borderRadius: "3px", fontWeight: 800, letterSpacing: "0.04em" }}>NO REGRESA</span>
-                      </div>
-                    </div>
-                    <div style={{ padding: "0.8rem 1rem" }}>
-                      <p style={{ fontSize: "0.7rem", color: "rgba(233,0,82,0.55)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.2rem" }}>{tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}</p>
-                      <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#fff", marginBottom: "0.6rem", lineHeight: 1.3 }}>{p.nombre}</p>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: "1rem", fontWeight: 900, color: "#E90052" }}>{Number(p.costo).toLocaleString()} pts</span>
-                        <button
-                          onClick={e => { e.stopPropagation(); setConfirmAction({ kind: "buy-product", producto: p }); }}
-                          disabled={p.stock <= 0 || Number(p.costo) > saldo}
-                          style={{ padding: "0.38rem 0.85rem", background: p.stock > 0 && Number(p.costo) <= saldo ? "#E90052" : "rgba(255,255,255,0.07)", color: p.stock > 0 && Number(p.costo) <= saldo ? "#fff" : "rgba(255,255,255,0.22)", border: "none", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 800, cursor: p.stock > 0 && Number(p.costo) <= saldo ? "pointer" : "not-allowed" }}
-                        >
-                          {p.stock === 0 ? "Agotado" : "Conseguir"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Empty state */}
-          {!loading && perfilGeneral.length === 0 && perfilTemporada.length === 0 && eventosFiltrados.length === 0 && (
+          {!loading && perfilFiltrados.length === 0 && (
             <p style={{ color: "#84878F", textAlign: "center", marginTop: "3rem", fontSize: "0.9rem" }}>No se encontraron productos</p>
           )}
         </div>
@@ -780,7 +719,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                     }}>
                       <div style={{
                         height: "80px", borderRadius: "8px",
-                        background: item.imagen ? `url(${item.imagen}) center/cover` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
+                        background: item.imagen ? `#f5f6f8 url(${item.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
                         {!item.imagen && <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem", fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>{tipoLabel(item.tipo)}</span>}
