@@ -1,37 +1,28 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 import { useEffect, useState } from "react";
-=======
-import { useState, useEffect } from "react";
->>>>>>> emilio
-=======
-import { useEffect, useState } from "react";
->>>>>>> 1086f9aa1cf8bfef59ed033d686f13d9614f95bb
-import Tablero    from "./pages/Tablero";
-import Partido    from "./pages/Partido";
-import Simulador  from "./pages/Simulador";
-import Tienda     from "./pages/Tienda";
-import Noticias   from "./pages/NoticiasLanding";
-import Login      from "./pages/Login";
+import Tablero from "./pages/Tablero";
+import Partido from "./pages/Partido";
+import Simulador from "./pages/Simulador";
+import Tienda from "./pages/Tienda";
+import Noticias from "./pages/NoticiasLanding";
+import Login from "./pages/Login";
 import ElegirNickname from "./pages/ElegirNickname";
-<<<<<<< HEAD
-<<<<<<< HEAD
 import Noticia from "./pages/Noticia";
-=======
->>>>>>> emilio
-=======
-import Noticia from "./pages/Noticia";
->>>>>>> 1086f9aa1cf8bfef59ed033d686f13d9614f95bb
 
-type Section = "tablero" | "partido" | "noticias" | "tienda" | "vr-arena" | "simulador";
+type Section =
+  | "tablero"
+  | "partido"
+  | "noticias"
+  | "tienda"
+  | "vr-arena"
+  | "simulador";
 
 const TABS: { key: Section; label: string }[] = [
-  { key: "tablero",   label: "Tablero"   },
-  { key: "partido",   label: "Partido"   },
-  { key: "tienda",    label: "Tienda"    },
+  { key: "tablero", label: "Tablero" },
+  { key: "partido", label: "Partido" },
+  { key: "tienda", label: "Tienda" },
   { key: "simulador", label: "Simulador" },
-  { key: "noticias",  label: "Noticias"  },
-  { key: "vr-arena",  label: "VR Arena"  },
+  { key: "noticias", label: "Noticias" },
+  { key: "vr-arena", label: "VR Arena" },
 ];
 
 const VALID_TABS = TABS.map((t) => t.key);
@@ -99,12 +90,15 @@ function UserIcon() {
 }
 
 export default function App() {
-  const [pathname,       setPathname]      = useState(() => window.location.pathname);
-  const [tab,            setTabState]      = useState<Section>(() =>
+  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const [tab, setTabState] = useState<Section>(() =>
     getSectionFromLocation(window.location.pathname),
   );
-  const [user,           setUser]          = useState<any>(null);
-  const [oauthNuevo,     setOauthNuevo]    = useState<{ correo: string; nombre: string } | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [oauthNuevo, setOauthNuevo] = useState<{
+    correo: string;
+    nombre: string;
+  } | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
   const syncLocationState = () => {
@@ -141,17 +135,25 @@ export default function App() {
     if (hash.includes("access_token")) {
       const params = new URLSearchParams(hash.slice(1));
       const accessToken = params.get("access_token");
-      if (!accessToken) { setSessionLoading(false); return; }
+      if (!accessToken) {
+        setSessionLoading(false);
+        return;
+      }
       window.history.replaceState(null, "", window.location.pathname);
       fetch(`${API_URL}/api/auth/google-sync`, {
-        method: "POST", credentials: "include",
+        method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ access_token: accessToken }),
       })
         .then((r) => r.json())
         .then((data) => {
-          if (!data.success) { alert("Error con Google login: " + data.error); return; }
-          if (data.isNew) setOauthNuevo({ correo: data.correo, nombre: data.nombre });
+          if (!data.success) {
+            alert("Error con Google login: " + data.error);
+            return;
+          }
+          if (data.isNew)
+            setOauthNuevo({ correo: data.correo, nombre: data.nombre });
           else setUser(data.user);
         })
         .catch(() => alert("No se pudo conectar con el servidor"))
@@ -159,14 +161,19 @@ export default function App() {
     } else {
       fetch(`${API_URL}/api/auth/me`, { credentials: "include" })
         .then((r) => r.json())
-        .then((data) => { if (data.success) setUser(data.user); })
+        .then((data) => {
+          if (data.success) setUser(data.user);
+        })
         .catch(() => {})
         .finally(() => setSessionLoading(false));
     }
   }, []);
 
   const logout = async () => {
-    await fetch(`${API_URL}/api/auth/logout`, { method: "POST", credentials: "include" }).catch(() => {});
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
     setUser(null);
   };
 
@@ -175,7 +182,9 @@ export default function App() {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-surface gap-3">
         <div className="w-8 h-8 rounded-full border-2 border-crimson border-t-transparent animate-spin" />
-        <span className="text-muted text-sm font-medium tracking-wide">Cargando PremierHub...</span>
+        <span className="text-muted text-sm font-medium tracking-wide">
+          Cargando PremierHub...
+        </span>
       </div>
     );
   }
@@ -185,7 +194,10 @@ export default function App() {
       <ElegirNickname
         correo={oauthNuevo.correo}
         nombre={oauthNuevo.nombre}
-        onComplete={(u) => { setOauthNuevo(null); setUser(u); }}
+        onComplete={(u) => {
+          setOauthNuevo(null);
+          setUser(u);
+        }}
       />
     );
   }
@@ -197,14 +209,16 @@ export default function App() {
   /* ── App ── */
   return (
     <div className="min-h-screen bg-surface">
-
       {/* ── Navbar ── */}
-      <nav className="flex items-center h-[60px] px-8 bg-navy gap-0.5"
-        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.18)" }}>
-
+      <nav
+        className="flex items-center h-[60px] px-8 bg-navy gap-0.5"
+        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.18)" }}
+      >
         {/* Logo */}
-        <span className="font-extrabold text-[1.25rem] tracking-tight select-none mr-10"
-          style={{ letterSpacing: "-0.02em" }}>
+        <span
+          className="font-extrabold text-[1.25rem] tracking-tight select-none mr-10"
+          style={{ letterSpacing: "-0.02em" }}
+        >
           <span className="text-crimson">PREMIER</span>
           <span className="text-white">HUB</span>
         </span>
@@ -224,17 +238,23 @@ export default function App() {
             {tab === t.key && (
               <span
                 className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full"
-                style={{ background: "linear-gradient(90deg, #E90052, #871d54)" }}
+                style={{
+                  background: "linear-gradient(90deg, #E90052, #871d54)",
+                }}
               />
             )}
-            <span className="absolute inset-0 rounded opacity-0 hover:opacity-100 transition-opacity duration-150"
-              style={{ background: "rgba(255,255,255,0.04)" }} />
+            <span
+              className="absolute inset-0 rounded opacity-0 hover:opacity-100 transition-opacity duration-150"
+              style={{ background: "rgba(255,255,255,0.04)" }}
+            />
           </button>
         ))}
 
         {/* User section */}
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-white/80 text-[0.82rem] font-medium">{user.nickname}</span>
+          <span className="text-white/80 text-[0.82rem] font-medium">
+            {user.nickname}
+          </span>
           <span
             className="text-white text-[0.75rem] font-bold px-3 py-1 rounded"
             style={{ background: "linear-gradient(135deg, #E90052, #871d54)" }}
@@ -252,20 +272,22 @@ export default function App() {
 
       {/* ── Contenido ── */}
       <div className="px-8 py-6 max-w-[1400px] mx-auto animate-fade-in">
-        {tab === "tablero"   && <Tablero />}
-        {tab === "partido"   && <Partido />}
+        {tab === "tablero" && <Tablero />}
+        {tab === "partido" && <Partido />}
         {tab === "simulador" && <Simulador />}
-        {tab === "tienda"    && (
+        {tab === "tienda" && (
           <Tienda
             user={user}
             onSaldoChange={(s: number) => setUser({ ...user, dinero: s })}
           />
         )}
-        {tab === "noticias"  && !isNewsDetailRoute && <Noticias />}
-        {tab === "noticias"  && isNewsDetailRoute && <Noticia />}
-        {tab === "vr-arena"  && (
+        {tab === "noticias" && !isNewsDetailRoute && <Noticias />}
+        {tab === "noticias" && isNewsDetailRoute && <Noticia />}
+        {tab === "vr-arena" && (
           <div className="flex flex-col items-center justify-center mt-24 gap-3">
-            <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">VR ARENA</span>
+            <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">
+              VR ARENA
+            </span>
             <span className="text-muted text-sm">Próximamente</span>
           </div>
         )}
