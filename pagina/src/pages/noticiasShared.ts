@@ -1,5 +1,27 @@
 const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
 export const DEFAULT_FILTER = "Todos los equipos";
+export const PREMIER_TEAM_OPTIONS = [
+  "Arsenal",
+  "Aston Villa",
+  "Bournemouth",
+  "Brentford",
+  "Brighton",
+  "Chelsea",
+  "Crystal Palace",
+  "Everton",
+  "Fulham",
+  "Ipswich",
+  "Leicester",
+  "Liverpool",
+  "Manchester City",
+  "Manchester United",
+  "Newcastle",
+  "Nottingham Forest",
+  "Southampton",
+  "Tottenham",
+  "West Ham",
+  "Wolverhampton Wanderers",
+] as const;
 
 
 // Respuesta del API sin normalizar
@@ -40,12 +62,35 @@ export interface NewsApiResponse {
   success?: boolean;
   data?: ApiNewsItem[];
   error?: string;
+  page?: number;
+  limit?: number;
+  hasMore?: boolean;
 }
 
 type NewsCacheSnapshot = {
   news: NewsItem[];
   error: string | null;
+  hasMore: boolean;
+  page: number;
+  search: string;
+  teamFilter: string;
   cachedAt: number;
+};
+
+export type FetchNewsParams = {
+  offset?: number;
+  page?: number;
+  limit?: number;
+  team?: string | null;
+  search?: string | null;
+};
+
+export type FetchNewsResult = {
+  news: NewsItem[];
+  error: string | null;
+  hasMore: boolean;
+  page: number;
+  limit: number;
 };
 
 const PREVIEW_MAX_LENGTH = 220;
@@ -522,6 +567,15 @@ function isNewsCacheFresh(cachedAt: number): boolean {
   return Date.now() - cachedAt <= FRONTEND_NEWS_CACHE_TTL_MS;
 }
 
+function normalizeNewsQueryValue(value: string | null | undefined): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
 function writeNewsCache(snapshot: NewsCacheSnapshot): void {
   memoryNewsCache = snapshot;
 
@@ -560,6 +614,11 @@ function readStoredNewsCache(): NewsCacheSnapshot | null {
     return {
       news: parsed.news as NewsItem[],
       error: typeof parsed.error === "string" ? parsed.error : null,
+      hasMore: Boolean(parsed.hasMore),
+      page: typeof parsed.page === "number" && parsed.page > 0 ? parsed.page : 1,
+      search: typeof parsed.search === "string" ? parsed.search : "",
+      teamFilter:
+        typeof parsed.teamFilter === "string" ? parsed.teamFilter : DEFAULT_FILTER,
       cachedAt: parsed.cachedAt,
     };
   } catch {
@@ -582,11 +641,71 @@ export function getCachedNewsSnapshot(): NewsCacheSnapshot | null {
   return null;
 }
 
-export async function fetchNews(signal?: AbortSignal): Promise<{
+export function setCachedNewsSnapshot(snapshot: {
   news: NewsItem[];
   error: string | null;
-}> {
-  const response = await fetch(`${API_URL}/api/noticias`, { signal });
+  hasMore?: boolean;
+  page?: number;
+  search?: string;
+  teamFilter?: string;
+}): void {
+  writeNewsCache({
+    news: snapshot.news,
+    error: snapshot.error,
+    hasMore: snapshot.hasMore ?? false,
+    page: snapshot.page ?? 1,
+    search: snapshot.search ?? "",
+    teamFilter: snapshot.teamFilter ?? DEFAULT_FILTER,
+    cachedAt: Date.now(),
+  });
+}
+
+export function mergeNewsItems(current: NewsItem[], incoming: NewsItem[]): NewsItem[] {
+  const seen = new Set<number>();
+  const merged: NewsItem[] = [];
+
+  for (const item of [...current, ...incoming]) {
+    if (seen.has(item.id)) {
+      continue;
+    }
+
+    seen.add(item.id);
+    merged.push(item);
+  }
+
+  return merged;
+}
+
+export async function fetchNews(
+  params: FetchNewsParams = {},
+  signal?: AbortSignal,
+): Promise<FetchNewsResult> {
+  const offset =
+    typeof params.offset === "number" && params.offset >= 0 ? params.offset : 0;
+  const page = typeof params.page === "number" && params.page > 0 ? params.page : 1;
+  const limit =
+    typeof params.limit === "number" && params.limit > 0 ? params.limit : 8;
+  const team = normalizeNewsQueryValue(params.team);
+  const search = normalizeNewsQueryValue(params.search);
+  const query = new URLSearchParams({
+    limit: String(limit),
+  });
+
+  if (offset > 0) {
+    query.set("offset", String(offset));
+  } else {
+    query.set("page", String(page));
+  }
+
+  if (team) {
+    query.set("team", team);
+  }
+
+  if (search) {
+    query.set("search", search);
+  }
+
+  const response = await fetch(`${API_URL}/api/noticias?${query.toString()}`, { signal });
 
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
@@ -599,22 +718,21 @@ export async function fetchNews(signal?: AbortSignal): Promise<{
       news: [],
       error:
         json.error || "No fue posible cargar noticias de la Premier League.",
+      hasMore: false,
+      page: typeof json.page === "number" ? json.page : page,
+      limit,
     };
   }
 
-  const result = {
+  return {
     news: json.data
       .map((item, index) => normalizeNewsItem(item, index))
       .filter((item): item is NewsItem => item !== null),
     error: null,
+    hasMore: Boolean(json.hasMore),
+    page: typeof json.page === "number" ? json.page : page,
+    limit: typeof json.limit === "number" ? json.limit : limit,
   };
-
-  writeNewsCache({
-    ...result,
-    cachedAt: Date.now(),
-  });
-
-  return result;
 }
 
 
