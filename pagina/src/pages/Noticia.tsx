@@ -9,10 +9,9 @@ import {
   getCachedNewsSnapshot,
   getNewsIdFromPath,
   navigateTo,
+  setCachedNewsSnapshot,
 } from "./noticiasShared";
 
-
-// Componente para mostrar la imagen de la noticia, con un fallback si no hay imagen disponible
 function NewsImage({
   image,
   alt,
@@ -24,21 +23,30 @@ function NewsImage({
   className: string;
   fallbackClassName: string;
 }) {
-  if (!image) {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [image]);
+
+  if (!image || hasError) {
     return <div className={fallbackClassName}>Premier League</div>;
   }
 
-  return <img src={image} alt={alt} className={className} />;
+  return (
+    <img
+      src={image}
+      alt={alt}
+      className={className}
+      onError={() => setHasError(true)}
+    />
+  );
 }
 
-
-// Componente para mostrar el badge del equipo asociado a la noticia, o un valor por defecto si no hay equipo asociado
 function TeamBadge({ team }: { team: string | null }) {
   return <span className="noticias-team-badge">{team || "Premier League"}</span>;
 }
 
-
-// Componente de noticia, con su imagen, título, fuente y tiempo de lectura
 function RelatedCard({
   item,
   onOpen,
@@ -73,15 +81,15 @@ function RelatedCard({
   );
 }
 
-
 export default function Noticia() {
   const cachedNewsSnapshot = getCachedNewsSnapshot();
+  const initialNewsId = getNewsIdFromPath(window.location.pathname);
+  const cachedSelectedNews =
+    cachedNewsSnapshot?.news.find((item) => item.id === initialNewsId) ?? null;
   const [news, setNews] = useState<NewsItem[]>(() => cachedNewsSnapshot?.news || []);
-  const [loading, setLoading] = useState(() => !cachedNewsSnapshot);
+  const [loading, setLoading] = useState(() => !cachedSelectedNews);
   const [error, setError] = useState<string | null>(() => cachedNewsSnapshot?.error || null);
-  const [newsId, setNewsId] = useState<number | null>(() =>
-    getNewsIdFromPath(window.location.pathname),
-  );
+  const [newsId, setNewsId] = useState<number | null>(() => initialNewsId);
 
   useEffect(() => {
     const syncPath = () => {
@@ -96,18 +104,30 @@ export default function Noticia() {
   }, []);
 
   useEffect(() => {
+    const selectedNewsInCurrentState =
+      newsId !== null && news.some((item) => item.id === newsId);
+
+    if (selectedNewsInCurrentState) {
+      setLoading(false);
+      return;
+    }
+
     const controller = new AbortController();
 
     const loadNews = async (): Promise<void> => {
       try {
-        if (!cachedNewsSnapshot) {
-          setLoading(true);
-        }
+        setLoading(true);
         setError(null);
 
-        const result = await fetchNews(controller.signal);
+        const result = await fetchNews({}, controller.signal);
         setNews(result.news);
         setError(result.error);
+        setCachedNewsSnapshot({
+          news: result.news,
+          error: result.error,
+          hasMore: result.hasMore,
+          page: result.page,
+        });
       } catch (requestError) {
         if (
           requestError instanceof DOMException &&
@@ -131,7 +151,7 @@ export default function Noticia() {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [newsId]);
 
   const selectedNews = useMemo(
     () => news.find((item) => item.id === newsId) ?? null,
@@ -242,7 +262,7 @@ export default function Noticia() {
           <div>
             <p className="noticias-related-section__eyebrow">Siguiente lectura</p>
             <h3 className="noticias-related-section__title">
-              Más noticias de la Premier League
+              MÃ¡s noticias de la Premier League
             </h3>
           </div>
 
