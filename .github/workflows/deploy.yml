@@ -22,11 +22,3 @@ jobs:
           kubectl set image deployment/pagina pagina=premier-pagina:${{ github.sha }} -n prod
           kubectl rollout status deployment/pagina -n prod --timeout=120s
 
-      - name: Update versions.env
-        run: |
-          cd /home/zamer/premier-hub-infra
-          git pull --rebase origin main
-          sed -i 's/^PROD_FRONTEND_TAG=.*/PROD_FRONTEND_TAG=${{ github.sha }}/' versions.env
-          git add versions.env
-          git commit -m "deploy: frontend prod → ${{ github.sha }}" || true
-          git push origin HEAD:main
