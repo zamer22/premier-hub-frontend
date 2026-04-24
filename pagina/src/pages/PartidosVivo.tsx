@@ -49,7 +49,7 @@ interface H2HRow {
   };
 }
 
-const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
+const API_URL = import.meta.env.VITE_API_URL;
 const TABS = ["Alineaciones", "Estadísticas", "H2H"];
 
 const STATS_ES: Record<string, string> = {
