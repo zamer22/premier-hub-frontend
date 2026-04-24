@@ -26,7 +26,7 @@ const TABS: { key: Section; label: string }[] = [
 const PROXIMAMENTE: Section[] = ["tablero", "simulador", "vr-arena"];
 
 const VALID_TABS = TABS.map((t) => t.key);
-const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function getTabFromUrl(): Section {
   const p = new URLSearchParams(window.location.search).get("tab") as Section;
