@@ -12,7 +12,11 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t premier-pagina:${{ github.sha }} -t premier-pagina:preprod ./pagina
+          docker build \
+            --build-arg VITE_API_URL=https://api-preprod.zamer-o.com \
+            --build-arg VITE_APP_URL=https://app-preprod.zamer-o.com \
+            --build-arg VITE_SUPABASE_URL=https://supabase-preprod.zamer-o.com \
+            -t premier-pagina:${{ github.sha }} -t premier-pagina:preprod ./pagina
           docker save premier-pagina:${{ github.sha }} | sudo k3s ctr images import -
 
       - name: Deploy to K3s
