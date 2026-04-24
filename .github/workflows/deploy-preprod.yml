@@ -21,8 +21,6 @@ jobs:
 
       - name: Deploy to K3s
         run: |
-          kubectl apply -f https://raw.githubusercontent.com/zamer22/premier-hub-infra/main/k8s/preprod/pagina-deployment.yaml
-          kubectl apply -f https://raw.githubusercontent.com/zamer22/premier-hub-infra/main/k8s/preprod/pagina-service.yaml
           kubectl set image deployment/pagina pagina=premier-pagina:${{ github.sha }} -n preprod
           kubectl rollout status deployment/pagina -n preprod --timeout=120s
 
