@@ -181,6 +181,7 @@ export default function App() {
       credentials: "include",
     }).catch(() => {});
     localStorage.removeItem("premier_tab");
+    sessionStorage.setItem("google_select_account", "1");
     window.history.replaceState({}, "", "/");
     setUser(null);
   };
