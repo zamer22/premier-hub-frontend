@@ -1,0 +1,26 @@
+name: Build and Deploy Frontend (prod)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=https://api.zamer-o.com \
+            --build-arg VITE_APP_URL=https://app.zamer-o.com \
+            --build-arg VITE_SUPABASE_URL=https://supabase.zamer-o.com \
+            -t premier-pagina:${{ github.sha }} -t premier-pagina:latest ./pagina
+          docker save premier-pagina:${{ github.sha }} | sudo k3s ctr images import -
+
+      - name: Deploy to K3s
+        run: |
+          kubectl set image deployment/pagina pagina=premier-pagina:${{ github.sha }} -n prod
+          kubectl rollout status deployment/pagina -n prod --timeout=120s
+
