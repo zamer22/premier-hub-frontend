@@ -5,6 +5,7 @@ import Noticias from "./pages/NoticiasLanding";
 import ElegirNickname from "./pages/ElegirNickname";
 import Noticia from "./pages/Noticia";
 import Landing from "./pages/Landing";
+import Historia from "./pages/Historia";
 
 type Section =
   | "tablero"
@@ -12,15 +13,17 @@ type Section =
   | "noticias"
   | "tienda"
   | "vr-arena"
-  | "simulador";
+  | "simulador"
+  | "historia"; 
+
 
 const TABS: { key: Section; label: string }[] = [
-  { key: "partido",   label: "Partido"   },
-  { key: "tablero",   label: "Tablero"   },
+  { key: "partido",   label: "Partidos"   },
   { key: "simulador", label: "Simulador" },
   { key: "vr-arena",  label: "VR Arena"  },
   { key: "tienda",    label: "Tienda"    },
   { key: "noticias",  label: "Noticias"  },
+  { key: "historia",  label: "Historia"  }, 
 ];
 
 const PROXIMAMENTE: Section[] = ["tablero", "simulador", "vr-arena"];
@@ -287,6 +290,8 @@ export default function App() {
         )}
         {tab === "noticias"  && !isNewsDetailRoute && <Noticias />}
         {tab === "noticias"  && isNewsDetailRoute  && <Noticia />}
+        {tab === "historia"  && <Historia />}
+
         {PROXIMAMENTE.includes(tab) && (
           <div className="flex flex-col items-center justify-center mt-24 gap-3">
             <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">

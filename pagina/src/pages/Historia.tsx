@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import styles from "./Historia.module.css";
+import styles from "../estilos/historia.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
