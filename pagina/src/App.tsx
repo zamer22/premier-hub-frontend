@@ -5,12 +5,14 @@ import Noticias from "./pages/NoticiasLanding";
 import ElegirNickname from "./pages/ElegirNickname";
 import Noticia from "./pages/Noticia";
 import Landing from "./pages/Landing";
+import Perfil from "./pages/Perfil";
 
 type Section =
   | "tablero"
   | "partido"
   | "noticias"
   | "tienda"
+  | "perfil"
   | "vr-arena"
   | "simulador";
 
@@ -25,7 +27,7 @@ const TABS: { key: Section; label: string }[] = [
 
 const PROXIMAMENTE: Section[] = ["tablero", "simulador", "vr-arena"];
 
-const VALID_TABS = TABS.map((t) => t.key);
+const VALID_TABS: Section[] = [...TABS.map((t) => t.key), "perfil"];
 const API_URL = import.meta.env.VITE_API_URL;
 
 function getTabFromUrl(): Section {
@@ -35,8 +37,7 @@ function getTabFromUrl(): Section {
 
 function getSectionFromPath(pathname: string): Section {
   const section = pathname.replace(/^\/+/, "").split("/")[0];
-  const match = TABS.find((tab) => tab.key === section);
-  return match?.key || "partido";
+  return VALID_TABS.includes(section as Section) ? (section as Section) : "partido";
 }
 
 function getInitialTab(): Section {
@@ -58,6 +59,30 @@ function getInitialTab(): Section {
 
 function getPathForSection(section: Section): string {
   return section === "tablero" ? "/" : `/${section}`;
+}
+
+function getInitials(user: any) {
+  const source = user?.nickname || user?.nombre_usuario || user?.correo || "PH";
+  return source
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part: string) => part[0]?.toUpperCase())
+    .join("") || "PH";
+}
+
+function getUserImage(user: any) {
+  return user?.foto_perfil_url || user?.foto_perfil || user?.avatar_url || user?.avatar || user?.imagen_perfil || "";
+}
+
+function getInventoryProfileImage(items: any[]) {
+  const preferred = items.find((item) =>
+    ["foto_perfil", "avatar"].includes(item.tipo) && item.imagen
+  );
+  const fallback = items.find((item) =>
+    ["foto_perfil", "avatar", "marco", "banner"].includes(item.tipo) && item.imagen
+  );
+  return preferred?.imagen || fallback?.imagen || "";
 }
 
 function CrownIcon() {
@@ -103,6 +128,7 @@ export default function App() {
   const [pathname,       setPathname]      = useState(() => window.location.pathname);
   const [tab,            setTabState]      = useState<Section>(getInitialTab);
   const [user,           setUser]          = useState<any>(null);
+  const [profileImage,   setProfileImage]  = useState("");
   const [oauthNuevo,     setOauthNuevo]    = useState<{ correo: string; nombre: string } | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
@@ -135,6 +161,31 @@ export default function App() {
       window.removeEventListener("popstate", syncLocationState);
     };
   }, []);
+
+  useEffect(() => {
+    if (!user?.id_usuario) {
+      setProfileImage("");
+      return;
+    }
+
+    let active = true;
+    const userImage = getUserImage(user);
+    if (userImage) setProfileImage(userImage);
+
+    fetch(`${API_URL}/api/tienda/mis-items/${user.id_usuario}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!active || !data.success) return;
+        setProfileImage(getInventoryProfileImage(data.data || []) || userImage);
+      })
+      .catch(() => {
+        if (active) setProfileImage(userImage);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id_usuario, user?.dinero]);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -182,6 +233,7 @@ export default function App() {
     }).catch(() => {});
     localStorage.removeItem("premier_tab");
     window.history.replaceState({}, "", "/");
+    setProfileImage("");
     setUser(null);
   };
 
@@ -259,7 +311,56 @@ export default function App() {
 
         {/* User section */}
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-white/55 text-[0.82rem] font-medium">{user.nickname}</span>
+          <button
+            onClick={() => setTab("perfil")}
+            aria-label="Abrir perfil"
+            title="Abrir perfil"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              minHeight: "34px",
+              padding: "0.25rem 0.65rem 0.25rem 0.3rem",
+              borderRadius: "8px",
+              border: tab === "perfil" ? "1px solid rgba(233,0,82,0.65)" : "1px solid transparent",
+              background: tab === "perfil" ? "rgba(233,0,82,0.12)" : "transparent",
+              color: tab === "perfil" ? "#fff" : "rgba(255,255,255,0.7)",
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              transition: "background 0.15s, border-color 0.15s, color 0.15s",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+              e.currentTarget.style.color = "#fff";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = tab === "perfil" ? "rgba(233,0,82,0.12)" : "transparent";
+              e.currentTarget.style.color = tab === "perfil" ? "#fff" : "rgba(255,255,255,0.7)";
+            }}
+          >
+            <span
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: "50%",
+                overflow: "hidden",
+                background: profileImage ? "#fff" : "linear-gradient(135deg, #E90052, #871d54)",
+                color: "#fff",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.72rem",
+                fontWeight: 900,
+                flex: "0 0 auto",
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.18)",
+              }}
+            >
+              {profileImage
+                ? <img src={profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                : getInitials(user)}
+            </span>
+            <span>{user.nickname}</span>
+          </button>
           <button
             onClick={logout}
             style={{
@@ -283,6 +384,13 @@ export default function App() {
           <Tienda
             user={user}
             onSaldoChange={(s: number) => setUser({ ...user, dinero: s })}
+          />
+        )}
+        {tab === "perfil"    && (
+          <Perfil
+            user={user}
+            profileImage={profileImage}
+            onGoToStore={() => setTab("tienda")}
           />
         )}
         {tab === "noticias"  && !isNewsDetailRoute && <Noticias />}
