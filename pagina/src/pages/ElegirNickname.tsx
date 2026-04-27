@@ -6,7 +6,7 @@ interface Props {
   onComplete: (user: any) => void;
 }
 
-const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ElegirNickname({ correo, nombre, onComplete }: Props) {
   const [nickname, setNickname] = useState("");

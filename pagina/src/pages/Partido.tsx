@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "../estilos/Partido.css";
 import PartidosVivo, { type LiveMatch } from "./PartidosVivo";
 
-const API_URL: string = import.meta.env.DEV ? "http://localhost:4000" : "https://api.zamer-o.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface ApiMatch {
   fixture: { id: number; date: string; status: { short: string; long: string } };

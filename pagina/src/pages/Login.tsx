@@ -4,7 +4,7 @@ interface LoginPageProps {
   onLoginSuccess: (user: any) => void;
 }
 
-const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const EyeOpen = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -59,8 +59,8 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   };
 
   const handleGoogle = () => {
-    const redirectTo = import.meta.env.DEV ? "http://localhost:5173" : "https://app.zamer-o.com";
-    window.location.href = `https://supabase.zamer-o.com/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
+    const redirectTo = import.meta.env.VITE_APP_URL;
+    window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
   };
 
   return (

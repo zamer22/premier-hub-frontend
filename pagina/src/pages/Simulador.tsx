@@ -1,5 +1,5 @@
 import { useState } from "react";
-const API_URL: string = "https://api.zamer-o.com";
+const API_URL = import.meta.env.VITE_API_URL;
 interface SimResult { resultado: string; probabilidades: { pierde_local: number; empate: number; gana_local: number }; }
 interface Simulacion { id_simulacion: number; status: string; resultado: SimResult | null; cambios: any; partido_data: any; }
 
