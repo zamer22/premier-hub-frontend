@@ -4,13 +4,19 @@ import { createPortal } from "react-dom";
 const API_URL = import.meta.env.VITE_API_URL;
 
 /* ── Types ── */
+interface Variante {
+  id_variante: number; talla: string; stock: number;
+}
 interface Producto {
   id_producto: number; nombre: string; costo: string; tipo: string;
   stock: number; es_nuevo: boolean; equipo: string | null; imagen: string | null;
   temporada_nombre?: string; temporada_fin?: string; categoria?: string;
+  descripcion?: string | null;
+  variantes?: Variante[];
 }
 interface InventarioItem extends Producto {
   id_inventario: number; fecha_compra: string; en_marketplace: boolean;
+  talla?: string | null;
 }
 interface Listado {
   id_listado: number; id_vendedor: number; precio: string;
@@ -41,9 +47,13 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [filtroPerfilTipo, setFiltroPerfilTipo] = useState<string>("todos");
   const [productModal, setProductModal] = useState<Producto | null>(null);
+  const [selectedVariante, setSelectedVariante] = useState<Variante | null>(null);
+
+  // Reset talla seleccionada cuando cambia el modal de producto
+  useEffect(() => { setSelectedVariante(null); }, [productModal?.id_producto]);
 
   type ConfirmAction =
-    | { kind: "buy-product"; producto: Producto }
+    | { kind: "buy-product"; producto: Producto; variante: Variante | null }
     | { kind: "buy-listing"; listado: Listado }
     | { kind: "publish"; item: InventarioItem; precio: number };
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
@@ -132,17 +142,24 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   });
 
   /* ── Actions ── */
-  const comprar = async (id_producto: number, nombre: string) => {
+  const comprar = async (id_producto: number, nombre: string, id_variante: number | null) => {
     try {
       const res = await fetch(`${API_URL}/api/tienda/comprar`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, id_producto }),
+        body: JSON.stringify({ id_usuario: user.id_usuario, id_producto, id_variante }),
       });
       const data = await res.json();
       if (data.success) {
         const nuevoSaldo = data.saldo != null && !isNaN(Number(data.saldo)) ? Number(data.saldo) : saldo;
         onSaldoChange(nuevoSaldo);
-        setProductos(prev => prev.map(p => p.id_producto === id_producto ? { ...p, stock: p.stock - 1 } : p));
+        fetchMisItems();
+        setProductos(prev => prev.map(p => {
+          if (p.id_producto !== id_producto) return p;
+          if (id_variante != null && p.variantes) {
+            return { ...p, variantes: p.variantes.map(v => v.id_variante === id_variante ? { ...v, stock: v.stock - 1 } : v) };
+          }
+          return { ...p, stock: (p.stock ?? 0) - 1 };
+        }));
         setConfirmAction(null);
         setProductModal(null);
         setSuccessMsg(`¡${nombre} es tuyo! Tu nuevo saldo es ${nuevoSaldo.toLocaleString()} pts.`);
@@ -231,7 +248,12 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
 
   /* ── Product card (reused across sub-tabs) ── */
-  const ProductCard = ({ p, onBuy, badge }: { p: Producto; onBuy: () => void; badge?: string }) => (
+  const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
+    const tieneVariantes = !!p.variantes && p.variantes.length > 0;
+    const stockTotal = tieneVariantes
+      ? (p.variantes ?? []).reduce((sum, v) => sum + v.stock, 0)
+      : (p.stock ?? 0);
+    return (
     <div
       onClick={() => setProductModal(p)}
       style={{
@@ -264,28 +286,33 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#263a55", marginBottom: "0.2rem", lineHeight: "1.3" }}>{p.nombre}</p>
         <p style={{ fontSize: "0.75rem", color: "#84878F", marginBottom: "0.5rem" }}>
           {tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}
-          {p.stock === 0
+          {stockTotal === 0
             ? <span style={{ marginLeft: "0.4rem", background: "#fee2e2", color: "#dc2626", fontSize: "0.65rem", fontWeight: 700, padding: "0.1rem 0.4rem", borderRadius: "4px" }}>Sin stock</span>
-            : <span style={{ marginLeft: "0.4rem", color: "#84878F" }}>· {p.stock} disp.</span>
+            : <span style={{ marginLeft: "0.4rem", color: "#84878F" }}>· {stockTotal} disp.</span>
           }
         </p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: "1rem", fontWeight: 800, color: "#263a55" }}>{p.costo} pts</span>
           <button
-            onClick={(e) => { e.stopPropagation(); setConfirmAction({ kind: "buy-product", producto: p }); }}
-            disabled={p.stock <= 0 || Number(p.costo) > saldo}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (tieneVariantes) setProductModal(p);
+              else setConfirmAction({ kind: "buy-product", producto: p, variante: null });
+            }}
+            disabled={stockTotal <= 0 || Number(p.costo) > saldo}
             style={{
               padding: "0.35rem 0.75rem",
-              background: p.stock > 0 && Number(p.costo) <= saldo ? "#E90052" : "#ddd",
-              color: p.stock > 0 && Number(p.costo) <= saldo ? "#fff" : "#999",
+              background: stockTotal > 0 && Number(p.costo) <= saldo ? "#E90052" : "#ddd",
+              color: stockTotal > 0 && Number(p.costo) <= saldo ? "#fff" : "#999",
               border: "none", borderRadius: "6px",
-              cursor: p.stock > 0 && Number(p.costo) <= saldo ? "pointer" : "not-allowed",
+              cursor: stockTotal > 0 && Number(p.costo) <= saldo ? "pointer" : "not-allowed",
               fontSize: "0.8rem", fontWeight: 600, transition: "background 0.2s",
-            }}>Comprar</button>
+            }}>{tieneVariantes ? "Ver tallas" : "Comprar"}</button>
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   /* ── Marketplace listing card ── */
   const ListingCard = ({ l, onBuy }: { l: Listado; onBuy: () => void }) => (
@@ -365,7 +392,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
             <h3 style={{ color: "#263a55", fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.4rem" }}>¿Confirmar acción?</h3>
             {confirmAction.kind === "buy-product" && (
               <p style={{ color: "#84878F", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>
-                Comprarás <strong style={{ color: "#263a55" }}>{confirmAction.producto.nombre}</strong> por <strong style={{ color: "#E90052" }}>{Number(confirmAction.producto.costo).toLocaleString()} pts</strong>. Te quedarán <strong style={{ color: "#263a55" }}>{(saldo - Number(confirmAction.producto.costo)).toLocaleString()} pts</strong>.
+                Comprarás <strong style={{ color: "#263a55" }}>{confirmAction.producto.nombre}</strong>{confirmAction.variante ? <> (talla <strong style={{ color: "#263a55" }}>{confirmAction.variante.talla}</strong>)</> : null} por <strong style={{ color: "#E90052" }}>{Number(confirmAction.producto.costo).toLocaleString()} pts</strong>. Te quedarán <strong style={{ color: "#263a55" }}>{(saldo - Number(confirmAction.producto.costo)).toLocaleString()} pts</strong>.
               </p>
             )}
             {confirmAction.kind === "buy-listing" && (
@@ -381,7 +408,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
             <div style={{ display: "flex", gap: "0.6rem" }}>
               <button onClick={() => setConfirmAction(null)} style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" }}>Cancelar</button>
               <button onClick={() => {
-                if (confirmAction.kind === "buy-product") comprar(confirmAction.producto.id_producto, confirmAction.producto.nombre);
+                if (confirmAction.kind === "buy-product") comprar(confirmAction.producto.id_producto, confirmAction.producto.nombre, confirmAction.variante?.id_variante ?? null);
                 else if (confirmAction.kind === "buy-listing") comprarMarketplace(confirmAction.listado.id_listado, confirmAction.listado.nombre);
                 else publicar();
               }} style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "none", background: "#E90052", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>
@@ -414,8 +441,17 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       {productModal && (() => {
         const isOwned = ownedIds.has(productModal.id_producto);
         const isRealItem = productModal.categoria === "real";
+        const tieneVariantes = !!productModal.variantes && productModal.variantes.length > 0;
+        const stockTotal = tieneVariantes
+          ? (productModal.variantes ?? []).reduce((sum, v) => sum + v.stock, 0)
+          : (productModal.stock ?? 0);
+        const stockSeleccionable = tieneVariantes
+          ? (selectedVariante ? selectedVariante.stock > 0 : false)
+          : stockTotal > 0;
+        // Real items: se pueden comprar múltiples veces (limitado por stock).
+        // Perfil items: solo uno por usuario.
         const canBuyModal = isRealItem
-          ? !isOwned && productModal.stock > 0 && Number(productModal.costo) <= saldo
+          ? stockSeleccionable && Number(productModal.costo) <= saldo
           : !isOwned && Number(productModal.costo) <= saldo;
         const imgBg = productModal.temporada_nombre ? "#1e1e3a" : isRealItem ? "#f5f6f8" : "#eef0f2";
         return (
@@ -429,7 +465,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                 {/* Badges top-left */}
                 <div style={{ position: "absolute", top: "12px", left: "12px", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                   {productModal.es_nuevo && <span style={{ background: "#E90052", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>NUEVO</span>}
-                  {isOwned && <span style={{ background: "#16a34a", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>EN TU PERFIL</span>}
+                  {isOwned && !isRealItem && <span style={{ background: "#16a34a", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>EN TU PERFIL</span>}
                 </div>
                 <button onClick={() => setProductModal(null)} style={{ position: "absolute", top: "10px", right: "10px", background: "rgba(0,0,0,0.45)", border: "none", color: "#fff", width: "28px", height: "28px", borderRadius: "50%", cursor: "pointer", fontSize: "0.9rem", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
@@ -443,19 +479,60 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                   {productModal.temporada_nombre && <span style={{ background: "rgba(135,29,84,0.1)", color: "#871d54", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>Temporada: {productModal.temporada_nombre}</span>}
                   {productModal.categoria === "evento" && <span style={{ background: "rgba(233,0,82,0.1)", color: "#E90052", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>DROP EXCLUSIVO</span>}
                 </div>
+                {/* Descripción (solo en modal) */}
+                {productModal.descripcion && (
+                  <p style={{ fontSize: "0.85rem", color: "#4b5563", lineHeight: 1.5, marginBottom: "0.85rem" }}>
+                    {productModal.descripcion}
+                  </p>
+                )}
                 {/* Stock info */}
                 <div style={{ background: "#f8f9fa", borderRadius: "8px", padding: "0.6rem 0.85rem", marginBottom: "0.9rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
                     <p style={{ fontSize: "0.65rem", color: "#84878F", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.1rem" }}>Stock</p>
                     {isRealItem
-                      ? <p style={{ fontSize: "0.82rem", color: productModal.stock === 0 ? "#dc2626" : "#263a55", fontWeight: 600 }}>{productModal.stock === 0 ? "Sin stock" : `${productModal.stock} disponibles`}</p>
+                      ? <p style={{ fontSize: "0.82rem", color: stockTotal === 0 ? "#dc2626" : "#263a55", fontWeight: 600 }}>{stockTotal === 0 ? "Sin stock" : `${stockTotal} disponibles`}</p>
                       : <p style={{ fontSize: "0.82rem", color: "#871d54", fontWeight: 700 }}>Objeto único por usuario</p>
                     }
                   </div>
-                  {isOwned && (
+                  {isOwned && !isRealItem && (
                     <div style={{ background: "#dcfce7", color: "#16a34a", fontSize: "0.72rem", fontWeight: 700, padding: "0.25rem 0.7rem", borderRadius: "6px" }}>Ya lo tienes</div>
                   )}
                 </div>
+                {/* Selector de talla (solo si tiene variantes) */}
+                {tieneVariantes && (
+                  <div style={{ marginBottom: "0.9rem" }}>
+                    <p style={{ fontSize: "0.65rem", color: "#84878F", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Talla</p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                      {(productModal.variantes ?? []).map(v => {
+                        const sinStock = v.stock <= 0;
+                        const seleccionada = selectedVariante?.id_variante === v.id_variante;
+                        return (
+                          <button
+                            key={v.id_variante}
+                            disabled={sinStock}
+                            onClick={() => setSelectedVariante(v)}
+                            style={{
+                              minWidth: "52px", padding: "0.45rem 0.7rem",
+                              border: seleccionada ? "2px solid #E90052" : "1px solid #d1d5db",
+                              borderRadius: "8px",
+                              background: sinStock ? "#f3f4f6" : seleccionada ? "rgba(233,0,82,0.08)" : "#fff",
+                              color: sinStock ? "#9ca3af" : seleccionada ? "#E90052" : "#263a55",
+                              fontWeight: 700, fontSize: "0.85rem",
+                              cursor: sinStock ? "not-allowed" : "pointer",
+                              textDecoration: sinStock ? "line-through" : "none",
+                              transition: "all 0.15s",
+                            }}
+                          >
+                            {v.talla}
+                            <span style={{ display: "block", fontSize: "0.6rem", fontWeight: 500, marginTop: "0.1rem", color: sinStock ? "#9ca3af" : "#84878F" }}>
+                              {sinStock ? "agotada" : `${v.stock} disp.`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 {/* Price + buy */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #f0f0f0", paddingTop: "0.9rem" }}>
                   <div>
@@ -465,9 +542,13 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                   </div>
                   <button
                     disabled={!canBuyModal}
-                    onClick={() => { if (canBuyModal) { setProductModal(null); setConfirmAction({ kind: "buy-product", producto: productModal }); } }}
+                    onClick={() => { if (canBuyModal) { setProductModal(null); setConfirmAction({ kind: "buy-product", producto: productModal, variante: selectedVariante }); } }}
                     style={{ padding: "0.65rem 1.75rem", border: "none", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: canBuyModal ? "pointer" : "not-allowed", background: canBuyModal ? "#E90052" : "#e0e0e0", color: canBuyModal ? "#fff" : "#999" }}>
-                    {isOwned ? "Ya tienes este" : isRealItem && productModal.stock === 0 ? "Sin stock" : Number(productModal.costo) > saldo ? "Saldo insuficiente" : "Comprar ahora"}
+                    {isOwned && !isRealItem ? "Ya tienes este"
+                      : isRealItem && stockTotal === 0 ? "Sin stock"
+                      : tieneVariantes && !selectedVariante ? "Elegí una talla"
+                      : Number(productModal.costo) > saldo ? "Saldo insuficiente"
+                      : "Comprar ahora"}
                   </button>
                 </div>
               </div>
@@ -628,7 +709,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                         <span style={{ fontSize: "0.72rem", color: "#84878F", marginLeft: "0.25rem" }}>pts</span>
                       </div>
                       <button
-                        onClick={e => { e.stopPropagation(); if (canBuy) setConfirmAction({ kind: "buy-product", producto: p }); }}
+                        onClick={e => { e.stopPropagation(); if (canBuy) setConfirmAction({ kind: "buy-product", producto: p, variante: null }); }}
                         disabled={!canBuy}
                         style={{ padding: "0.38rem 0.85rem", background: canBuy ? "#E90052" : "#e9ecef", color: canBuy ? "#fff" : "#aaa", border: "none", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 700, cursor: canBuy ? "pointer" : "not-allowed" }}
                       >
@@ -653,7 +734,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           {loading ? <p style={{ color: "#84878F" }}>Cargando...</p> : (
             productosFiltrados.length === 0 ? <p style={{ color: "#84878F", textAlign: "center", marginTop: "2rem" }}>No se encontraron productos</p> : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "1rem" }}>
-                {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} onBuy={() => comprar(p.id_producto, p.nombre)} badge="OBJETO REAL" />)}
+                {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} badge="OBJETO REAL" />)}
               </div>
             )
           )}
@@ -724,7 +805,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                       </p>
                       {item.en_marketplace ? (
                         <span style={{ fontSize: "0.7rem", color: "#E90052", fontWeight: 600 }}>En marketplace</span>
-                      ) : (
+                      ) : item.categoria === "perfil" ? (
                         <button onClick={() => setPublishingItem({ item, precio: "" })}
                           style={{
                             padding: "0.3rem 0.6rem", background: "#E90052", color: "#fff",
@@ -733,7 +814,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                           }}>
                           Publicar
                         </button>
-                      )}
+                      ) : null}
                     </div>
                   ))}
                 </div>
