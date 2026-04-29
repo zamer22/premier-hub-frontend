@@ -80,7 +80,7 @@
 .logoCard.selected {
   border: 2px solid #e90052;
   background: linear-gradient(180deg, #fff7fa 0%, #ffffff 100%);
-  box-shadow: 0 18px 40px rgba(233, 0, 82, 0.18);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
 }
 
 .logoImg {
@@ -249,7 +249,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 22px rgba(233, 0, 82, 0.2);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
 }
 
 .dotYear {
