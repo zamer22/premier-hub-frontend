@@ -221,7 +221,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
     if (!d.success) { showToast(d.error || "Error", false); return null; }
     setSelected(d.data);
     setPedidos(prev => prev.map(p => p.id_pedido === d.data.id_pedido ? d.data : p));
-    return d.data as AdminPedido;
+    return { pedido: d.data as AdminPedido, refunded: d.refunded as number | undefined, warning: d.warning as string | undefined };
   };
 
   const estadoCambio = useMemo(() => {
@@ -259,9 +259,16 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
       body.notas_admin = notas.trim() || null;
     }
     setSaving(true);
-    const ok = await aplicarUpdate(body);
+    const result = await aplicarUpdate(body);
     setSaving(false);
-    if (ok) showToast("Cambios guardados", true);
+    if (!result) return;
+    if (result.warning) {
+      showToast(result.warning, false);
+    } else if (result.refunded != null) {
+      showToast(`Cancelado · ${Number(result.refunded).toLocaleString()} pts devueltos al usuario`, true);
+    } else {
+      showToast("Cambios guardados", true);
+    }
   };
 
   const descartarCambios = () => {
@@ -376,6 +383,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
         ) : (() => {
           const dirSnap = selected.direccion_snapshot || {};
           const color = ESTADO_COLOR[selected.estado] || ESTADO_COLOR.procesando;
+          const isLocked = selected.estado === "entregado" || selected.estado === "cancelado";
           return (
             <div style={{ background: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               {/* Encabezado */}
@@ -397,38 +405,60 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                 </span>
               </div>
 
-              {/* Estado: botones */}
-              <div>
-                <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
-                  Cambiar estado
-                  {estadoCambio && (
-                    <span style={{ marginLeft: "0.5rem", fontSize: "0.7rem", fontWeight: 600, color: "#E90052", textTransform: "none", letterSpacing: 0 }}>
-                      · pendiente de guardar
-                    </span>
-                  )}
-                </h4>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
-                  {ESTADOS.map(est => {
-                    const sel = estadoPendiente === est;
-                    const original = selected.estado === est;
-                    const c = ESTADO_COLOR[est];
-                    return (
-                      <button key={est} disabled={sel} onClick={() => setEstadoPendiente(est)}
-                        style={{
-                          padding: "0.45rem 0.95rem", borderRadius: "8px",
-                          border: sel ? "2px solid #263a55" : original ? "1px dashed #84878F" : "1px solid #e5e7eb",
-                          background: sel ? c.bg : "#fff",
-                          color: sel ? c.fg : "#374151",
-                          fontSize: "0.78rem", fontWeight: sel ? 800 : 600,
-                          cursor: sel ? "default" : "pointer",
-                          textTransform: "capitalize",
-                        }}>
-                        {ESTADO_LABEL[est]}
-                      </button>
-                    );
-                  })}
+              {/* Banner: pedido finalizado (no editable) */}
+              {isLocked && (
+                <div style={{
+                  background: selected.estado === "entregado" ? "#dcfce7" : "#fee2e2",
+                  border: `1px solid ${selected.estado === "entregado" ? "#86efac" : "#fecaca"}`,
+                  borderRadius: "10px", padding: "0.85rem 1rem",
+                  display: "flex", alignItems: "center", gap: "0.6rem",
+                }}>
+                  <span style={{ fontSize: "1.1rem" }}>{selected.estado === "entregado" ? "✓" : "✕"}</span>
+                  <div>
+                    <p style={{ fontSize: "0.85rem", fontWeight: 700, color: selected.estado === "entregado" ? "#166534" : "#991b1b" }}>
+                      Pedido {ESTADO_LABEL[selected.estado].toLowerCase()}
+                    </p>
+                    <p style={{ fontSize: "0.74rem", color: selected.estado === "entregado" ? "#166534" : "#991b1b" }}>
+                      Este pedido ya está cerrado y no puede modificarse.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Estado: botones */}
+              {!isLocked && (
+                <div>
+                  <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
+                    Cambiar estado
+                    {estadoCambio && (
+                      <span style={{ marginLeft: "0.5rem", fontSize: "0.7rem", fontWeight: 600, color: "#E90052", textTransform: "none", letterSpacing: 0 }}>
+                        · pendiente de guardar
+                      </span>
+                    )}
+                  </h4>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
+                    {ESTADOS.map(est => {
+                      const sel = estadoPendiente === est;
+                      const original = selected.estado === est;
+                      const c = ESTADO_COLOR[est];
+                      return (
+                        <button key={est} disabled={sel} onClick={() => setEstadoPendiente(est)}
+                          style={{
+                            padding: "0.45rem 0.95rem", borderRadius: "8px",
+                            border: sel ? "2px solid #263a55" : original ? "1px dashed #84878F" : "1px solid #e5e7eb",
+                            background: sel ? c.bg : "#fff",
+                            color: sel ? c.fg : "#374151",
+                            fontSize: "0.78rem", fontWeight: sel ? 800 : 600,
+                            cursor: sel ? "default" : "pointer",
+                            textTransform: "capitalize",
+                          }}>
+                          {ESTADO_LABEL[est]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Dirección */}
               <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem" }}>
@@ -444,8 +474,11 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                     <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                       Ubicación del paquete
                     </h4>
-                    <p style={{ fontSize: "0.7rem", color: "#84878F", fontStyle: "italic" }}>Buscá un lugar o hacé click en el mapa</p>
+                    {!isLocked && (
+                      <p style={{ fontSize: "0.7rem", color: "#84878F", fontStyle: "italic" }}>Busca un lugar o haz click en el mapa</p>
+                    )}
                   </div>
+                  {!isLocked && (
                   <div style={{ display: "flex", gap: "0.4rem", position: "relative", marginBottom: "0.5rem" }}>
                     <input
                       type="text"
@@ -488,13 +521,14 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                       </div>
                     )}
                   </div>
-                  {geoError && <p style={{ fontSize: "0.72rem", color: "#dc2626", marginBottom: "0.5rem" }}>{geoError}</p>}
+                  )}
+                  {!isLocked && geoError && <p style={{ fontSize: "0.72rem", color: "#dc2626", marginBottom: "0.5rem" }}>{geoError}</p>}
                   <AdminTrackingMap
                     destLat={Number(selected.lat_destino)}
                     destLng={Number(selected.lng_destino)}
                     actualLat={latActual}
                     actualLng={lngActual}
-                    onMovePackage={(la, ln) => { setLatActual(la); setLngActual(ln); }}
+                    onMovePackage={isLocked ? () => {} : (la, ln) => { setLatActual(la); setLngActual(ln); }}
                   />
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
                     <p style={{ fontSize: "0.72rem", color: "#84878F" }}>
@@ -524,40 +558,45 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
                   <input placeholder="Número de tracking" value={tracking}
                     onChange={(e) => setTracking(e.target.value)}
-                    style={inputBase} />
+                    disabled={isLocked}
+                    style={{ ...inputBase, background: isLocked ? "#f4f6f8" : "#fff", color: isLocked ? "#84878F" : "#263a55" }} />
                   <input type="date" value={fechaEstimada}
                     onChange={(e) => setFechaEstimada(e.target.value)}
-                    style={inputBase} />
+                    disabled={isLocked}
+                    style={{ ...inputBase, background: isLocked ? "#f4f6f8" : "#fff", color: isLocked ? "#84878F" : "#263a55" }} />
                 </div>
                 <textarea placeholder="Notas para el cliente (opcional)" rows={3}
                   value={notas}
                   onChange={(e) => setNotas(e.target.value)}
-                  style={{ ...inputBase, resize: "vertical", fontFamily: "inherit" }} />
+                  disabled={isLocked}
+                  style={{ ...inputBase, resize: "vertical", fontFamily: "inherit", background: isLocked ? "#f4f6f8" : "#fff", color: isLocked ? "#84878F" : "#263a55" }} />
               </div>
 
               {/* Barra de guardado global */}
-              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "0.6rem", borderTop: "1px solid #f0f0f0", paddingTop: "1rem" }}>
-                <button onClick={descartarCambios} disabled={!hayCambios || saving}
-                  style={{
-                    padding: "0.55rem 1.2rem", borderRadius: "8px",
-                    border: "1px solid #e5e7eb", background: "#fff",
-                    color: !hayCambios || saving ? "#bbb" : "#374151",
-                    fontWeight: 600, fontSize: "0.82rem",
-                    cursor: !hayCambios || saving ? "not-allowed" : "pointer",
-                  }}>
-                  Descartar
-                </button>
-                <button onClick={guardarTodo} disabled={!hayCambios || saving}
-                  style={{
-                    padding: "0.55rem 1.5rem", borderRadius: "8px", border: "none",
-                    background: !hayCambios || saving ? "#e0e0e0" : "#E90052",
-                    color: !hayCambios || saving ? "#999" : "#fff",
-                    fontWeight: 700, fontSize: "0.85rem",
-                    cursor: !hayCambios || saving ? "not-allowed" : "pointer",
-                  }}>
-                  {saving ? "Guardando..." : "Guardar cambios"}
-                </button>
-              </div>
+              {!isLocked && (
+                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "0.6rem", borderTop: "1px solid #f0f0f0", paddingTop: "1rem" }}>
+                  <button onClick={descartarCambios} disabled={!hayCambios || saving}
+                    style={{
+                      padding: "0.55rem 1.2rem", borderRadius: "8px",
+                      border: "1px solid #e5e7eb", background: "#fff",
+                      color: !hayCambios || saving ? "#bbb" : "#374151",
+                      fontWeight: 600, fontSize: "0.82rem",
+                      cursor: !hayCambios || saving ? "not-allowed" : "pointer",
+                    }}>
+                    Descartar
+                  </button>
+                  <button onClick={guardarTodo} disabled={!hayCambios || saving}
+                    style={{
+                      padding: "0.55rem 1.5rem", borderRadius: "8px", border: "none",
+                      background: !hayCambios || saving ? "#e0e0e0" : "#E90052",
+                      color: !hayCambios || saving ? "#999" : "#fff",
+                      fontWeight: 700, fontSize: "0.85rem",
+                      cursor: !hayCambios || saving ? "not-allowed" : "pointer",
+                    }}>
+                    {saving ? "Guardando..." : "Guardar cambios"}
+                  </button>
+                </div>
+              )}
             </div>
           );
         })()}

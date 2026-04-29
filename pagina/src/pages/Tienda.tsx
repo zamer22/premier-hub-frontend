@@ -420,7 +420,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     setFiltroTipo("todos");
     setFiltroPerfilTipo("todos");
     if (subTab === "perfil") { fetchProductos("perfil"); fetchMisItems(); }
-    else if (subTab === "real") { fetchProductos("real"); }
+    else if (subTab === "real") { fetchProductos("real"); fetchPedidos(); }
     else if (subTab === "pedidos") { fetchPedidos(); }
     else { fetchListados(); fetchMisItems(); fetchMisListados(); }
   }, [subTab, fetchProductos, fetchListados, fetchMisItems, fetchMisListados, fetchPedidos]);
@@ -504,7 +504,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const guardarDireccion = async (): Promise<Direccion | null> => {
     const f = newDireccion;
     if (!f.alias || !f.nombre_destinatario || !f.calle || !f.ciudad) {
-      showToast("Completá alias, nombre, calle y ciudad", false);
+      showToast("Completa alias, nombre, calle y ciudad", false);
       return null;
     }
     setSavingDireccion(true);
@@ -631,7 +631,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     if (!pedidoModal) return;
     const f = pedidoDireccionForm;
     if (!f.alias || !f.nombre_destinatario || !f.calle || !f.ciudad) {
-      showToast("Completá alias, nombre, calle y ciudad", false); return;
+      showToast("Completa alias, nombre, calle y ciudad", false); return;
     }
     setSavingPedidoDireccion(true);
     try {
@@ -791,6 +791,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
             onClick={(e) => {
               e.stopPropagation();
               if (tieneVariantes) setProductModal(p);
+              else if (p.categoria === "real") abrirCheckout(p, null);
               else setConfirmAction({ kind: "buy-product", producto: p, variante: null });
             }}
             disabled={stockTotal <= 0 || Number(p.costo) > saldo}
@@ -939,8 +940,10 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
       {/* Modal: detalle de producto */}
       {productModal && (() => {
-        const isOwned = ownedIds.has(productModal.id_producto);
         const isRealItem = productModal.categoria === "real";
+        const isOwned = isRealItem
+          ? pedidos.some(p => p.id_producto === productModal.id_producto && p.estado !== "cancelado")
+          : ownedIds.has(productModal.id_producto);
         const tieneVariantes = !!productModal.variantes && productModal.variantes.length > 0;
         const stockTotal = tieneVariantes
           ? (productModal.variantes ?? []).reduce((sum, v) => sum + v.stock, 0)
@@ -957,10 +960,10 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         return (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9000, padding: "1rem" }}
             onClick={() => setProductModal(null)}>
-            <div style={{ background: "#fff", borderRadius: "16px", width: "480px", maxWidth: "100%", overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.45)" }}
+            <div style={{ background: "#fff", borderRadius: "16px", width: "480px", maxWidth: "100%", maxHeight: "90vh", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.45)" }}
               onClick={(e) => e.stopPropagation()}>
               {/* Image */}
-              <div style={{ height: "240px", background: productModal.imagen ? `${imgBg} url(${productModal.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ flexShrink: 0, height: "220px", background: productModal.imagen ? `${imgBg} url(${productModal.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {!productModal.imagen && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.8rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase" }}>{tipoLabel(productModal.tipo)}</span>}
                 {/* Badges top-left */}
                 <div style={{ position: "absolute", top: "12px", left: "12px", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
@@ -970,7 +973,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                 <button onClick={() => setProductModal(null)} style={{ position: "absolute", top: "10px", right: "10px", background: "rgba(0,0,0,0.45)", border: "none", color: "#fff", width: "28px", height: "28px", borderRadius: "50%", cursor: "pointer", fontSize: "0.9rem", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
               {/* Info */}
-              <div style={{ padding: "1.25rem 1.5rem" }}>
+              <div style={{ padding: "1.25rem 1.5rem", overflowY: "auto", flex: 1 }}>
                 <h3 style={{ color: "#263a55", fontSize: "1.2rem", fontWeight: 800, marginBottom: "0.3rem" }}>{productModal.nombre}</h3>
                 {/* Meta pills */}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.85rem" }}>
@@ -1056,7 +1059,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                     style={{ padding: "0.65rem 1.75rem", border: "none", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: canBuyModal ? "pointer" : "not-allowed", background: canBuyModal ? "#E90052" : "#e0e0e0", color: canBuyModal ? "#fff" : "#999" }}>
                     {isOwned && !isRealItem ? "Ya tienes este"
                       : isRealItem && stockTotal === 0 ? "Sin stock"
-                      : tieneVariantes && !selectedVariante ? "Elegí una talla"
+                      : tieneVariantes && !selectedVariante ? "Elige una talla"
                       : Number(productModal.costo) > saldo ? "Saldo insuficiente"
                       : isRealItem ? "Continuar al envío"
                       : "Comprar ahora"}
@@ -1096,7 +1099,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                           </div>
                           <textarea value={newReview.comentario}
                             onChange={(e) => setNewReview(r => ({ ...r, comentario: e.target.value }))}
-                            placeholder="Contá tu experiencia con el producto..."
+                            placeholder="Cuenta tu experiencia con el producto..."
                             rows={3}
                             style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit", marginBottom: "0.5rem" }} />
                           <button onClick={enviarReseña} disabled={submittingReview || newReview.comentario.trim().length < 3}
@@ -1417,7 +1420,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                       <p style={{ fontSize: "0.85rem", color: "#263a55", fontWeight: 600 }}>{dirSnap.nombre_destinatario || "—"}{dirSnap.telefono ? ` · ${dirSnap.telefono}` : ""}</p>
                       <p style={{ fontSize: "0.78rem", color: "#374151" }}>{dirSnap.calle || ""}{dirSnap.ciudad ? `, ${dirSnap.ciudad}` : ""}{dirSnap.estado ? `, ${dirSnap.estado}` : ""}{dirSnap.codigo_postal ? ` ${dirSnap.codigo_postal}` : ""}</p>
                       {p.estado !== "procesando" && (
-                        <p style={{ fontSize: "0.7rem", color: "#9ca3af", marginTop: "0.4rem", fontStyle: "italic" }}>Ya no podés editar la dirección porque el pedido salió de "procesando".</p>
+                        <p style={{ fontSize: "0.7rem", color: "#9ca3af", marginTop: "0.4rem", fontStyle: "italic" }}>Ya no puedes editar la dirección porque el pedido salió de "procesando".</p>
                       )}
                     </>
                   ) : (
@@ -1837,8 +1840,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         <div>
           {pedidos.length === 0 ? (
             <div style={{ background: "#fff", borderRadius: "12px", padding: "3rem 1.5rem", textAlign: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-              <p style={{ color: "#84878F", fontSize: "0.95rem", marginBottom: "0.4rem" }}>Aún no tenés pedidos</p>
-              <p style={{ color: "#9ca3af", fontSize: "0.82rem" }}>Comprá un objeto real desde la pestaña "Objetos Reales" y aparecerá acá.</p>
+              <p style={{ color: "#84878F", fontSize: "0.95rem", marginBottom: "0.4rem" }}>Aún no tienes pedidos</p>
+              <p style={{ color: "#9ca3af", fontSize: "0.82rem" }}>Compra un objeto real desde la pestaña "Objetos Reales" y aparecerá aquí.</p>
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
