@@ -38,7 +38,10 @@ interface SubmitResponse {
 }
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-const PYRAMID_ROWS = [[0], [1, 2], [3, 4, 5], [6, 7, 8, 9]];
+const BOARD_ROWS = [
+  [0, 1, 2, 3, 4],
+  [5, 6, 7, 8, 9],
+];
 
 function calculateCorrectCount(players: Player[]): number {
   return players.reduce((total, player, index) => {
@@ -291,8 +294,8 @@ export default function Wordle() {
         <span className={scoreBadgeClass}>{score}/10 correctas</span>
       )}
 
-      <div className="wordle-pyramid">
-        {PYRAMID_ROWS.map((rowPositions, rowIdx) => (
+      <div className="wordle-board">
+        {BOARD_ROWS.map((rowPositions, rowIdx) => (
           <div key={rowIdx} className="wordle-row">
             {rowPositions.map((posIndex) =>
               order[posIndex] ? (
@@ -318,7 +321,7 @@ export default function Wordle() {
       <div className="wordle-btn-wrap">
         {!submitted ? (
           <button className="wordle-btn-confirm" onClick={handleSubmit}>
-            Confirmar orden
+            Confirmar
           </button>
         ) : (
           <p className="wordle-next-msg">Vuelve manana para el proximo desafio</p>
