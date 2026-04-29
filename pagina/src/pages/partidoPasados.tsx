@@ -583,7 +583,7 @@ export default function PartidoPasado({ match, onBack }: Props) {
           letterSpacing: "0.05em",
         }}
       >
-        Volver arriba
+        Regresar
       </button>
 
     </div>

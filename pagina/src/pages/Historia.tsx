@@ -269,7 +269,7 @@ export default function Historia() {
     e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.22)";
   }}
 >
-  Volver arriba
+  Regresar
 </button>
     </div>
   );
