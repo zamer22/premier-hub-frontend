@@ -105,7 +105,22 @@ function RecenterMap({ lat, lng }: { lat: number | null; lng: number | null }) {
   }, [lat, lng, map]);
   return null;
 }
-interface GeoResult { display_name: string; lat: string; lon: string; place_id: number }
+interface GeoResult { display_name: string; lat: number; lng: number; id: number }
+
+function photonToResults(data: any): GeoResult[] {
+  if (!Array.isArray(data?.features)) return [];
+  return (data.features as any[]).map((f: any, i: number) => {
+    const p = f.properties || {};
+    const [lon, lat] = f.geometry?.coordinates ?? [0, 0];
+    const parts: string[] = [
+      p.housenumber && p.street ? `${p.street} ${p.housenumber}` : (p.street || p.name || ""),
+      p.city || p.county || "",
+      p.state || "",
+      p.country || "",
+    ].map(s => s.trim()).filter(Boolean);
+    return { display_name: parts.join(", "), lat, lng: lon, id: p.osm_id ?? i };
+  });
+}
 
 function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: number | null; onChange: (lat: number, lng: number) => void }) {
   function ClickHandler() {
@@ -125,15 +140,14 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
     setSearching(true);
     setSearchError(null);
     try {
-      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=10&dedupe=0&addressdetails=1&q=${encodeURIComponent(term)}`, {
-        headers: { "Accept-Language": "es" },
-      });
-      const data: GeoResult[] = await r.json();
-      if (!Array.isArray(data) || data.length === 0) {
+      const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(term)}&limit=10&lang=es`);
+      const data = await r.json();
+      const parsed = photonToResults(data);
+      if (parsed.length === 0) {
         setResults([]);
         if (manual) setSearchError("Sin resultados");
       } else {
-        setResults(data);
+        setResults(parsed);
       }
     } catch {
       if (manual) setSearchError("Error al buscar");
@@ -155,7 +169,7 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
   }, [search]);
 
   const elegirResultado = (r: GeoResult) => {
-    onChange(Number(r.lat), Number(r.lon));
+    onChange(r.lat, r.lng);
     setResults([]);
     setSearch(r.display_name);
   };
@@ -193,7 +207,7 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
             boxShadow: "0 4px 12px rgba(0,0,0,0.12)", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
           }}>
             {results.map(r => (
-              <button key={r.place_id} type="button" onClick={() => elegirResultado(r)}
+              <button key={r.id} type="button" onClick={() => elegirResultado(r)}
                 style={{
                   display: "block", width: "100%", textAlign: "left",
                   padding: "0.55rem 0.75rem", border: "none", background: "transparent",
