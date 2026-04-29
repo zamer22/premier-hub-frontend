@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -122,9 +122,10 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
   // Buscador de lugar para ubicar el paquete
   const [geoSearch, setGeoSearch] = useState("");
-  const [geoResults, setGeoResults] = useState<{ display_name: string; lat: number; lng: number; id: number }[]>([]);
+  const [geoResults, setGeoResults] = useState<{ display_name: string; lat: string; lon: string; place_id: number }[]>([]);
   const [geoSearching, setGeoSearching] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const geoJustSelected = useRef(false);
 
   const buscarLugar = async (q: string, manual: boolean) => {
     const term = q.trim();
@@ -132,25 +133,16 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
     setGeoSearching(true);
     setGeoError(null);
     try {
-      const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(term)}&limit=10&lang=es`);
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=10&addressdetails=1&q=${encodeURIComponent(term)}`,
+        { headers: { "Accept-Language": "es" } }
+      );
       const data = await r.json();
-      const features: any[] = Array.isArray(data?.features) ? data.features : [];
-      const parsed = features.map((f: any, i: number) => {
-        const p = f.properties || {};
-        const [lon, lat] = f.geometry?.coordinates ?? [0, 0];
-        const parts: string[] = [
-          p.housenumber && p.street ? `${p.street} ${p.housenumber}` : (p.street || p.name || ""),
-          p.city || p.county || "",
-          p.state || "",
-          p.country || "",
-        ].map((s: string) => s.trim()).filter(Boolean);
-        return { display_name: parts.join(", "), lat, lng: lon, id: p.osm_id ?? i };
-      });
-      if (parsed.length === 0) {
+      if (!Array.isArray(data) || data.length === 0) {
         setGeoResults([]);
-        if (manual) setGeoError("Sin resultados");
+        if (manual) setGeoError("Sin resultados. Intentá con más detalle o menos términos.");
       } else {
-        setGeoResults(parsed);
+        setGeoResults(data);
       }
     } catch {
       if (manual) setGeoError("Error al buscar");
@@ -161,20 +153,18 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
   // Búsqueda en vivo (debounced) a partir de 3 caracteres
   useEffect(() => {
+    if (geoJustSelected.current) { geoJustSelected.current = false; return; }
     const term = geoSearch.trim();
-    if (term.length < 3) {
-      setGeoResults([]);
-      setGeoError(null);
-      return;
-    }
+    if (term.length < 3) { setGeoResults([]); setGeoError(null); return; }
     const t = setTimeout(() => buscarLugar(term, false), 500);
     return () => clearTimeout(t);
-  }, [geoSearch]);
+  }, [geoSearch]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const elegirLugar = (r: { lat: number; lng: number; display_name: string }) => {
-    setLatActual(r.lat);
-    setLngActual(r.lng);
+  const elegirLugar = (r: { display_name: string; lat: string; lon: string }) => {
+    setLatActual(Number(r.lat));
+    setLngActual(Number(r.lon));
     setGeoResults([]);
+    geoJustSelected.current = true;
     setGeoSearch(r.display_name);
   };
 
@@ -483,7 +473,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                         boxShadow: "0 4px 12px rgba(0,0,0,0.12)", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
                       }}>
                         {geoResults.map(r => (
-                          <button key={r.id} type="button" onClick={() => elegirLugar(r)}
+                          <button key={r.place_id} type="button" onClick={() => elegirLugar(r)}
                             style={{
                               display: "block", width: "100%", textAlign: "left",
                               padding: "0.55rem 0.75rem", border: "none", background: "transparent",

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, useRef, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { MapContainer, TileLayer, Marker, Polyline, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
@@ -105,22 +105,7 @@ function RecenterMap({ lat, lng }: { lat: number | null; lng: number | null }) {
   }, [lat, lng, map]);
   return null;
 }
-interface GeoResult { display_name: string; lat: number; lng: number; id: number }
-
-function photonToResults(data: any): GeoResult[] {
-  if (!Array.isArray(data?.features)) return [];
-  return (data.features as any[]).map((f: any, i: number) => {
-    const p = f.properties || {};
-    const [lon, lat] = f.geometry?.coordinates ?? [0, 0];
-    const parts: string[] = [
-      p.housenumber && p.street ? `${p.street} ${p.housenumber}` : (p.street || p.name || ""),
-      p.city || p.county || "",
-      p.state || "",
-      p.country || "",
-    ].map(s => s.trim()).filter(Boolean);
-    return { display_name: parts.join(", "), lat, lng: lon, id: p.osm_id ?? i };
-  });
-}
+interface GeoResult { display_name: string; lat: string; lon: string; place_id: number }
 
 function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: number | null; onChange: (lat: number, lng: number) => void }) {
   function ClickHandler() {
@@ -133,6 +118,7 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
   const [results, setResults] = useState<GeoResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const justSelected = useRef(false);
 
   const buscarDireccion = async (q: string, manual: boolean) => {
     const term = q.trim();
@@ -140,14 +126,16 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
     setSearching(true);
     setSearchError(null);
     try {
-      const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(term)}&limit=10&lang=es`);
-      const data = await r.json();
-      const parsed = photonToResults(data);
-      if (parsed.length === 0) {
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=10&addressdetails=1&q=${encodeURIComponent(term)}`,
+        { headers: { "Accept-Language": "es" } }
+      );
+      const data: GeoResult[] = await r.json();
+      if (!Array.isArray(data) || data.length === 0) {
         setResults([]);
-        if (manual) setSearchError("Sin resultados");
+        if (manual) setSearchError("Sin resultados. Intentá con más detalle o menos términos.");
       } else {
-        setResults(parsed);
+        setResults(data);
       }
     } catch {
       if (manual) setSearchError("Error al buscar");
@@ -158,19 +146,17 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
 
   // Búsqueda en vivo (debounced) a partir de 3 caracteres
   useEffect(() => {
+    if (justSelected.current) { justSelected.current = false; return; }
     const term = search.trim();
-    if (term.length < 3) {
-      setResults([]);
-      setSearchError(null);
-      return;
-    }
+    if (term.length < 3) { setResults([]); setSearchError(null); return; }
     const t = setTimeout(() => buscarDireccion(term, false), 500);
     return () => clearTimeout(t);
-  }, [search]);
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const elegirResultado = (r: GeoResult) => {
-    onChange(r.lat, r.lng);
+    onChange(Number(r.lat), Number(r.lon));
     setResults([]);
+    justSelected.current = true;
     setSearch(r.display_name);
   };
 
@@ -207,7 +193,7 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
             boxShadow: "0 4px 12px rgba(0,0,0,0.12)", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
           }}>
             {results.map(r => (
-              <button key={r.id} type="button" onClick={() => elegirResultado(r)}
+              <button key={r.place_id} type="button" onClick={() => elegirResultado(r)}
                 style={{
                   display: "block", width: "100%", textAlign: "left",
                   padding: "0.55rem 0.75rem", border: "none", background: "transparent",
