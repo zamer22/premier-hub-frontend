@@ -1,7 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Fix default marker icons cuando se usa bundler
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 const API_URL = import.meta.env.VITE_API_URL;
+const DEFAULT_MAP_CENTER: [number, number] = [19.4326, -99.1332]; // CDMX
 
 /* ── Types ── */
 interface Variante {
@@ -23,13 +35,125 @@ interface Listado {
   nombre: string; tipo: string; imagen: string | null; equipo: string | null;
   vendedor_nickname: string; fecha_creacion: string;
 }
+interface Direccion {
+  id_direccion: number;
+  id_usuario: number;
+  alias: string;
+  nombre_destinatario: string;
+  telefono: string | null;
+  calle: string;
+  ciudad: string;
+  estado: string | null;
+  codigo_postal: string | null;
+  pais: string;
+  lat: number | null;
+  lng: number | null;
+  es_predeterminada: boolean;
+}
+interface Pedido {
+  id_pedido: number;
+  id_usuario: number;
+  id_producto: number;
+  id_variante: number | null;
+  costo: string;
+  direccion_snapshot: any;
+  lat_destino: number | null;
+  lng_destino: number | null;
+  estado: "procesando" | "enviado" | "en_camino" | "entregado" | "cancelado";
+  fecha_pedido: string;
+  fecha_entrega: string | null;
+  producto?: { id_producto: number; nombre: string; imagen: string | null; tipo: string; descripcion?: string | null } | null;
+  variante?: { id_variante: number; talla: string } | null;
+}
+interface Comentario {
+  id_comentario: number;
+  id_producto: number;
+  id_usuario: number;
+  calificacion: number;
+  comentario: string;
+  fecha_creacion: string;
+  usuario?: { nickname: string | null; nombre_usuario: string | null } | null;
+}
+type NewDireccionForm = {
+  alias: string;
+  nombre_destinatario: string;
+  telefono: string;
+  calle: string;
+  ciudad: string;
+  estado: string;
+  codigo_postal: string;
+  pais: string;
+  lat: number | null;
+  lng: number | null;
+  es_predeterminada: boolean;
+};
+const EMPTY_DIRECCION: NewDireccionForm = {
+  alias: "", nombre_destinatario: "", telefono: "", calle: "", ciudad: "",
+  estado: "", codigo_postal: "", pais: "MX", lat: null, lng: null, es_predeterminada: false,
+};
+
+/* ── Map helpers ── */
+function RecenterMap({ lat, lng }: { lat: number | null; lng: number | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (lat != null && lng != null) map.setView([lat, lng], map.getZoom());
+  }, [lat, lng, map]);
+  return null;
+}
+function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: number | null; onChange: (lat: number, lng: number) => void }) {
+  function ClickHandler() {
+    useMapEvents({ click: (e) => onChange(e.latlng.lat, e.latlng.lng) });
+    return null;
+  }
+  const center: [number, number] = lat != null && lng != null ? [lat, lng] : DEFAULT_MAP_CENTER;
+  return (
+    <MapContainer center={center} zoom={11} style={{ height: "200px", width: "100%", borderRadius: "8px" }}>
+      <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      {lat != null && lng != null && <Marker position={[lat, lng]} />}
+      <RecenterMap lat={lat} lng={lng} />
+      <ClickHandler />
+    </MapContainer>
+  );
+}
+function DestinationMap({ lat, lng }: { lat: number; lng: number }) {
+  return (
+    <MapContainer center={[lat, lng]} zoom={13} style={{ height: "260px", width: "100%", borderRadius: "10px" }} scrollWheelZoom={false}>
+      <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <Marker position={[lat, lng]} />
+    </MapContainer>
+  );
+}
+
+const ESTADO_PEDIDO_LABEL: Record<string, string> = {
+  procesando: "Procesando", enviado: "Enviado", en_camino: "En camino", entregado: "Entregado", cancelado: "Cancelado",
+};
+const ESTADO_PEDIDO_COLOR: Record<string, { bg: string; fg: string }> = {
+  procesando: { bg: "#fef3c7", fg: "#92400e" },
+  enviado:    { bg: "#dbeafe", fg: "#1e40af" },
+  en_camino:  { bg: "#e0e7ff", fg: "#4338ca" },
+  entregado:  { bg: "#dcfce7", fg: "#16a34a" },
+  cancelado:  { bg: "#fee2e2", fg: "#dc2626" },
+};
+const ESTADO_FLOW = ["procesando", "enviado", "en_camino", "entregado"] as const;
+
+const inputStyle: CSSProperties = {
+  padding: "0.6rem 0.7rem",
+  border: "1.5px solid #e0e0e0",
+  borderRadius: "8px",
+  fontSize: "0.85rem",
+  outline: "none",
+  width: "100%",
+  boxSizing: "border-box",
+  color: "#263a55",
+  background: "#fff",
+};
 
 interface TiendaProps {
   user: { id_usuario: number; nickname: string; dinero: number; [k: string]: any };
   onSaldoChange: (nuevoSaldo: number) => void;
 }
 
-type SubTab = "perfil" | "real" | "marketplace";
+type SubTab = "perfil" | "real" | "marketplace" | "pedidos";
 type MarketView = "explorar" | "mis-items";
 
 /* ── Component ── */
@@ -59,15 +183,42 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Checkout (envío) — solo para items reales
+  const [checkoutAction, setCheckoutAction] = useState<{ producto: Producto; variante: Variante | null } | null>(null);
+  const [direcciones, setDirecciones] = useState<Direccion[]>([]);
+  const [selectedDireccionId, setSelectedDireccionId] = useState<number | null>(null);
+  const [showNewDireccion, setShowNewDireccion] = useState(false);
+  const [newDireccion, setNewDireccion] = useState<NewDireccionForm>(EMPTY_DIRECCION);
+  const [savingDireccion, setSavingDireccion] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
+
+  // Pedidos
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [pedidoModal, setPedidoModal] = useState<Pedido | null>(null);
+
+  // Editar dirección de un pedido en 'procesando'
+  const [editingPedidoDireccion, setEditingPedidoDireccion] = useState(false);
+  const [pedidoDireccionForm, setPedidoDireccionForm] = useState<NewDireccionForm>(EMPTY_DIRECCION);
+  const [savingPedidoDireccion, setSavingPedidoDireccion] = useState(false);
+
+  // Reseñas / comentarios (productos reales)
+  const [productComments, setProductComments] = useState<Comentario[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [newReview, setNewReview] = useState<{ calificacion: number; comentario: string }>({ calificacion: 5, comentario: "" });
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  // Pedido id reciente (para mostrar destacado en success modal)
+  const [successPedidoId, setSuccessPedidoId] = useState<number | null>(null);
+
   const saldo = Number(user.dinero) || 0;
   const showToast = (msg: string, ok: boolean) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 3000); };
 
   // Bloquear scroll del body cuando hay un modal abierto
   useEffect(() => {
-    const hasModal = !!productModal || !!confirmAction || !!successMsg || !!publishingItem;
+    const hasModal = !!productModal || !!confirmAction || !!successMsg || !!publishingItem || !!checkoutAction || !!pedidoModal;
     document.body.style.overflow = hasModal ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [productModal, confirmAction, successMsg, publishingItem]);
+  }, [productModal, confirmAction, successMsg, publishingItem, checkoutAction, pedidoModal]);
 
   /* ── Data fetching ── */
   const fetchProductos = useCallback(async (cat: string) => {
@@ -104,7 +255,21 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     } catch { /* ignore */ }
   }, [user.id_usuario]);
 
+  const fetchDirecciones = useCallback(async () => {
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/direcciones/${user.id_usuario}`);
+      const d = await r.json();
+      if (d.success) setDirecciones(d.data);
+    } catch { /* ignore */ }
+  }, [user.id_usuario]);
 
+  const fetchPedidos = useCallback(async () => {
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/pedidos/${user.id_usuario}`);
+      const d = await r.json();
+      if (d.success) setPedidos(d.data);
+    } catch { /* ignore */ }
+  }, [user.id_usuario]);
 
   // Reset filtros al cambiar de tab
   useEffect(() => {
@@ -113,8 +278,9 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     setFiltroPerfilTipo("todos");
     if (subTab === "perfil") { fetchProductos("perfil"); fetchMisItems(); }
     else if (subTab === "real") { fetchProductos("real"); }
+    else if (subTab === "pedidos") { fetchPedidos(); }
     else { fetchListados(); fetchMisItems(); fetchMisListados(); }
-  }, [subTab, fetchProductos, fetchListados, fetchMisItems, fetchMisListados]);
+  }, [subTab, fetchProductos, fetchListados, fetchMisItems, fetchMisListados, fetchPedidos]);
 
   const TIPOS = ["todos", "jersey", "balonazo", "ropa", "accesorio"];
 
@@ -142,11 +308,11 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   });
 
   /* ── Actions ── */
-  const comprar = async (id_producto: number, nombre: string, id_variante: number | null) => {
+  const comprar = async (id_producto: number, nombre: string, id_variante: number | null, id_direccion: number | null = null) => {
     try {
       const res = await fetch(`${API_URL}/api/tienda/comprar`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, id_producto, id_variante }),
+        body: JSON.stringify({ id_usuario: user.id_usuario, id_producto, id_variante, id_direccion }),
       });
       const data = await res.json();
       if (data.success) {
@@ -162,9 +328,194 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         }));
         setConfirmAction(null);
         setProductModal(null);
-        setSuccessMsg(`¡${nombre} es tuyo! Tu nuevo saldo es ${nuevoSaldo.toLocaleString()} pts.`);
-      } else { setConfirmAction(null); showToast(data.error, false); }
-    } catch { setConfirmAction(null); showToast("Error de conexion", false); }
+        setCheckoutAction(null);
+        if (id_direccion != null) {
+          setSuccessPedidoId(data.id_pedido ?? null);
+          setSuccessMsg(`¡${nombre} comprado! Tu pedido ya está en camino. Saldo: ${nuevoSaldo.toLocaleString()} pts.`);
+          fetchPedidos();
+        } else {
+          setSuccessPedidoId(null);
+          setSuccessMsg(`¡${nombre} es tuyo! Tu nuevo saldo es ${nuevoSaldo.toLocaleString()} pts.`);
+        }
+        return true;
+      } else { setConfirmAction(null); showToast(data.error, false); return false; }
+    } catch { setConfirmAction(null); showToast("Error de conexion", false); return false; }
+  };
+
+  const abrirCheckout = async (producto: Producto, variante: Variante | null) => {
+    setCheckoutAction({ producto, variante });
+    setShowNewDireccion(false);
+    setNewDireccion(EMPTY_DIRECCION);
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/direcciones/${user.id_usuario}`);
+      const d = await r.json();
+      if (d.success) {
+        setDirecciones(d.data);
+        const pred = d.data.find((x: Direccion) => x.es_predeterminada) || d.data[0];
+        setSelectedDireccionId(pred?.id_direccion ?? null);
+        if (!d.data.length) setShowNewDireccion(true);
+      }
+    } catch { /* ignore */ }
+  };
+
+  const guardarDireccion = async (): Promise<Direccion | null> => {
+    const f = newDireccion;
+    if (!f.alias || !f.nombre_destinatario || !f.calle || !f.ciudad) {
+      showToast("Completá alias, nombre, calle y ciudad", false);
+      return null;
+    }
+    setSavingDireccion(true);
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/direcciones`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_usuario: user.id_usuario, ...f }),
+      });
+      const d = await r.json();
+      if (!d.success) { showToast(d.error || "Error guardando dirección", false); return null; }
+      setDirecciones(prev => {
+        const next = f.es_predeterminada
+          ? prev.map(x => ({ ...x, es_predeterminada: false }))
+          : prev;
+        return [d.data, ...next];
+      });
+      setSelectedDireccionId(d.data.id_direccion);
+      setShowNewDireccion(false);
+      setNewDireccion(EMPTY_DIRECCION);
+      showToast("Dirección guardada", true);
+      return d.data;
+    } catch {
+      showToast("Error de conexión", false);
+      return null;
+    } finally {
+      setSavingDireccion(false);
+    }
+  };
+
+  const confirmarPedido = async () => {
+    if (!checkoutAction || !selectedDireccionId) return;
+    setPlacingOrder(true);
+    try {
+      await comprar(
+        checkoutAction.producto.id_producto,
+        checkoutAction.producto.nombre,
+        checkoutAction.variante?.id_variante ?? null,
+        selectedDireccionId,
+      );
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
+
+  const fetchComentarios = useCallback(async (id_producto: number) => {
+    setLoadingComments(true);
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/comentarios/${id_producto}`);
+      const d = await r.json();
+      if (d.success) setProductComments(d.data);
+    } catch { /* ignore */ } finally { setLoadingComments(false); }
+  }, []);
+
+  // Cargar comentarios al abrir el modal de un producto real
+  useEffect(() => {
+    if (productModal && productModal.categoria === "real") {
+      fetchComentarios(productModal.id_producto);
+      setNewReview({ calificacion: 5, comentario: "" });
+    } else {
+      setProductComments([]);
+    }
+  }, [productModal, fetchComentarios]);
+
+  // Reset edición de dirección cuando cambia el pedido abierto
+  useEffect(() => {
+    setEditingPedidoDireccion(false);
+  }, [pedidoModal?.id_pedido]);
+
+  const enviarReseña = async () => {
+    if (!productModal) return;
+    if (newReview.comentario.trim().length < 3) { showToast("El comentario es muy corto", false); return; }
+    setSubmittingReview(true);
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/comentarios`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id_usuario: user.id_usuario,
+          id_producto: productModal.id_producto,
+          calificacion: newReview.calificacion,
+          comentario: newReview.comentario.trim(),
+        }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        setProductComments(prev => [d.data, ...prev]);
+        setNewReview({ calificacion: 5, comentario: "" });
+        showToast("Reseña publicada", true);
+      } else { showToast(d.error || "Error al publicar", false); }
+    } catch { showToast("Error de conexión", false); }
+    finally { setSubmittingReview(false); }
+  };
+
+  const eliminarReseña = async (id_comentario: number) => {
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/comentarios/${id_comentario}?id_usuario=${user.id_usuario}`, { method: "DELETE" });
+      const d = await r.json();
+      if (d.success) {
+        setProductComments(prev => prev.filter(c => c.id_comentario !== id_comentario));
+        showToast("Reseña eliminada", true);
+      } else { showToast(d.error || "Error", false); }
+    } catch { showToast("Error de conexión", false); }
+  };
+
+  const iniciarEditarPedidoDireccion = () => {
+    if (!pedidoModal) return;
+    const s = pedidoModal.direccion_snapshot || {};
+    setPedidoDireccionForm({
+      alias: s.alias || "",
+      nombre_destinatario: s.nombre_destinatario || "",
+      telefono: s.telefono || "",
+      calle: s.calle || "",
+      ciudad: s.ciudad || "",
+      estado: s.estado || "",
+      codigo_postal: s.codigo_postal || "",
+      pais: s.pais || "MX",
+      lat: s.lat != null ? Number(s.lat) : (pedidoModal.lat_destino != null ? Number(pedidoModal.lat_destino) : null),
+      lng: s.lng != null ? Number(s.lng) : (pedidoModal.lng_destino != null ? Number(pedidoModal.lng_destino) : null),
+      es_predeterminada: false,
+    });
+    setEditingPedidoDireccion(true);
+  };
+
+  const guardarPedidoDireccion = async () => {
+    if (!pedidoModal) return;
+    const f = pedidoDireccionForm;
+    if (!f.alias || !f.nombre_destinatario || !f.calle || !f.ciudad) {
+      showToast("Completá alias, nombre, calle y ciudad", false); return;
+    }
+    setSavingPedidoDireccion(true);
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/pedido/${pedidoModal.id_pedido}/direccion`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_usuario: user.id_usuario, ...f }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        setPedidoModal(d.data);
+        setPedidos(prev => prev.map(p => p.id_pedido === d.data.id_pedido ? d.data : p));
+        setEditingPedidoDireccion(false);
+        showToast("Dirección actualizada", true);
+      } else { showToast(d.error || "No se pudo actualizar", false); }
+    } catch { showToast("Error de conexión", false); }
+    finally { setSavingPedidoDireccion(false); }
+  };
+
+  const eliminarDireccion = async (id_direccion: number) => {
+    try {
+      const r = await fetch(`${API_URL}/api/tienda/direcciones/${id_direccion}?id_usuario=${user.id_usuario}`, { method: "DELETE" });
+      const d = await r.json();
+      if (d.success) {
+        setDirecciones(prev => prev.filter(x => x.id_direccion !== id_direccion));
+        if (selectedDireccionId === id_direccion) setSelectedDireccionId(null);
+      } else { showToast(d.error || "Error", false); }
+    } catch { showToast("Error de conexión", false); }
   };
 
   const reclamarBonus = async () => {
@@ -422,15 +773,21 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       {/* Modal: éxito */}
       {successMsg && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9003 }}
-          onClick={() => setSuccessMsg(null)}>
-          <div style={{ background: "#fff", borderRadius: "14px", padding: "2rem", width: "360px", maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.4)", textAlign: "center" }}
+          onClick={() => { setSuccessMsg(null); setSuccessPedidoId(null); }}>
+          <div style={{ background: "#fff", borderRadius: "14px", padding: "2rem", width: "380px", maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.4)", textAlign: "center" }}
             onClick={(e) => e.stopPropagation()}>
             <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: "linear-gradient(135deg, #E90052, #871d54)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem" }}>
               <span style={{ color: "#fff", fontSize: "1.5rem", fontWeight: 900 }}>✓</span>
             </div>
             <h3 style={{ color: "#263a55", fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.45rem" }}>¡Operación exitosa!</h3>
-            <p style={{ color: "#84878F", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>{successMsg}</p>
-            <button onClick={() => setSuccessMsg(null)} style={{ padding: "0.65rem 2.5rem", borderRadius: "8px", border: "none", background: "linear-gradient(135deg, #263a55, #1a2a3f)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>
+            <p style={{ color: "#84878F", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: successPedidoId ? "0.85rem" : "1.4rem" }}>{successMsg}</p>
+            {successPedidoId && (
+              <div style={{ background: "linear-gradient(135deg, rgba(233,0,82,0.08), rgba(135,29,84,0.08))", border: "1px solid rgba(233,0,82,0.2)", borderRadius: "10px", padding: "0.75rem 1rem", marginBottom: "1.4rem" }}>
+                <p style={{ fontSize: "0.65rem", color: "#84878F", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.06em", marginBottom: "0.15rem" }}>Número de pedido</p>
+                <p style={{ fontSize: "1.4rem", color: "#E90052", fontWeight: 900, letterSpacing: "0.02em" }}>#{successPedidoId}</p>
+              </div>
+            )}
+            <button onClick={() => { setSuccessMsg(null); setSuccessPedidoId(null); }} style={{ padding: "0.65rem 2.5rem", borderRadius: "8px", border: "none", background: "linear-gradient(135deg, #263a55, #1a2a3f)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>
               Cerrar
             </button>
           </div>
@@ -542,15 +899,452 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                   </div>
                   <button
                     disabled={!canBuyModal}
-                    onClick={() => { if (canBuyModal) { setProductModal(null); setConfirmAction({ kind: "buy-product", producto: productModal, variante: selectedVariante }); } }}
+                    onClick={() => {
+                      if (!canBuyModal) return;
+                      const prod = productModal;
+                      const vr = selectedVariante;
+                      setProductModal(null);
+                      if (isRealItem) {
+                        abrirCheckout(prod, vr);
+                      } else {
+                        setConfirmAction({ kind: "buy-product", producto: prod, variante: vr });
+                      }
+                    }}
                     style={{ padding: "0.65rem 1.75rem", border: "none", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: canBuyModal ? "pointer" : "not-allowed", background: canBuyModal ? "#E90052" : "#e0e0e0", color: canBuyModal ? "#fff" : "#999" }}>
                     {isOwned && !isRealItem ? "Ya tienes este"
                       : isRealItem && stockTotal === 0 ? "Sin stock"
                       : tieneVariantes && !selectedVariante ? "Elegí una talla"
                       : Number(productModal.costo) > saldo ? "Saldo insuficiente"
+                      : isRealItem ? "Continuar al envío"
                       : "Comprar ahora"}
                   </button>
                 </div>
+
+                {/* Reseñas (solo productos reales) */}
+                {isRealItem && (() => {
+                  const userComment = productComments.find(c => c.id_usuario === user.id_usuario);
+                  const total = productComments.length;
+                  const avg = total > 0 ? productComments.reduce((s, c) => s + c.calificacion, 0) / total : 0;
+                  return (
+                    <div style={{ marginTop: "1.25rem", borderTop: "1px solid #f0f0f0", paddingTop: "1rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+                        <h4 style={{ color: "#263a55", fontSize: "0.95rem", fontWeight: 800 }}>Reseñas</h4>
+                        {total > 0 && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                            <span style={{ color: "#f59e0b", fontSize: "0.95rem", letterSpacing: "0.05em" }}>
+                              {"★".repeat(Math.round(avg))}{"☆".repeat(5 - Math.round(avg))}
+                            </span>
+                            <span style={{ fontSize: "0.78rem", color: "#84878F", fontWeight: 600 }}>{avg.toFixed(1)} · {total} reseña{total === 1 ? "" : "s"}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Form (solo si compró y no comentó aún) */}
+                      {isOwned && !userComment && (
+                        <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem", marginBottom: "0.85rem" }}>
+                          <p style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Tu reseña</p>
+                          <div style={{ display: "flex", gap: "0.15rem", marginBottom: "0.5rem" }}>
+                            {[1, 2, 3, 4, 5].map(n => (
+                              <button key={n} onClick={() => setNewReview(r => ({ ...r, calificacion: n }))}
+                                style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.4rem", lineHeight: 1, padding: 0, color: n <= newReview.calificacion ? "#f59e0b" : "#d1d5db" }}>
+                                {n <= newReview.calificacion ? "★" : "☆"}
+                              </button>
+                            ))}
+                          </div>
+                          <textarea value={newReview.comentario}
+                            onChange={(e) => setNewReview(r => ({ ...r, comentario: e.target.value }))}
+                            placeholder="Contá tu experiencia con el producto..."
+                            rows={3}
+                            style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit", marginBottom: "0.5rem" }} />
+                          <button onClick={enviarReseña} disabled={submittingReview || newReview.comentario.trim().length < 3}
+                            style={{
+                              padding: "0.5rem 1.1rem", borderRadius: "8px", border: "none",
+                              background: submittingReview || newReview.comentario.trim().length < 3 ? "#e0e0e0" : "#E90052",
+                              color: submittingReview || newReview.comentario.trim().length < 3 ? "#999" : "#fff",
+                              fontWeight: 700, fontSize: "0.8rem",
+                              cursor: submittingReview || newReview.comentario.trim().length < 3 ? "not-allowed" : "pointer",
+                            }}>
+                            {submittingReview ? "Publicando..." : "Publicar reseña"}
+                          </button>
+                        </div>
+                      )}
+                      {!isOwned && (
+                        <p style={{ fontSize: "0.78rem", color: "#9ca3af", marginBottom: "0.85rem", fontStyle: "italic" }}>
+                          Tenés que comprar el producto para dejar una reseña.
+                        </p>
+                      )}
+
+                      {/* Lista de reseñas */}
+                      {loadingComments ? (
+                        <p style={{ fontSize: "0.82rem", color: "#84878F" }}>Cargando reseñas...</p>
+                      ) : productComments.length === 0 ? (
+                        <p style={{ fontSize: "0.82rem", color: "#9ca3af", textAlign: "center", padding: "1rem 0" }}>
+                          Aún no hay reseñas. {isOwned && !userComment ? "¡Sé el primero!" : ""}
+                        </p>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
+                          {productComments.map(c => {
+                            const isMine = c.id_usuario === user.id_usuario;
+                            const nick = c.usuario?.nickname || c.usuario?.nombre_usuario || `Usuario #${c.id_usuario}`;
+                            return (
+                              <div key={c.id_comentario} style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: "10px", padding: "0.75rem 0.9rem" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                    <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#263a55" }}>{nick}{isMine && <span style={{ marginLeft: "0.4rem", fontSize: "0.62rem", background: "#dbeafe", color: "#1e40af", padding: "0.1rem 0.4rem", borderRadius: "4px", fontWeight: 700 }}>TÚ</span>}</span>
+                                    <span style={{ color: "#f59e0b", fontSize: "0.82rem", letterSpacing: "0.04em" }}>
+                                      {"★".repeat(c.calificacion)}{"☆".repeat(5 - c.calificacion)}
+                                    </span>
+                                  </div>
+                                  <span style={{ fontSize: "0.7rem", color: "#9ca3af" }}>{new Date(c.fecha_creacion).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                                </div>
+                                <p style={{ fontSize: "0.82rem", color: "#374151", lineHeight: 1.5 }}>{c.comentario}</p>
+                                {isMine && (
+                                  <button onClick={() => eliminarReseña(c.id_comentario)}
+                                    style={{ marginTop: "0.4rem", background: "transparent", border: "none", color: "#dc2626", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", padding: 0 }}>
+                                    Eliminar mi reseña
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Modal: checkout (envío) — solo items reales */}
+      {checkoutAction && (() => {
+        const { producto, variante } = checkoutAction;
+        const costo = Number(producto.costo);
+        const saldoFinal = saldo - costo;
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9004, padding: "1rem", overflowY: "auto" }}
+            onClick={() => { if (!placingOrder) setCheckoutAction(null); }}>
+            <div style={{ background: "#fff", borderRadius: "16px", width: "520px", maxWidth: "100%", maxHeight: "92vh", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.45)" }}
+              onClick={(e) => e.stopPropagation()}>
+              {/* Header */}
+              <div style={{ padding: "1.1rem 1.5rem", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 style={{ color: "#263a55", fontSize: "1.1rem", fontWeight: 800 }}>Finalizar compra</h3>
+                <button onClick={() => { if (!placingOrder) setCheckoutAction(null); }} style={{ background: "transparent", border: "none", color: "#84878F", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
+              </div>
+
+              <div style={{ padding: "1.25rem 1.5rem" }}>
+                {/* Resumen */}
+                <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.9rem 1rem", marginBottom: "1rem", display: "flex", gap: "0.85rem", alignItems: "center" }}>
+                  <div style={{ width: "60px", height: "60px", borderRadius: "8px", background: producto.imagen ? `#fff url(${producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55, #871d54)", flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: "0.88rem", fontWeight: 700, color: "#263a55", marginBottom: "0.15rem" }}>{producto.nombre}</p>
+                    <p style={{ fontSize: "0.72rem", color: "#84878F" }}>
+                      {tipoLabel(producto.tipo)}{variante ? ` · talla ${variante.talla}` : ""}
+                    </p>
+                    <p style={{ fontSize: "0.95rem", color: "#E90052", fontWeight: 800, marginTop: "0.2rem" }}>{costo.toLocaleString()} pts</p>
+                  </div>
+                </div>
+
+                {/* Direcciones */}
+                <div style={{ marginBottom: "1rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                    <h4 style={{ fontSize: "0.78rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Dirección de envío</h4>
+                    {!showNewDireccion && (
+                      <button onClick={() => setShowNewDireccion(true)}
+                        style={{ background: "transparent", border: "none", color: "#E90052", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
+                        + Nueva dirección
+                      </button>
+                    )}
+                  </div>
+
+                  {direcciones.length === 0 && !showNewDireccion && (
+                    <p style={{ fontSize: "0.82rem", color: "#84878F", padding: "0.6rem 0" }}>No tienes direcciones guardadas. Agregá una para continuar.</p>
+                  )}
+
+                  {direcciones.length > 0 && !showNewDireccion && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                      {direcciones.map(dir => {
+                        const sel = selectedDireccionId === dir.id_direccion;
+                        return (
+                          <label key={dir.id_direccion}
+                            style={{
+                              display: "flex", alignItems: "flex-start", gap: "0.7rem",
+                              padding: "0.75rem 0.9rem",
+                              border: sel ? "2px solid #E90052" : "1.5px solid #e5e7eb",
+                              borderRadius: "10px", cursor: "pointer",
+                              background: sel ? "rgba(233,0,82,0.04)" : "#fff",
+                            }}>
+                            <input type="radio" name="direccion" checked={sel} onChange={() => setSelectedDireccionId(dir.id_direccion)}
+                              style={{ marginTop: "0.2rem", accentColor: "#E90052" }} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.1rem" }}>
+                                <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "#263a55" }}>
+                                  {dir.alias} {dir.es_predeterminada && <span style={{ fontSize: "0.65rem", background: "#dcfce7", color: "#16a34a", padding: "0.1rem 0.4rem", borderRadius: "4px", marginLeft: "0.4rem", fontWeight: 700 }}>PREDETERMINADA</span>}
+                                </p>
+                                <button type="button" onClick={(e) => { e.preventDefault(); eliminarDireccion(dir.id_direccion); }}
+                                  style={{ background: "transparent", border: "none", color: "#dc2626", fontSize: "0.7rem", cursor: "pointer", fontWeight: 600 }}>
+                                  Eliminar
+                                </button>
+                              </div>
+                              <p style={{ fontSize: "0.78rem", color: "#374151" }}>{dir.nombre_destinatario}{dir.telefono ? ` · ${dir.telefono}` : ""}</p>
+                              <p style={{ fontSize: "0.75rem", color: "#84878F" }}>{dir.calle}, {dir.ciudad}{dir.estado ? `, ${dir.estado}` : ""}{dir.codigo_postal ? ` ${dir.codigo_postal}` : ""}</p>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Form nueva dirección */}
+                  {showNewDireccion && (
+                    <div style={{ border: "1.5px solid #e5e7eb", borderRadius: "10px", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
+                        <input placeholder="Alias (Casa, Oficina...)" value={newDireccion.alias}
+                          onChange={(e) => setNewDireccion({ ...newDireccion, alias: e.target.value })}
+                          style={inputStyle} />
+                        <input placeholder="Nombre del destinatario" value={newDireccion.nombre_destinatario}
+                          onChange={(e) => setNewDireccion({ ...newDireccion, nombre_destinatario: e.target.value })}
+                          style={inputStyle} />
+                      </div>
+                      <input placeholder="Teléfono (opcional)" value={newDireccion.telefono}
+                        onChange={(e) => setNewDireccion({ ...newDireccion, telefono: e.target.value })}
+                        style={inputStyle} />
+                      <input placeholder="Calle y número" value={newDireccion.calle}
+                        onChange={(e) => setNewDireccion({ ...newDireccion, calle: e.target.value })}
+                        style={inputStyle} />
+                      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 0.8fr", gap: "0.6rem" }}>
+                        <input placeholder="Ciudad" value={newDireccion.ciudad}
+                          onChange={(e) => setNewDireccion({ ...newDireccion, ciudad: e.target.value })}
+                          style={inputStyle} />
+                        <input placeholder="Estado" value={newDireccion.estado}
+                          onChange={(e) => setNewDireccion({ ...newDireccion, estado: e.target.value })}
+                          style={inputStyle} />
+                        <input placeholder="CP" value={newDireccion.codigo_postal}
+                          onChange={(e) => setNewDireccion({ ...newDireccion, codigo_postal: e.target.value })}
+                          style={inputStyle} />
+                      </div>
+
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" }}>
+                          <label style={{ fontSize: "0.72rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Ubicación en mapa</label>
+                          <button type="button" onClick={() => {
+                            if (!navigator.geolocation) { showToast("Geolocalización no disponible", false); return; }
+                            navigator.geolocation.getCurrentPosition(
+                              (pos) => setNewDireccion(prev => ({ ...prev, lat: pos.coords.latitude, lng: pos.coords.longitude })),
+                              () => showToast("No se pudo obtener tu ubicación", false),
+                            );
+                          }} style={{ background: "transparent", border: "none", color: "#E90052", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>
+                            Usar mi ubicación
+                          </button>
+                        </div>
+                        <p style={{ fontSize: "0.7rem", color: "#84878F", marginBottom: "0.4rem" }}>Hacé click en el mapa para fijar la ubicación.</p>
+                        <LocationPicker lat={newDireccion.lat} lng={newDireccion.lng}
+                          onChange={(lat, lng) => setNewDireccion(prev => ({ ...prev, lat, lng }))} />
+                        {newDireccion.lat != null && newDireccion.lng != null && (
+                          <p style={{ fontSize: "0.7rem", color: "#84878F", marginTop: "0.3rem" }}>
+                            {newDireccion.lat.toFixed(5)}, {newDireccion.lng.toFixed(5)}
+                          </p>
+                        )}
+                      </div>
+
+                      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.78rem", color: "#374151" }}>
+                        <input type="checkbox" checked={newDireccion.es_predeterminada}
+                          onChange={(e) => setNewDireccion({ ...newDireccion, es_predeterminada: e.target.checked })}
+                          style={{ accentColor: "#E90052" }} />
+                        Usar como predeterminada
+                      </label>
+
+                      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.3rem" }}>
+                        <button onClick={() => { setShowNewDireccion(false); setNewDireccion(EMPTY_DIRECCION); }} disabled={savingDireccion}
+                          style={{ flex: 1, padding: "0.6rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: "pointer", fontWeight: 600, fontSize: "0.82rem" }}>
+                          Cancelar
+                        </button>
+                        <button onClick={guardarDireccion} disabled={savingDireccion}
+                          style={{ flex: 1, padding: "0.6rem", borderRadius: "8px", border: "none", background: "#263a55", color: "#fff", cursor: savingDireccion ? "wait" : "pointer", fontWeight: 700, fontSize: "0.82rem" }}>
+                          {savingDireccion ? "Guardando..." : "Guardar dirección"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Totales */}
+                <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem", marginBottom: "1rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", color: "#374151" }}>
+                    <span>Total</span><strong style={{ color: "#E90052" }}>{costo.toLocaleString()} pts</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: "#84878F", marginTop: "0.25rem" }}>
+                    <span>Saldo después de la compra</span><span style={{ fontWeight: 700, color: "#263a55" }}>{saldoFinal.toLocaleString()} pts</span>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "0.6rem" }}>
+                  <button onClick={() => setCheckoutAction(null)} disabled={placingOrder}
+                    style={{ flex: 1, padding: "0.75rem", borderRadius: "10px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: placingOrder ? "wait" : "pointer", fontWeight: 600, fontSize: "0.88rem" }}>
+                    Cancelar
+                  </button>
+                  <button onClick={confirmarPedido} disabled={!selectedDireccionId || placingOrder || showNewDireccion}
+                    style={{ flex: 2, padding: "0.75rem", borderRadius: "10px", border: "none",
+                      background: !selectedDireccionId || showNewDireccion ? "#e0e0e0" : "#E90052",
+                      color: !selectedDireccionId || showNewDireccion ? "#999" : "#fff",
+                      cursor: !selectedDireccionId || placingOrder || showNewDireccion ? "not-allowed" : "pointer",
+                      fontWeight: 700, fontSize: "0.88rem" }}>
+                    {placingOrder ? "Procesando..." : "Confirmar pedido"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Modal: detalle de pedido (con mapa) */}
+      {pedidoModal && (() => {
+        const p = pedidoModal;
+        const dirSnap = p.direccion_snapshot || {};
+        const idx = ESTADO_FLOW.indexOf(p.estado as any);
+        const color = ESTADO_PEDIDO_COLOR[p.estado] || ESTADO_PEDIDO_COLOR.procesando;
+        return (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9005, padding: "1rem", overflowY: "auto" }}
+            onClick={() => setPedidoModal(null)}>
+            <div style={{ background: "#fff", borderRadius: "16px", width: "560px", maxWidth: "100%", maxHeight: "92vh", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.45)" }}
+              onClick={(e) => e.stopPropagation()}>
+              <div style={{ padding: "1.1rem 1.5rem", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h3 style={{ color: "#263a55", fontSize: "1.05rem", fontWeight: 800 }}>Pedido #{p.id_pedido}</h3>
+                  <p style={{ color: "#84878F", fontSize: "0.76rem" }}>{new Date(p.fecha_pedido).toLocaleString("es-MX")}</p>
+                </div>
+                <button onClick={() => setPedidoModal(null)} style={{ background: "transparent", border: "none", color: "#84878F", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
+              </div>
+
+              <div style={{ padding: "1.25rem 1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {/* Producto */}
+                <div style={{ display: "flex", gap: "0.85rem", alignItems: "center" }}>
+                  <div style={{ width: "72px", height: "72px", borderRadius: "8px", background: p.producto?.imagen ? `#f5f6f8 url(${p.producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55, #871d54)", flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "#263a55" }}>{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
+                    <p style={{ fontSize: "0.78rem", color: "#84878F" }}>
+                      {p.producto?.tipo ? tipoLabel(p.producto.tipo) : ""}{p.variante ? ` · talla ${p.variante.talla}` : ""}
+                    </p>
+                    <p style={{ fontSize: "0.92rem", color: "#E90052", fontWeight: 800, marginTop: "0.15rem" }}>{Number(p.costo).toLocaleString()} pts</p>
+                  </div>
+                  <span style={{ background: color.bg, color: color.fg, padding: "0.3rem 0.75rem", borderRadius: "999px", fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    {ESTADO_PEDIDO_LABEL[p.estado] || p.estado}
+                  </span>
+                </div>
+
+                {/* Timeline */}
+                {p.estado !== "cancelado" && (
+                  <div>
+                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.6rem" }}>Estado del envío</h4>
+                    <div style={{ display: "flex", justifyContent: "space-between", position: "relative" }}>
+                      <div style={{ position: "absolute", top: "11px", left: "12px", right: "12px", height: "2px", background: "#e5e7eb", zIndex: 0 }} />
+                      <div style={{ position: "absolute", top: "11px", left: "12px", height: "2px", background: "#E90052", zIndex: 1, width: idx > 0 ? `calc(${(idx / (ESTADO_FLOW.length - 1)) * 100}% - 24px)` : "0" }} />
+                      {ESTADO_FLOW.map((est, i) => {
+                        const reached = i <= idx;
+                        return (
+                          <div key={est} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem", zIndex: 2, flex: 1 }}>
+                            <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: reached ? "#E90052" : "#e5e7eb", color: reached ? "#fff" : "#84878F", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 700 }}>
+                              {reached ? "✓" : i + 1}
+                            </div>
+                            <p style={{ fontSize: "0.68rem", color: reached ? "#263a55" : "#84878F", fontWeight: reached ? 700 : 500, textAlign: "center" }}>{ESTADO_PEDIDO_LABEL[est]}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Dirección */}
+                <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Dirección de entrega</h4>
+                    {p.estado === "procesando" && !editingPedidoDireccion && (
+                      <button onClick={iniciarEditarPedidoDireccion}
+                        style={{ background: "transparent", border: "none", color: "#E90052", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>
+                        Editar
+                      </button>
+                    )}
+                  </div>
+
+                  {!editingPedidoDireccion ? (
+                    <>
+                      <p style={{ fontSize: "0.85rem", color: "#263a55", fontWeight: 600 }}>{dirSnap.nombre_destinatario || "—"}{dirSnap.telefono ? ` · ${dirSnap.telefono}` : ""}</p>
+                      <p style={{ fontSize: "0.78rem", color: "#374151" }}>{dirSnap.calle || ""}{dirSnap.ciudad ? `, ${dirSnap.ciudad}` : ""}{dirSnap.estado ? `, ${dirSnap.estado}` : ""}{dirSnap.codigo_postal ? ` ${dirSnap.codigo_postal}` : ""}</p>
+                      {p.estado !== "procesando" && (
+                        <p style={{ fontSize: "0.7rem", color: "#9ca3af", marginTop: "0.4rem", fontStyle: "italic" }}>Ya no podés editar la dirección porque el pedido salió de "procesando".</p>
+                      )}
+                    </>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+                        <input placeholder="Alias" value={pedidoDireccionForm.alias}
+                          onChange={(e) => setPedidoDireccionForm({ ...pedidoDireccionForm, alias: e.target.value })}
+                          style={inputStyle} />
+                        <input placeholder="Nombre del destinatario" value={pedidoDireccionForm.nombre_destinatario}
+                          onChange={(e) => setPedidoDireccionForm({ ...pedidoDireccionForm, nombre_destinatario: e.target.value })}
+                          style={inputStyle} />
+                      </div>
+                      <input placeholder="Teléfono (opcional)" value={pedidoDireccionForm.telefono}
+                        onChange={(e) => setPedidoDireccionForm({ ...pedidoDireccionForm, telefono: e.target.value })}
+                        style={inputStyle} />
+                      <input placeholder="Calle y número" value={pedidoDireccionForm.calle}
+                        onChange={(e) => setPedidoDireccionForm({ ...pedidoDireccionForm, calle: e.target.value })}
+                        style={inputStyle} />
+                      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 0.8fr", gap: "0.5rem" }}>
+                        <input placeholder="Ciudad" value={pedidoDireccionForm.ciudad}
+                          onChange={(e) => setPedidoDireccionForm({ ...pedidoDireccionForm, ciudad: e.target.value })}
+                          style={inputStyle} />
+                        <input placeholder="Estado" value={pedidoDireccionForm.estado}
+                          onChange={(e) => setPedidoDireccionForm({ ...pedidoDireccionForm, estado: e.target.value })}
+                          style={inputStyle} />
+                        <input placeholder="CP" value={pedidoDireccionForm.codigo_postal}
+                          onChange={(e) => setPedidoDireccionForm({ ...pedidoDireccionForm, codigo_postal: e.target.value })}
+                          style={inputStyle} />
+                      </div>
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
+                          <label style={{ fontSize: "0.7rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Ubicación en mapa</label>
+                          <button type="button" onClick={() => {
+                            if (!navigator.geolocation) { showToast("Geolocalización no disponible", false); return; }
+                            navigator.geolocation.getCurrentPosition(
+                              (pos) => setPedidoDireccionForm(prev => ({ ...prev, lat: pos.coords.latitude, lng: pos.coords.longitude })),
+                              () => showToast("No se pudo obtener tu ubicación", false),
+                            );
+                          }} style={{ background: "transparent", border: "none", color: "#E90052", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer" }}>
+                            Usar mi ubicación
+                          </button>
+                        </div>
+                        <LocationPicker lat={pedidoDireccionForm.lat} lng={pedidoDireccionForm.lng}
+                          onChange={(lat, lng) => setPedidoDireccionForm(prev => ({ ...prev, lat, lng }))} />
+                      </div>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button onClick={() => setEditingPedidoDireccion(false)} disabled={savingPedidoDireccion}
+                          style={{ flex: 1, padding: "0.55rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem" }}>
+                          Cancelar
+                        </button>
+                        <button onClick={guardarPedidoDireccion} disabled={savingPedidoDireccion}
+                          style={{ flex: 1, padding: "0.55rem", borderRadius: "8px", border: "none", background: "#E90052", color: "#fff", cursor: savingPedidoDireccion ? "wait" : "pointer", fontWeight: 700, fontSize: "0.8rem" }}>
+                          {savingPedidoDireccion ? "Guardando..." : "Guardar cambios"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Mapa */}
+                {p.lat_destino != null && p.lng_destino != null && (
+                  <div>
+                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>Ubicación de entrega</h4>
+                    <DestinationMap lat={Number(p.lat_destino)} lng={Number(p.lng_destino)} />
+                  </div>
+                )}
+
+                {p.fecha_entrega && (
+                  <p style={{ fontSize: "0.78rem", color: "#16a34a", fontWeight: 600 }}>Entregado el {new Date(p.fecha_entrega).toLocaleString("es-MX")}</p>
+                )}
               </div>
             </div>
           </div>
@@ -596,6 +1390,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           { key: "perfil" as SubTab,       label: "Objetos de Perfil" },
           { key: "real" as SubTab,         label: "Objetos Reales"    },
           { key: "marketplace" as SubTab,  label: "Marketplace"       },
+          { key: "pedidos" as SubTab,      label: "Mis Pedidos"       },
         ]).map((t) => (
           <button key={t.key} onClick={() => setSubTab(t.key)}
             style={{
@@ -611,7 +1406,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       </div>
 
       {/* Buscador + filtros (real y explorar marketplace; perfil tiene su propio buscador) */}
-      {subTab !== "perfil" && (subTab !== "marketplace" || marketView === "explorar") && (
+      {subTab !== "perfil" && subTab !== "pedidos" && (subTab !== "marketplace" || marketView === "explorar") && (
         <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
             <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.75rem", fontWeight: 600 }}>&#x2315;</span>
@@ -851,6 +1646,56 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Sub-tab: Mis Pedidos ── */}
+      {subTab === "pedidos" && (
+        <div>
+          {pedidos.length === 0 ? (
+            <div style={{ background: "#fff", borderRadius: "12px", padding: "3rem 1.5rem", textAlign: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+              <p style={{ color: "#84878F", fontSize: "0.95rem", marginBottom: "0.4rem" }}>Aún no tenés pedidos</p>
+              <p style={{ color: "#9ca3af", fontSize: "0.82rem" }}>Comprá un objeto real desde la pestaña "Objetos Reales" y aparecerá acá.</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {pedidos.map(p => {
+                const color = ESTADO_PEDIDO_COLOR[p.estado] || ESTADO_PEDIDO_COLOR.procesando;
+                return (
+                  <div key={p.id_pedido} onClick={() => setPedidoModal(p)}
+                    style={{
+                      background: "#fff", borderRadius: "12px", padding: "0.9rem 1.1rem",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.06)", cursor: "pointer",
+                      display: "flex", gap: "1rem", alignItems: "center",
+                      transition: "transform 0.15s, box-shadow 0.15s",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.10)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; }}
+                  >
+                    <div style={{ width: "64px", height: "64px", borderRadius: "8px", background: p.producto?.imagen ? `#f5f6f8 url(${p.producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55, #871d54)", flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ display: "inline-block", background: "#263a55", color: "#fff", padding: "0.2rem 0.55rem", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, letterSpacing: "0.02em" }}>#{p.id_pedido}</span>
+                          <p style={{ fontSize: "0.92rem", color: "#263a55", fontWeight: 700, marginTop: "0.35rem" }}>{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
+                          <p style={{ fontSize: "0.74rem", color: "#84878F" }}>
+                            {p.producto?.tipo ? tipoLabel(p.producto.tipo) : ""}{p.variante ? ` · talla ${p.variante.talla}` : ""}
+                          </p>
+                        </div>
+                        <span style={{ background: color.bg, color: color.fg, padding: "0.25rem 0.65rem", borderRadius: "999px", fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+                          {ESTADO_PEDIDO_LABEL[p.estado] || p.estado}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.4rem" }}>
+                        <p style={{ fontSize: "0.72rem", color: "#84878F" }}>{new Date(p.fecha_pedido).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                        <p style={{ fontSize: "0.85rem", color: "#E90052", fontWeight: 800 }}>{Number(p.costo).toLocaleString()} pts</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
