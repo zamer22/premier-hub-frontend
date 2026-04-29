@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Polyline, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -59,6 +59,11 @@ interface Pedido {
   direccion_snapshot: any;
   lat_destino: number | null;
   lng_destino: number | null;
+  lat_actual: number | null;
+  lng_actual: number | null;
+  tracking_numero: string | null;
+  fecha_estimada: string | null;
+  notas_admin: string | null;
   estado: "procesando" | "enviado" | "en_camino" | "entregado" | "cancelado";
   fecha_pedido: string;
   fecha_entrega: string | null;
@@ -100,26 +105,164 @@ function RecenterMap({ lat, lng }: { lat: number | null; lng: number | null }) {
   }, [lat, lng, map]);
   return null;
 }
+interface GeoResult { display_name: string; lat: string; lon: string; place_id: number }
+
 function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: number | null; onChange: (lat: number, lng: number) => void }) {
   function ClickHandler() {
     useMapEvents({ click: (e) => onChange(e.latlng.lat, e.latlng.lng) });
     return null;
   }
   const center: [number, number] = lat != null && lng != null ? [lat, lng] : DEFAULT_MAP_CENTER;
+
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState<GeoResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+
+  const buscarDireccion = async (q: string, manual: boolean) => {
+    const term = q.trim();
+    if (!term) return;
+    setSearching(true);
+    setSearchError(null);
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=10&dedupe=0&addressdetails=1&q=${encodeURIComponent(term)}`, {
+        headers: { "Accept-Language": "es" },
+      });
+      const data: GeoResult[] = await r.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        setResults([]);
+        if (manual) setSearchError("Sin resultados");
+      } else {
+        setResults(data);
+      }
+    } catch {
+      if (manual) setSearchError("Error al buscar");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  // Búsqueda en vivo (debounced) a partir de 3 caracteres
+  useEffect(() => {
+    const term = search.trim();
+    if (term.length < 3) {
+      setResults([]);
+      setSearchError(null);
+      return;
+    }
+    const t = setTimeout(() => buscarDireccion(term, false), 500);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const elegirResultado = (r: GeoResult) => {
+    onChange(Number(r.lat), Number(r.lon));
+    setResults([]);
+    setSearch(r.display_name);
+  };
+
   return (
-    <MapContainer center={center} zoom={11} style={{ height: "200px", width: "100%", borderRadius: "8px" }}>
-      <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {lat != null && lng != null && <Marker position={[lat, lng]} />}
-      <RecenterMap lat={lat} lng={lng} />
-      <ClickHandler />
-    </MapContainer>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+      <div style={{ display: "flex", gap: "0.4rem", position: "relative" }}>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); buscarDireccion(search, true); } }}
+          placeholder="Buscar dirección o lugar (ej. Av. Reforma 222, CDMX)"
+          style={{
+            flex: 1, padding: "0.5rem 0.7rem", border: "1.5px solid #e0e0e0",
+            borderRadius: "8px", fontSize: "0.82rem", outline: "none",
+            color: "#263a55", background: "#fff",
+          }}
+        />
+        <button type="button" onClick={() => buscarDireccion(search, true)} disabled={searching || !search.trim()}
+          style={{
+            padding: "0.5rem 0.95rem", borderRadius: "8px", border: "none",
+            background: searching || !search.trim() ? "#e0e0e0" : "#263a55",
+            color: searching || !search.trim() ? "#999" : "#fff",
+            fontSize: "0.78rem", fontWeight: 700,
+            cursor: searching || !search.trim() ? "not-allowed" : "pointer",
+            whiteSpace: "nowrap",
+          }}>
+          {searching ? "..." : "Buscar"}
+        </button>
+        {results.length > 0 && (
+          <div style={{
+            position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem",
+            background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.12)", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
+          }}>
+            {results.map(r => (
+              <button key={r.place_id} type="button" onClick={() => elegirResultado(r)}
+                style={{
+                  display: "block", width: "100%", textAlign: "left",
+                  padding: "0.55rem 0.75rem", border: "none", background: "transparent",
+                  fontSize: "0.78rem", color: "#263a55", cursor: "pointer",
+                  borderBottom: "1px solid #f0f0f0",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = "#f8f9fa"}
+                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
+                {r.display_name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {searchError && <p style={{ fontSize: "0.72rem", color: "#dc2626" }}>{searchError}</p>}
+      <MapContainer center={center} zoom={11} style={{ height: "200px", width: "100%", borderRadius: "8px" }}>
+        <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {lat != null && lng != null && <Marker position={[lat, lng]} />}
+        <RecenterMap lat={lat} lng={lng} />
+        <ClickHandler />
+      </MapContainer>
+    </div>
   );
 }
-function DestinationMap({ lat, lng }: { lat: number; lng: number }) {
+const destinoIcon = L.divIcon({
+  html: `<div style="background:#E90052;color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">🏠</div>`,
+  className: "",
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+});
+const paqueteIcon = L.divIcon({
+  html: `<div style="background:#2563eb;color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">📦</div>`,
+  className: "",
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+});
+
+function FitBounds({ points }: { points: [number, number][] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (points.length === 0) return;
+    if (points.length === 1) { map.setView(points[0], 13); return; }
+    map.fitBounds(points, { padding: [40, 40] });
+  }, [JSON.stringify(points)]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
+
+function TrackingMap({
+  destLat, destLng, actualLat, actualLng, mostrarPaquete,
+}: {
+  destLat: number; destLng: number;
+  actualLat?: number | null; actualLng?: number | null;
+  mostrarPaquete: boolean;
+}) {
+  const tienePaquete = mostrarPaquete && actualLat != null && actualLng != null;
+  const puntos: [number, number][] = tienePaquete
+    ? [[actualLat as number, actualLng as number], [destLat, destLng]]
+    : [[destLat, destLng]];
   return (
-    <MapContainer center={[lat, lng]} zoom={13} style={{ height: "260px", width: "100%", borderRadius: "10px" }} scrollWheelZoom={false}>
+    <MapContainer center={[destLat, destLng]} zoom={5} style={{ height: "300px", width: "100%", borderRadius: "10px" }} scrollWheelZoom={false}>
       <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <Marker position={[lat, lng]} />
+      <Marker position={[destLat, destLng]} icon={destinoIcon} />
+      {tienePaquete && (
+        <>
+          <Marker position={[actualLat as number, actualLng as number]} icon={paqueteIcon} />
+          <Polyline positions={puntos} pathOptions={{ color: "#2563eb", dashArray: "8, 6", weight: 3 }} />
+        </>
+      )}
+      <FitBounds points={puntos} />
     </MapContainer>
   );
 }
@@ -1334,11 +1477,49 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                   )}
                 </div>
 
-                {/* Mapa */}
+                {/* Tracking info (si admin la cargó) */}
+                {(p.tracking_numero || p.fecha_estimada || p.notas_admin) && (
+                  <div style={{ background: "#f1f5f9", borderRadius: "10px", padding: "0.85rem 1rem" }}>
+                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Información de envío</h4>
+                    {p.tracking_numero && (
+                      <p style={{ fontSize: "0.82rem", color: "#374151" }}>
+                        <span style={{ color: "#84878F", fontWeight: 600 }}>Tracking: </span>
+                        <span style={{ fontWeight: 700, color: "#263a55", letterSpacing: "0.02em" }}>{p.tracking_numero}</span>
+                      </p>
+                    )}
+                    {p.fecha_estimada && (
+                      <p style={{ fontSize: "0.82rem", color: "#374151" }}>
+                        <span style={{ color: "#84878F", fontWeight: 600 }}>Entrega estimada: </span>
+                        <span style={{ fontWeight: 700, color: "#263a55" }}>{new Date(p.fecha_estimada).toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric" })}</span>
+                      </p>
+                    )}
+                    {p.notas_admin && (
+                      <p style={{ fontSize: "0.78rem", color: "#374151", marginTop: "0.3rem", fontStyle: "italic" }}>
+                        “{p.notas_admin}”
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Mapa de tracking */}
                 {p.lat_destino != null && p.lng_destino != null && (
                   <div>
-                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>Ubicación de entrega</h4>
-                    <DestinationMap lat={Number(p.lat_destino)} lng={Number(p.lng_destino)} />
+                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
+                      {p.estado === "entregado" ? "Ubicación de entrega" : "Ruta del envío"}
+                    </h4>
+                    <TrackingMap
+                      destLat={Number(p.lat_destino)}
+                      destLng={Number(p.lng_destino)}
+                      actualLat={p.lat_actual != null ? Number(p.lat_actual) : null}
+                      actualLng={p.lng_actual != null ? Number(p.lng_actual) : null}
+                      mostrarPaquete={p.estado !== "entregado" && p.estado !== "cancelado"}
+                    />
+                    {p.estado !== "entregado" && p.estado !== "cancelado" && p.lat_actual != null && p.lng_actual != null && (
+                      <p style={{ fontSize: "0.7rem", color: "#84878F", marginTop: "0.3rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><span style={{ width: "10px", height: "10px", background: "#2563eb", borderRadius: "50%" }} /> Paquete</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><span style={{ width: "10px", height: "10px", background: "#E90052", borderRadius: "50%" }} /> Destino</span>
+                      </p>
+                    )}
                   </div>
                 )}
 

@@ -5,6 +5,7 @@ import Noticias from "./pages/NoticiasLanding";
 import ElegirNickname from "./pages/ElegirNickname";
 import Noticia from "./pages/Noticia";
 import Landing from "./pages/Landing";
+import AdminEnvios from "./pages/AdminEnvios";
 
 type Section =
   | "tablero"
@@ -212,6 +213,8 @@ export default function App() {
   }
 
   if (!user) return <Landing onLoginSuccess={(u) => setUser(u)} />;
+
+  if (user.es_admin) return <AdminEnvios user={user} onLogout={logout} />;
 
   const isNewsDetailRoute = /^\/noticias\/\d+\/?$/.test(pathname);
 
