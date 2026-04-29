@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
-import Partido    from "./pages/Partido";
-import Tienda     from "./pages/Tienda";
-import Noticias   from "./pages/NoticiasLanding";
-import ElegirNickname from "./pages/ElegirNickname";
-<<<<<<< HEAD
-import Noticia    from "./pages/Noticia";
-import Landing    from "./pages/Landing";
-import Historia from "./pages/Historia";
-=======
-import Noticia from "./pages/Noticia";
-import Landing from "./pages/Landing";
-import Perfil from "./pages/Perfil";
-import Wordle from "./pages/Wordle";
->>>>>>> origin/Wordle
+import Partido          from "./pages/Partido";
+import Tienda           from "./pages/Tienda";
+import Noticias         from "./pages/NoticiasLanding";
+import ElegirNickname   from "./pages/ElegirNickname";
+import Noticia          from "./pages/Noticia";
+import Landing          from "./pages/Landing";
+import Historia         from "./pages/Historia";
+import Perfil           from "./pages/Perfil";
+import Wordle           from "./pages/Wordle";
 
 type Section =
   | "tablero"
@@ -22,11 +17,8 @@ type Section =
   | "perfil"
   | "vr-arena"
   | "simulador"
-<<<<<<< HEAD
-  | "historia";              
-=======
+  | "historia"
   | "Arcade";
->>>>>>> origin/Wordle
 
 const TABS: { key: Section; label: string }[] = [
   { key: "partido",   label: "Partido"   },
@@ -35,11 +27,8 @@ const TABS: { key: Section; label: string }[] = [
   { key: "vr-arena",  label: "VR Arena"  },
   { key: "tienda",    label: "Tienda"    },
   { key: "noticias",  label: "Noticias"  },
-<<<<<<< HEAD
-  { key: "historia",  label: "Historia"  }, 
-=======
+  { key: "historia",  label: "Historia"  },
   { key: "Arcade",    label: "Arcade"    },
->>>>>>> origin/Wordle
 ];
 
 const PROXIMAMENTE: Section[] = ["tablero", "simulador", "vr-arena"];
@@ -72,8 +61,6 @@ function getInitialTab(): Section {
   return "partido";
 }
 
-<<<<<<< HEAD
-=======
 function getPathForSection(section: Section): string {
   return section === "tablero" ? "/" : `/${section}`;
 }
@@ -102,7 +89,6 @@ function getInventoryProfileImage(items: any[]) {
   return preferred?.imagen || fallback?.imagen || "";
 }
 
->>>>>>> origin/Wordle
 function CrownIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="app-icon" fill="none"
@@ -127,18 +113,11 @@ function UserIcon() {
 }
 
 export default function App() {
-<<<<<<< HEAD
-  const [pathname,       setPathname]       = useState(() => window.location.pathname);
-  const [tab,            setTabState]       = useState<Section>(getInitialTab);
-  const [user,           setUser]           = useState<any>(null);
-  const [oauthNuevo,     setOauthNuevo]     = useState<{ correo: string; nombre: string } | null>(null);
-=======
   const [pathname,       setPathname]      = useState(() => window.location.pathname);
   const [tab,            setTabState]      = useState<Section>(getInitialTab);
   const [user,           setUser]          = useState<any>(null);
   const [profileImage,   setProfileImage]  = useState("");
   const [oauthNuevo,     setOauthNuevo]    = useState<{ correo: string; nombre: string } | null>(null);
->>>>>>> origin/Wordle
   const [sessionLoading, setSessionLoading] = useState(true);
 
   const syncLocationState = () => {
@@ -355,35 +334,24 @@ export default function App() {
 
       {/* Contenido */}
       <div className="px-8 py-6 max-w-[1400px] mx-auto animate-fade-in">
-<<<<<<< HEAD
+        {tab === "Arcade"   && <Wordle />}
         {tab === "partido"  && <Partido />}
-        {tab === "historia" && <Historia />} 
+        {tab === "historia" && <Historia />}
         {tab === "tienda"   && (
-=======
-        {tab === "Arcade"    && <Wordle />}
-        {tab === "partido"   && <Partido />}
-        {tab === "tienda"    && (
->>>>>>> origin/Wordle
           <Tienda
             user={user}
             onSaldoChange={(s: number) => setUser({ ...user, dinero: s })}
           />
         )}
-<<<<<<< HEAD
-        {tab === "noticias" && !isNewsDetailRoute && <Noticias />}
-        {tab === "noticias" && isNewsDetailRoute  && <Noticia />}
-        
-=======
-        {tab === "perfil"    && (
+        {tab === "perfil"   && (
           <Perfil
             user={user}
             profileImage={profileImage}
             onGoToStore={() => setTab("tienda")}
           />
         )}
-        {tab === "noticias"  && !isNewsDetailRoute && <Noticias />}
-        {tab === "noticias"  && isNewsDetailRoute  && <Noticia />}
->>>>>>> origin/Wordle
+        {tab === "noticias" && !isNewsDetailRoute && <Noticias />}
+        {tab === "noticias" && isNewsDetailRoute  && <Noticia />}
         {PROXIMAMENTE.includes(tab) && (
           <div className="flex flex-col items-center justify-center mt-24 gap-3">
             <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">
