@@ -5,6 +5,7 @@ import Noticias from "./pages/NoticiasLanding";
 import ElegirNickname from "./pages/ElegirNickname";
 import Noticia from "./pages/Noticia";
 import Landing from "./pages/Landing";
+import Wordle from "./pages/Wordle";
 
 type Section =
   | "tablero"
@@ -12,7 +13,8 @@ type Section =
   | "noticias"
   | "tienda"
   | "vr-arena"
-  | "simulador";
+  | "simulador"
+  | "Arcade";
 
 const TABS: { key: Section; label: string }[] = [
   { key: "partido",   label: "Partido"   },
@@ -21,6 +23,7 @@ const TABS: { key: Section; label: string }[] = [
   { key: "vr-arena",  label: "VR Arena"  },
   { key: "tienda",    label: "Tienda"    },
   { key: "noticias",  label: "Noticias"  },
+  { key: "Arcade",    label: "Arcade"    },
 ];
 
 const PROXIMAMENTE: Section[] = ["tablero", "simulador", "vr-arena"];
@@ -278,6 +281,7 @@ export default function App() {
 
       {/* ── Contenido ── */}
       <div className="px-8 py-6 max-w-[1400px] mx-auto animate-fade-in">
+        {tab === "Arcade"    && <Wordle />}
         {tab === "partido"   && <Partido />}
         {tab === "tienda"    && (
           <Tienda
