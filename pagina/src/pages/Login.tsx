@@ -60,7 +60,10 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   const handleGoogle = () => {
     const redirectTo = import.meta.env.VITE_APP_URL;
-    window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
+    const selectAccount = sessionStorage.getItem("google_select_account");
+    sessionStorage.removeItem("google_select_account");
+    const prompt = selectAccount ? "&query_params=prompt%3Dselect_account" : "";
+    window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}${prompt}`;
   };
 
   return (
