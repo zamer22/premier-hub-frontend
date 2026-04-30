@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, CSSProperties } from "react";
 import Partido          from "./pages/Partido";
 import Tienda           from "./pages/Tienda";
 import Noticias         from "./pages/NoticiasLanding";
@@ -147,6 +147,7 @@ function UserIcon() {
 
 export default function App() {
   const [pathname, setPathname] = useState(() => window.location.pathname);
+  const isNewsDetailRoute = pathname.startsWith("/noticias/");
   const [tab, setTabState] = useState<Section>(getInitialTab);
   const [user, setUser] = useState<any>(null);
   const [profileImage, setProfileImage] = useState("");
