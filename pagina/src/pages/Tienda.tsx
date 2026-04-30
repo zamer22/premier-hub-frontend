@@ -785,7 +785,7 @@ const ProductVisual = ({ p, height = 140 }: { p: Producto | Listado; height?: nu
   );
 };
 
-const ProductCard = ({ p, onBuy, badge }: { p: Producto; onBuy: () => void; badge?: string }) => {
+const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
   const tieneVariantes = !!p.variantes && p.variantes.length > 0;
   const stockTotal = tieneVariantes
     ? (p.variantes ?? []).reduce((sum, v) => sum + v.stock, 0)
