@@ -1750,7 +1750,7 @@ const ProductCard = ({ p, badge, imgBg }: { p: Producto; badge?: string; imgBg?:
           {loading ? <p style={{ color: "#84878F" }}>Cargando...</p> : (
             productosFiltrados.length === 0 ? <p style={{ color: "#84878F", textAlign: "center", marginTop: "2rem" }}>No se encontraron productos</p> : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "1rem" }}>
-                {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} badge="OBJETO REAL" imgBg="#EEF3F8" />)}
+                {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} badge="OBJETO REAL" imgBg="#c8dff5" />)}
               </div>
             )
           )}
