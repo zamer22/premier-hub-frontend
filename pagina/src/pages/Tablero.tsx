@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-const API_URL: string = "https://api.zamer-o.com";
+const API_URL = import.meta.env.VITE_API_URL;
 interface RankingRow { id: number; nickname: string; posicion: number; puntos: number; partidas: number; victorias: number; derrotas: number; }
 
 export default function Tablero() {
