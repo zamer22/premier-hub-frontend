@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-declare module "react-dom" {
-  import type { ReactNode } from "react";
-  export function createPortal(children: ReactNode, container: Element | DocumentFragment): ReactNode;
-}
-
 const API_URL = import.meta.env.VITE_API_URL;
 
 interface User {
