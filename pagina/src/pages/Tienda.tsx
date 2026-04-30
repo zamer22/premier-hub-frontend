@@ -23,8 +23,7 @@ interface Producto {
   id_producto: number; nombre: string; costo: string; tipo: string;
   stock: number; es_nuevo: boolean; equipo: string | null; imagen: string | null;
   temporada_nombre?: string; temporada_fin?: string; categoria?: string;
-  descripcion?: string | null;
-  variantes?: Variante[];
+  descripcion?: string | null; variantes?: Variante[]; rareza?: string | null; css?: string | null; metadata?: Record<string, any> | null;
 }
 interface InventarioItem extends Producto {
   id_inventario: number; fecha_compra: string; en_marketplace: boolean;
@@ -34,6 +33,7 @@ interface Listado {
   id_listado: number; id_vendedor: number; precio: string;
   nombre: string; tipo: string; imagen: string | null; equipo: string | null;
   vendedor_nickname: string; fecha_creacion: string;
+  css?: string | null; metadata?: Record<string, any> | null;
 }
 interface Direccion {
   id_direccion: number;
@@ -378,7 +378,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     try {
       const r = await fetch(`${API_URL}/api/tienda/mis-items/${user.id_usuario}`);
       const d = await r.json();
-      if (d.success) setMisItems(d.data);
+      if (d.success) setMisItems((d.data || []).filter((item: InventarioItem) => item.tipo !== "avatar"));
     } catch { /* ignore */ }
   }, [user.id_usuario]);
 
@@ -438,8 +438,9 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
   const matchBq = (texto: string) => texto.toLowerCase().includes(busqueda.toLowerCase());
   const matchPerfilTipo = (p: Producto) => filtroPerfilTipo === "todos" || p.tipo === filtroPerfilTipo;
-  const perfilTipos = ["todos", ...Array.from(new Set(productos.map(p => p.tipo)))];
-  const perfilFiltrados = productos.filter(p =>
+  const perfilProductos = productos.filter(p => p.tipo !== "avatar");
+  const perfilTipos = ["todos", ...Array.from(new Set(perfilProductos.map(p => p.tipo)))];
+  const perfilFiltrados = perfilProductos.filter(p =>
     (matchBq(p.nombre) || matchBq(p.equipo ?? "")) && matchPerfilTipo(p));
 
   const listadosFiltrados = listados.filter(l => {
@@ -735,19 +736,61 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const tipoLabel = (tipo: string) => {
     const map: Record<string, string> = {
       jersey: "Jersey", balonazo: "Balón", ropa: "Ropa", accesorio: "Accesorio",
-      banner: "Banner", marco: "Marco", foto_perfil: "Foto de Perfil", avatar: "Avatar",
+      banner: "Banner", marco: "Marco", titulo: "Titulo", trofeo: "Trofeo",
+      achievement: "Achievement", foto_perfil: "Postcard",
     };
     return map[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1).replace(/_/g, " ");
   };
 
 
   /* ── Product card (reused across sub-tabs) ── */
-  const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
-    const tieneVariantes = !!p.variantes && p.variantes.length > 0;
-    const stockTotal = tieneVariantes
-      ? (p.variantes ?? []).reduce((sum, v) => sum + v.stock, 0)
-      : (p.stock ?? 0);
-    return (
+const productBackground = (p: Producto | Listado) => {
+  const metadata = p.metadata || {};
+  const cssBackground = p.css || metadata.background || metadata.css_background;
+  if (cssBackground) return String(cssBackground);
+  if (p.imagen) return `#eef0f2 url(${p.imagen}) center/contain no-repeat`;
+  if (p.tipo === "marco") return "linear-gradient(135deg, #263a55, #871d54)";
+  return "#eef0f2";
+};
+
+const ProductVisual = ({ p, height = 140 }: { p: Producto | Listado; height?: number }) => {
+  const isTextItem = ["titulo", "achievement"].includes(p.tipo);
+  const isPostcard = p.tipo === "foto_perfil";
+  return (
+    <div style={{
+      height,
+      background: productBackground(p),
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "0.85rem",
+      boxSizing: "border-box",
+    }}>
+      {isTextItem && (
+        <span style={{ color: "#263a55", fontSize: "1.05rem", fontWeight: 900, textAlign: "center", lineHeight: 1.2 }}>
+          {p.nombre}
+        </span>
+      )}
+      {isPostcard && !p.imagen && (
+        <span style={{ color: "#9aa3af", fontSize: "0.82rem", fontWeight: 900, textAlign: "center", textTransform: "uppercase" }}>
+          Sin imagen
+        </span>
+      )}
+      {!p.imagen && !isTextItem && !isPostcard && p.tipo !== "marco" && (
+        <span style={{ color: "#9aa3af", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          {tipoLabel(p.tipo)}
+        </span>
+      )}
+    </div>
+  );
+};
+
+const ProductCard = ({ p, onBuy, badge }: { p: Producto; onBuy: () => void; badge?: string }) => {
+  const tieneVariantes = !!p.variantes && p.variantes.length > 0;
+  const stockTotal = tieneVariantes
+    ? (p.variantes ?? []).reduce((sum, v) => sum + v.stock, 0)
+    : (p.stock ?? 0);
+  return (
     <div
       onClick={() => setProductModal(p)}
       style={{
@@ -770,12 +813,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           color: "#fff", fontSize: "0.6rem", padding: "0.2rem 0.5rem", borderRadius: "4px", fontWeight: 700, zIndex: 1,
         }}>{badge}</span>
       )}
-      <div style={{
-        height: "140px", background: p.imagen ? `#f5f6f8 url(${p.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        {!p.imagen && <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>{tipoLabel(p.tipo)}</span>}
-      </div>
+      <ProductVisual p={p} height={140} />
       <div style={{ padding: "0.75rem 1rem" }}>
         <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#263a55", marginBottom: "0.2rem", lineHeight: "1.3" }}>{p.nombre}</p>
         <p style={{ fontSize: "0.75rem", color: "#84878F", marginBottom: "0.5rem" }}>
@@ -819,12 +857,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; }}
     >
-      <div style={{
-        height: "120px", background: l.imagen ? `#f5f6f8 url(${l.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        {!l.imagen && <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>{tipoLabel(l.tipo)}</span>}
-      </div>
+      <ProductVisual p={l} height={120} />
       <div style={{ padding: "0.75rem 1rem" }}>
         <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#263a55", marginBottom: "0.15rem" }}>{l.nombre}</p>
         <p style={{ fontSize: "0.7rem", color: "#84878F", marginBottom: "0.4rem" }}>
@@ -956,15 +989,14 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         const canBuyModal = isRealItem
           ? stockSeleccionable && Number(productModal.costo) <= saldo
           : !isOwned && Number(productModal.costo) <= saldo;
-        const imgBg = productModal.temporada_nombre ? "#1e1e3a" : isRealItem ? "#f5f6f8" : "#eef0f2";
         return (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9000, padding: "1rem" }}
             onClick={() => setProductModal(null)}>
             <div style={{ background: "#fff", borderRadius: "16px", width: "480px", maxWidth: "100%", maxHeight: "90vh", display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.45)" }}
               onClick={(e) => e.stopPropagation()}>
               {/* Image */}
-              <div style={{ flexShrink: 0, height: "220px", background: productModal.imagen ? `${imgBg} url(${productModal.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {!productModal.imagen && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.8rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase" }}>{tipoLabel(productModal.tipo)}</span>}
+              <div style={{ position: "relative" }}>
+                <ProductVisual p={productModal} height={240} />
                 {/* Badges top-left */}
                 <div style={{ position: "absolute", top: "12px", left: "12px", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                   {productModal.es_nuevo && <span style={{ background: "#E90052", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>NUEVO</span>}
@@ -1672,8 +1704,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                   onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)"; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.07)"; }}
                 >
-                  <div style={{ height: "160px", position: "relative", background: p.imagen ? `#eef0f2 url(${p.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {!p.imagen && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.1rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em" }}>{tipoLabel(p.tipo)}</span>}
+                  <div style={{ position: "relative" }}>
+                    <ProductVisual p={p} height={160} />
                     {owned
                       ? <span style={{ position: "absolute", top: "10px", left: "10px", background: "#16a34a", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800 }}>EN TU PERFIL</span>
                       : p.es_nuevo && <span style={{ position: "absolute", top: "10px", left: "10px", background: "#E90052", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800 }}>NUEVO</span>
@@ -1771,12 +1803,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                       background: "#fff", borderRadius: "10px", padding: "0.75rem",
                       boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "0.4rem",
                     }}>
-                      <div style={{
-                        height: "80px", borderRadius: "8px",
-                        background: item.imagen ? `#f5f6f8 url(${item.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55 0%, #871d54 100%)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                      }}>
-                        {!item.imagen && <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.9rem", fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase" }}>{tipoLabel(item.tipo)}</span>}
+                      <div style={{ borderRadius: "8px", overflow: "hidden" }}>
+                        <ProductVisual p={item} height={80} />
                       </div>
                       <p style={{ fontWeight: 600, fontSize: "0.8rem", color: "#263a55" }}>{item.nombre}</p>
                       <p style={{ fontSize: "0.7rem", color: "#84878F" }}>
