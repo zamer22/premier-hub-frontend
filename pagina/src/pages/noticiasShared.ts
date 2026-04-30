@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.DEV ? "" : "https://api.zamer-o.com";
+const API_URL = import.meta.env.VITE_API_URL;
 export const DEFAULT_FILTER = "Todos los equipos";
 export const PREMIER_TEAM_OPTIONS = [
   "Arsenal",
