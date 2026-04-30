@@ -748,23 +748,18 @@ const productBackground = (p: Producto | Listado) => {
   const metadata = p.metadata || {};
   const cssBackground = p.css || metadata.background || metadata.css_background;
   if (cssBackground) return String(cssBackground);
-  if (p.imagen) return `#eef0f2 url(${p.imagen}) center/contain no-repeat`;
+  if (p.imagen) return `#c8dff5 url(${p.imagen}) center/contain no-repeat`;
   if (p.tipo === "marco") return "linear-gradient(135deg, #263a55, #871d54)";
-  return "#eef0f2";
+  return "#c8dff5";
 };
 
-const ProductVisual = ({ p, height = 140, imgBg }: { p: Producto | Listado; height?: number; imgBg?: string }) => {
+const ProductVisual = ({ p, height = 140 }: { p: Producto | Listado; height?: number }) => {
   const isTextItem = ["titulo", "achievement"].includes(p.tipo);
   const isPostcard = p.tipo === "foto_perfil";
-  const bg = imgBg && p.imagen
-    ? `${imgBg} url(${p.imagen}) center/contain no-repeat`
-    : imgBg && !p.imagen && p.tipo !== "marco"
-    ? imgBg
-    : productBackground(p);
   return (
     <div style={{
       height,
-      background: bg,
+      background: productBackground(p),
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -790,7 +785,7 @@ const ProductVisual = ({ p, height = 140, imgBg }: { p: Producto | Listado; heig
   );
 };
 
-const ProductCard = ({ p, badge, imgBg }: { p: Producto; badge?: string; imgBg?: string }) => {
+const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
   const tieneVariantes = !!p.variantes && p.variantes.length > 0;
   const stockTotal = tieneVariantes
     ? (p.variantes ?? []).reduce((sum, v) => sum + v.stock, 0)
@@ -818,7 +813,7 @@ const ProductCard = ({ p, badge, imgBg }: { p: Producto; badge?: string; imgBg?:
           color: "#fff", fontSize: "0.6rem", padding: "0.2rem 0.5rem", borderRadius: "4px", fontWeight: 700, zIndex: 1,
         }}>{badge}</span>
       )}
-      <ProductVisual p={p} height={140} imgBg={imgBg} />
+      <ProductVisual p={p} height={140} />
       <div style={{ padding: "0.75rem 1rem" }}>
         <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#263a55", marginBottom: "0.2rem", lineHeight: "1.3" }}>{p.nombre}</p>
         <p style={{ fontSize: "0.75rem", color: "#84878F", marginBottom: "0.5rem" }}>
@@ -1750,7 +1745,7 @@ const ProductCard = ({ p, badge, imgBg }: { p: Producto; badge?: string; imgBg?:
           {loading ? <p style={{ color: "#84878F" }}>Cargando...</p> : (
             productosFiltrados.length === 0 ? <p style={{ color: "#84878F", textAlign: "center", marginTop: "2rem" }}>No se encontraron productos</p> : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "1rem" }}>
-                {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} badge="OBJETO REAL" imgBg="#c8dff5" />)}
+                {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} badge="OBJETO REAL" />)}
               </div>
             )
           )}
