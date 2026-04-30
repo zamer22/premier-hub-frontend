@@ -3,12 +3,13 @@ import { useState } from "react";
 interface Props {
   correo: string;
   nombre: string;
+  fotoPerfilUrl?: string;
   onComplete: (user: any) => void;
 }
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function ElegirNickname({ correo, nombre, onComplete }: Props) {
+export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComplete }: Props) {
   const [nickname, setNickname] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +24,7 @@ export default function ElegirNickname({ correo, nombre, onComplete }: Props) {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo, nombre, nickname: nickname.trim() }),
+        body: JSON.stringify({ correo, nombre_usuario: nombre, nickname: nickname.trim(), foto_perfil_url: fotoPerfilUrl }),
       });
       const data = await res.json();
       if (data.success) onComplete(data.user);
@@ -38,7 +39,7 @@ export default function ElegirNickname({ correo, nombre, onComplete }: Props) {
   return (
     <div style={{ display: "flex", height: "100vh", justifyContent: "center", alignItems: "center", background: "#263a55" }}>
       <div style={{ background: "#fff", padding: "2.5rem", borderRadius: "12px", width: "100%", maxWidth: "400px", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
-        <h2 style={{ color: "#263a55", fontWeight: 800, marginBottom: "0.5rem" }}>¡Casi listo!</h2>
+        <h2 style={{ color: "#263a55", fontWeight: 800, marginBottom: "0.5rem" }}>Casi listo</h2>
         <p style={{ color: "#84878F", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
           Hola <strong>{nombre}</strong>, elige un nickname para tu cuenta en PremierHub.
         </p>
@@ -56,7 +57,7 @@ export default function ElegirNickname({ correo, nombre, onComplete }: Props) {
               style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #ddd", fontSize: "0.9rem", boxSizing: "border-box" }}
               required
             />
-            <p style={{ fontSize: "0.75rem", color: "#84878F", marginTop: "0.3rem" }}>Solo letras, números y guiones bajos. Máx. 20 caracteres.</p>
+            <p style={{ fontSize: "0.75rem", color: "#84878F", marginTop: "0.3rem" }}>Solo letras, numeros y guiones bajos. Max. 20 caracteres.</p>
           </div>
           {error && <p style={{ color: "#E90052", fontSize: "0.85rem", margin: 0 }}>{error}</p>}
           <button
