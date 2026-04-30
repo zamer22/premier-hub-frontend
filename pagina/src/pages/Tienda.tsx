@@ -785,7 +785,7 @@ const ProductVisual = ({ p, height = 140 }: { p: Producto | Listado; height?: nu
   );
 };
 
-const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
+const ProductCard = ({ p, badge, cardBg }: { p: Producto; badge?: string; cardBg?: string }) => {
   const tieneVariantes = !!p.variantes && p.variantes.length > 0;
   const stockTotal = tieneVariantes
     ? (p.variantes ?? []).reduce((sum, v) => sum + v.stock, 0)
@@ -794,7 +794,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
     <div
       onClick={() => setProductModal(p)}
       style={{
-        background: "#fff", borderRadius: "12px", overflow: "hidden",
+        background: cardBg ?? "#fff", borderRadius: "12px", overflow: "hidden",
         boxShadow: "0 1px 4px rgba(0,0,0,0.06)", transition: "transform 0.2s, box-shadow 0.2s",
         cursor: "pointer", position: "relative",
       }}
@@ -1745,7 +1745,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
           {loading ? <p style={{ color: "#84878F" }}>Cargando...</p> : (
             productosFiltrados.length === 0 ? <p style={{ color: "#84878F", textAlign: "center", marginTop: "2rem" }}>No se encontraron productos</p> : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "1rem" }}>
-                {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} badge="OBJETO REAL" />)}
+                {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} badge="OBJETO REAL" cardBg="#EEF3F8" />)}
               </div>
             )
           )}
