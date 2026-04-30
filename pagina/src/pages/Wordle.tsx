@@ -7,7 +7,19 @@ interface Player {
   initials: string;
   image?: string | null;
   stat: number;
-  correctRank: number;
+  correctRank?: number | null;
+  correct_rank?: number | null;
+  correct?: boolean;
+  is_correct?: boolean;
+  submitted_rank?: number | null;
+}
+
+interface AttemptResult {
+  player_id: string;
+  submitted_rank: number;
+  correct_rank: number | null;
+  correct: boolean;
+  metric_value?: number | null;
 }
 
 interface Attempt {
@@ -15,6 +27,8 @@ interface Attempt {
   dinero_ganado: number;
   submitted_order?: string[];
   created_at?: string;
+  results?: AttemptResult[];
+  correct_order?: string[];
 }
 
 interface DailyResponse {
@@ -45,8 +59,29 @@ const BOARD_ROWS = [
 
 function calculateCorrectCount(players: Player[]): number {
   return players.reduce((total, player, index) => {
-    return total + (index + 1 === player.correctRank ? 1 : 0);
+    const correctRank = player.correctRank ?? player.correct_rank;
+    return total + (index + 1 === correctRank ? 1 : 0);
   }, 0);
+}
+
+function applyAttemptResults(players: Player[], results?: AttemptResult[]): Player[] {
+  if (!results?.length) return players;
+
+  const resultByPlayerId = new Map(results.map((result) => [result.player_id, result]));
+
+  return players.map((player, index) => {
+    const result = resultByPlayerId.get(player.id);
+    if (!result) return player;
+
+    return {
+      ...player,
+      correctRank: result.correct_rank,
+      correct_rank: result.correct_rank,
+      correct: result.correct,
+      is_correct: result.correct,
+      submitted_rank: result.submitted_rank ?? index + 1,
+    };
+  });
 }
 
 interface CardProps {
@@ -75,7 +110,8 @@ function PlayerCard({
   onDragEnd,
 }: CardProps) {
   const [imgError, setImgError] = useState(false);
-  const isCorrect = submitted && posIndex + 1 === player.correctRank;
+  const correctRank = player.correctRank ?? player.correct_rank;
+  const isCorrect = submitted && (player.correct ?? player.is_correct ?? posIndex + 1 === correctRank);
 
   const cardClasses = [
     "wordle-card",
@@ -170,15 +206,16 @@ export default function Wordle() {
             .filter(Boolean) as Player[];
 
           const restoredOrder = restored.length === json.data.players.length ? restored : json.data.players;
-          const visibleScore = calculateCorrectCount(restoredOrder);
-          const apiScore = json.data.attempt?.score ?? visibleScore;
+          const orderWithResults = applyAttemptResults(restoredOrder, json.data.attempt.results);
+          const visibleScore = calculateCorrectCount(orderWithResults);
+          const apiScore = json.data.attempt.score ?? visibleScore;
 
           if (apiScore !== visibleScore) {
             console.warn("Wordle score mismatch", { apiScore, visibleScore });
           }
 
-          setOrder(restoredOrder);
-          setScore(visibleScore);
+          setOrder(orderWithResults);
+          setScore(apiScore);
         } else {
           setOrder(json.data.players);
           setScore(0);
@@ -250,14 +287,16 @@ export default function Wordle() {
         return;
       }
 
-      const visibleScore = calculateCorrectCount(order);
+      const orderWithResults = applyAttemptResults(order, json.data?.results);
+      const visibleScore = calculateCorrectCount(orderWithResults);
       const apiScore = json.data?.score ?? visibleScore;
 
       if (apiScore !== visibleScore) {
         console.warn("Wordle score mismatch", { apiScore, visibleScore });
       }
 
-      setScore(visibleScore);
+      setOrder(orderWithResults);
+      setScore(apiScore);
       setSubmitted(true);
     } catch {
       setErrorMsg("Error al enviar el intento");
