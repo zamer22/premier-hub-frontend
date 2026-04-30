@@ -1,32 +1,49 @@
-import { useEffect, useState } from "react";
-import Partido    from "./pages/Partido";
-import Tienda     from "./pages/Tienda";
-import Noticias from "./pages/NoticiasLanding";
-import ElegirNickname from "./pages/ElegirNickname";
-import Noticia from "./pages/Noticia";
-import Landing from "./pages/Landing";
+import { useEffect, useState, CSSProperties } from "react";
+import Partido          from "./pages/Partido";
+import Tienda           from "./pages/Tienda";
+import Noticias         from "./pages/NoticiasLanding";
+import ElegirNickname   from "./components/ElegirNickname";
+import Noticia          from "./pages/Noticia";
+import Landing          from "./pages/Landing";
+import Historia         from "./pages/Historia";
+import Perfil           from "./pages/Perfil";
+import Wordle           from "./pages/Wordle";
+import AdminEnvios      from "./pages/AdminEnvios";
 
 type Section =
   | "tablero"
   | "partido"
   | "noticias"
   | "tienda"
+  | "perfil"
   | "vr-arena"
-  | "simulador";
+  | "simulador"
+  | "historia"
+  | "Arcade";
 
 const TABS: { key: Section; label: string }[] = [
-  { key: "partido",   label: "Partido"   },
-  { key: "tablero",   label: "Tablero"   },
+  { key: "partido", label: "Partido" },
+  { key: "tablero", label: "Tablero" },
   { key: "simulador", label: "Simulador" },
   { key: "vr-arena",  label: "VR Arena"  },
   { key: "tienda",    label: "Tienda"    },
   { key: "noticias",  label: "Noticias"  },
+  { key: "historia",  label: "Historia"  },
+  { key: "Arcade",    label: "Arcade"    },
 ];
 
 const PROXIMAMENTE: Section[] = ["tablero", "simulador", "vr-arena"];
 
-const VALID_TABS = TABS.map((t) => t.key);
+const VALID_TABS: Section[] = [...TABS.map((t) => t.key), "perfil"];
 const API_URL = import.meta.env.VITE_API_URL;
+
+type InventoryItem = {
+  id_inventario: number;
+  tipo: string;
+  imagen?: string | null;
+  css?: string | null;
+  metadata?: Record<string, any> | null;
+};
 
 function getTabFromUrl(): Section {
   const p = new URLSearchParams(window.location.search).get("tab") as Section;
@@ -35,21 +52,20 @@ function getTabFromUrl(): Section {
 
 function getSectionFromPath(pathname: string): Section {
   const section = pathname.replace(/^\/+/, "").split("/")[0];
-  const match = TABS.find((tab) => tab.key === section);
-  return match?.key || "partido";
+  return VALID_TABS.includes(section as Section)
+    ? (section as Section)
+    : "partido";
 }
 
 function getInitialTab(): Section {
   const pathname = window.location.pathname;
   const search = window.location.search;
 
-  // Si la URL tiene info de ruta/tab, úsala
   if (pathname !== "/" || search.includes("tab=")) {
     if (pathname === "/") return getTabFromUrl();
     return getSectionFromPath(pathname);
   }
 
-  // Si no hay nada en la URL, revisar localStorage
   const saved = localStorage.getItem("premier_tab") as Section;
   if (saved && VALID_TABS.includes(saved)) return saved;
 
@@ -60,18 +76,56 @@ function getPathForSection(section: Section): string {
   return section === "tablero" ? "/" : `/${section}`;
 }
 
+function getInitials(user: any) {
+  const source = user?.nickname || user?.nombre_usuario || user?.correo || "PH";
+  return (
+    source
+      .split(/[\s._-]+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part: string) => part[0]?.toUpperCase())
+      .join("") || "PH"
+  );
+}
+
+function getUserImage(user: any) {
+  if (!user?.id_usuario) return "";
+  return (
+    user?.foto_perfil_url ||
+    user?.foto_perfil ||
+    user?.avatar_url ||
+    user?.avatar ||
+    user?.imagen_perfil ||
+    ""
+  );
+}
+
+function getInventoryProfileImage(items: InventoryItem[]) {
+  const preferred = items.find(
+    (item) => item.tipo === "foto_perfil" && item.imagen,
+  );
+  const fallback = items.find(
+    (item) =>
+      ["foto_perfil", "marco", "banner"].includes(item.tipo) && item.imagen,
+  );
+  return preferred?.imagen || fallback?.imagen || "";
+}
+
+function getFrameStyle(frame?: InventoryItem | null): CSSProperties {
+  const metadata = frame?.metadata || {};
+  const cssBackground =
+    frame?.css || metadata.background || metadata.css_background;
+
+  if (cssBackground) return { background: String(cssBackground) };
+  if (frame?.imagen)
+    return { background: `#fff url(${frame.imagen}) center/cover no-repeat` };
+  return { background: "#d6dbe3" };
+}
+
 function CrownIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className="app-icon"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="app-icon" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 18h16" />
       <path d="m5 18 1.7-8 5.3 4 5.3-4L19 18" />
       <path d="M8 7.2a1 1 0 1 1 0-.1" />
@@ -83,16 +137,8 @@ function CrownIcon() {
 
 function UserIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className="app-icon"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="app-icon" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
       <path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" />
     </svg>
@@ -100,26 +146,32 @@ function UserIcon() {
 }
 
 export default function App() {
-  const [pathname,       setPathname]      = useState(() => window.location.pathname);
-  const [tab,            setTabState]      = useState<Section>(getInitialTab);
-  const [user,           setUser]          = useState<any>(null);
-  const [oauthNuevo,     setOauthNuevo]    = useState<{ correo: string; nombre: string } | null>(null);
+  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const isNewsDetailRoute = pathname.startsWith("/noticias/");
+  const [tab, setTabState] = useState<Section>(getInitialTab);
+  const [user, setUser] = useState<any>(null);
+  const [profileImage, setProfileImage] = useState("");
+  const [profileFrame, setProfileFrame] = useState<InventoryItem | null>(null);
+  const [oauthNuevo, setOauthNuevo] = useState<{
+    correo: string;
+    nombre: string;
+    fotoPerfilUrl?: string;
+  } | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
   const syncLocationState = () => {
     const nextPathname = window.location.pathname;
     setPathname(nextPathname);
-    const next = nextPathname === "/"
-      ? getTabFromUrl()
-      : getSectionFromPath(nextPathname);
+    const next =
+      nextPathname === "/" ? getTabFromUrl() : getSectionFromPath(nextPathname);
     setTabState(next);
   };
 
   const setTab = (next: Section) => {
     localStorage.setItem("premier_tab", next);
     const url = new URL(window.location.href);
-    if (next === "noticias") {
-      url.pathname = "/noticias";
+    if (next === "noticias" || next === "historia") {
+      url.pathname = `/${next}`;
       url.searchParams.delete("tab");
     } else {
       url.pathname = "/";
@@ -131,20 +183,57 @@ export default function App() {
 
   useEffect(() => {
     window.addEventListener("popstate", syncLocationState);
-    return () => {
-      window.removeEventListener("popstate", syncLocationState);
-    };
+    return () => window.removeEventListener("popstate", syncLocationState);
   }, []);
+
+  useEffect(() => {
+    if (!user?.id_usuario) {
+      setProfileImage("");
+      return;
+    }
+
+    let active = true;
+    const userImage = getUserImage(user);
+    if (userImage) setProfileImage(userImage);
+
+    Promise.all([
+      fetch(`${API_URL}/api/tienda/mis-items/${user.id_usuario}`).then((r) =>
+        r.json(),
+      ),
+      fetch(`${API_URL}/api/auth/profile/customization`, {
+        credentials: "include",
+      }).then((r) => r.json()),
+    ])
+      .then(([itemsData, customizationData]) => {
+        if (!active || !itemsData.success) return;
+        const items: InventoryItem[] = itemsData.data || [];
+        const customization = customizationData.success
+          ? customizationData.data
+          : {};
+        const frame =
+          items.find(
+            (item) =>
+              Number(item.id_inventario) ===
+              Number(customization?.marco_inventario_id),
+          ) || null;
+        setProfileFrame(frame);
+        setProfileImage(userImage || getInventoryProfileImage(items));
+      })
+      .catch(() => {
+        if (active) setProfileImage(userImage);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id_usuario, user?.dinero]);
 
   useEffect(() => {
     const hash = window.location.hash;
     if (hash.includes("access_token")) {
       const params = new URLSearchParams(hash.slice(1));
       const accessToken = params.get("access_token");
-      if (!accessToken) {
-        setSessionLoading(false);
-        return;
-      }
+      if (!accessToken) { setSessionLoading(false); return; }
       window.history.replaceState(null, "", window.location.pathname);
       fetch(`${API_URL}/api/auth/google-sync`, {
         method: "POST",
@@ -159,7 +248,11 @@ export default function App() {
             return;
           }
           if (data.isNew)
-            setOauthNuevo({ correo: data.correo, nombre: data.nombre });
+            setOauthNuevo({
+              correo: data.correo,
+              nombre: data.nombre,
+              fotoPerfilUrl: data.foto_perfil_url,
+            });
           else setUser(data.user);
         })
         .catch(() => alert("No se pudo conectar con el servidor"))
@@ -167,33 +260,27 @@ export default function App() {
     } else {
       fetch(`${API_URL}/api/auth/me`, { credentials: "include" })
         .then((r) => r.json())
-        .then((data) => {
-          if (data.success) setUser(data.user);
-        })
+        .then((data) => { if (data.success) setUser(data.user); })
         .catch(() => {})
         .finally(() => setSessionLoading(false));
     }
   }, []);
 
   const logout = async () => {
-    await fetch(`${API_URL}/api/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-    }).catch(() => {});
+    await fetch(`${API_URL}/api/auth/logout`, { method: "POST", credentials: "include" }).catch(() => {});
     localStorage.removeItem("premier_tab");
     sessionStorage.setItem("google_select_account", "1");
     window.history.replaceState({}, "", "/");
+    setProfileImage("");
+    setProfileFrame(null);
     setUser(null);
   };
 
-  /* ── Loading ── */
   if (sessionLoading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-surface gap-3">
         <div className="w-8 h-8 rounded-full border-2 border-crimson border-t-transparent animate-spin" />
-        <span className="text-muted text-sm font-medium tracking-wide">
-          Cargando PremierHub...
-        </span>
+        <span className="text-muted text-sm font-medium tracking-wide">Cargando PremierHub...</span>
       </div>
     );
   }
@@ -203,7 +290,11 @@ export default function App() {
       <ElegirNickname
         correo={oauthNuevo.correo}
         nombre={oauthNuevo.nombre}
+        fotoPerfilUrl={oauthNuevo.fotoPerfilUrl}
         onComplete={(u) => {
+          if (u.avatar_url) {
+            setProfileImage(u.avatar_url);
+          }
           setOauthNuevo(null);
           setUser(u);
         }}
@@ -211,17 +302,35 @@ export default function App() {
     );
   }
 
-  if (!user) return <Landing onLoginSuccess={(u) => setUser(u)} />;
+  if (!user) return (
+  <Landing
+    onLoginSuccess={async (u) => {
+      setTabState("partido");
+      localStorage.removeItem("premier_tab");
+      const full = await fetch(`${API_URL}/api/auth/me`, { credentials: "include" })
+        .then(r => r.json())
+        .catch(() => ({ success: false }));
+      setUser(full.success ? full.user : u);
+    }}
+  />
+);
 
-  const isNewsDetailRoute = /^\/noticias\/\d+\/?$/.test(pathname);
-
+  if (user.es_admin) return <AdminEnvios user={user} onLogout={logout} />;
 
   return (
-    <div className="min-h-screen bg-surface" style={{ paddingTop: "60px" }}>
-
+    <div className="min-h-screen bg-surface" style={{ paddingTop: "66px" }}>
       {/* ── Navbar ── */}
-      <nav className="flex items-center h-[60px] px-8 bg-navy gap-0.5"
-        style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, boxShadow: "0 2px 12px rgba(0,0,0,0.18)" }}>
+      <nav
+        className="flex items-center h-[66px] px-8 bg-navy gap-0.5"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          boxShadow: "0 2px 12px rgba(0,0,0,0.18)",
+        }}
+      >
         {/* Logo */}
         <span
           className="font-extrabold text-[1.25rem] tracking-tight select-none mr-10"
@@ -231,67 +340,151 @@ export default function App() {
           <span className="text-white">HUB</span>
         </span>
 
-        {/* Tabs */}
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className="relative px-4 py-2 text-[0.82rem] font-medium whitespace-nowrap transition-all duration-200 cursor-pointer border-0 bg-transparent outline-none"
-            style={{
-              color: tab === t.key ? "#ffffff" : "#84878F",
-              fontWeight: tab === t.key ? 700 : 500,
-            }}
+            style={{ color: tab === t.key ? "#ffffff" : "#84878F", fontWeight: tab === t.key ? 700 : 500 }}
           >
             {t.label}
             {tab === t.key && (
-              <span
-                className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full"
-                style={{
-                  background: "linear-gradient(90deg, #E90052, #871d54)",
-                }}
-              />
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full"
+                style={{ background: "linear-gradient(90deg, #E90052, #871d54)" }} />
             )}
-            <span
-              className="absolute inset-0 rounded opacity-0 hover:opacity-100 transition-opacity duration-150"
-              style={{ background: "rgba(255,255,255,0.04)" }}
-            />
+            <span className="absolute inset-0 rounded opacity-0 hover:opacity-100 transition-opacity duration-150"
+              style={{ background: "rgba(255,255,255,0.04)" }} />
           </button>
         ))}
 
-        {/* User section */}
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-white/55 text-[0.82rem] font-medium">{user.nickname}</span>
           <button
-            onClick={logout}
+            onClick={() => setTab("perfil")}
+            aria-label="Abrir perfil"
+            title="Abrir perfil"
             style={{
-              padding: "0.3rem 0.9rem", border: "1px solid rgba(255,255,255,0.22)",
-              borderRadius: "6px", background: "transparent",
-              color: "rgba(255,255,255,0.55)", fontSize: "0.75rem", fontWeight: 600,
-              cursor: "pointer", transition: "border-color 0.15s, color 0.15s",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              minHeight: "42px",
+              padding: "0.25rem 0.75rem 0.25rem 0.28rem",
+              borderRadius: "8px",
+              border:
+                tab === "perfil"
+                  ? "1px solid rgba(233,0,82,0.65)"
+                  : "1px solid transparent",
+              background:
+                tab === "perfil" ? "rgba(233,0,82,0.12)" : "transparent",
+              color: tab === "perfil" ? "#fff" : "rgba(255,255,255,0.7)",
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              transition: "background 0.15s, border-color 0.15s, color 0.15s",
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.5)"; e.currentTarget.style.color = "rgba(255,255,255,0.9)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.22)"; e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+              e.currentTarget.style.color = "#fff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background =
+                tab === "perfil" ? "rgba(233,0,82,0.12)" : "transparent";
+              e.currentTarget.style.color =
+                tab === "perfil" ? "#fff" : "rgba(255,255,255,0.7)";
+            }}
           >
-            Salir
+            <span
+              style={{
+                ...getFrameStyle(profileFrame),
+                width: 34,
+                height: 34,
+                borderRadius: "11px",
+                padding: 3,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flex: "0 0 auto",
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.18)",
+              }}
+            >
+              <span
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  background: profileImage
+                    ? "#fff"
+                    : "linear-gradient(135deg, #E90052, #871d54)",
+                  color: "#fff",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.72rem",
+                  fontWeight: 900,
+                }}
+              >
+                {profileImage ? (
+                  <img
+                    src={profileImage}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                ) : (
+                  getInitials(user)
+                )}
+              </span>
+            </span>
+            <span>{user.nickname}</span>
           </button>
         </div>
       </nav>
 
-      {/* ── Contenido ── */}
-      <div className="px-8 py-6 max-w-[1400px] mx-auto animate-fade-in">
-        {tab === "partido"   && <Partido />}
-        {tab === "tienda"    && (
+      {/* Contenido */}
+      <div
+  className={
+    tab === "perfil"
+      ? "px-8 py-6 w-full"
+      : "px-8 py-6 max-w-[1400px] mx-auto animate-fade-in"
+  }
+>
+  {tab === "Arcade"   && <Wordle />}
+  {tab === "partido"  && <Partido />}
+  {tab === "historia" && <Historia />}
+  {tab === "tienda"   && (
           <Tienda
             user={user}
             onSaldoChange={(s: number) => setUser({ ...user, dinero: s })}
           />
         )}
-        {tab === "noticias"  && !isNewsDetailRoute && <Noticias />}
-        {tab === "noticias"  && isNewsDetailRoute  && <Noticia />}
+        {tab === "perfil" && (
+          <Perfil
+            user={user}
+            profileImage={profileImage}
+            onLogout={logout}
+            onUserUpdated={(nextUser) => setUser(nextUser)}
+            onProfileImageChanged={(nextImage) => setProfileImage(nextImage)}
+            onCustomizationChanged={(nextCustomization) =>
+              setProfileFrame(nextCustomization.marcoItem || null)
+            }
+            onAccountDeleted={() => {
+              localStorage.removeItem("premier_tab");
+              window.history.replaceState({}, "", "/");
+              setProfileImage("");
+              setProfileFrame(null);
+              setUser(null);
+            }}
+          />
+        )}
+        {tab === "noticias" && !isNewsDetailRoute && <Noticias />}
+        {tab === "noticias" && isNewsDetailRoute && <Noticia />}
         {PROXIMAMENTE.includes(tab) && (
           <div className="flex flex-col items-center justify-center mt-24 gap-3">
             <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">
-              {TABS.find(t => t.key === tab)?.label.toUpperCase()}
+              {TABS.find((t) => t.key === tab)?.label.toUpperCase()}
             </span>
             <span className="text-muted text-sm">Próximamente</span>
           </div>
