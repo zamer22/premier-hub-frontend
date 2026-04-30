@@ -52,7 +52,6 @@ function TimelineList({ events }: { events: TimelineEvent[] }) {
     const timer = setTimeout(updateLine, 50);
     window.addEventListener("resize", updateLine);
 
-    // Recalcular cuando cualquier imagen del wrapper termine de cargar
     const imgs = wrapperRef.current?.querySelectorAll("img") ?? [];
     imgs.forEach((img) => img.addEventListener("load", updateLine));
 
@@ -121,9 +120,11 @@ export default function Historia() {
     setEventsError("");
     setEvents([]);
 
-    // Scroll suave hacia el header del equipo
     setTimeout(() => {
-      teamHeaderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      teamHeaderRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }, 50);
 
     fetch(`${API_URL}/api/historia/timeline/${team.id}`)
@@ -138,7 +139,6 @@ export default function Historia() {
 
   return (
     <div className={styles.root}>
-
       <section className={styles.pageHeading}>
         <h1 className={styles.pageTitle}>Historia</h1>
       </section>
@@ -156,15 +156,27 @@ export default function Historia() {
           <div className={styles.logosRow}>
             {teams.map((team) => {
               const isSelected = selectedTeam?.id === team.id;
+
               return (
                 <button
                   key={team.id}
                   type="button"
                   onClick={() => handleSelectTeam(team)}
-                  className={`${styles.logoCard} ${isSelected ? styles.selected : ""}`}
+                  className={`${styles.logoCard} ${
+                    isSelected ? styles.selected : ""
+                  }`}
                 >
-                  <img src={team.logo} alt={team.name} className={styles.logoImg} />
-                  <span className={`${styles.logoName} ${isSelected ? styles.selected : ""}`}>
+                  <img
+                    src={team.logo}
+                    alt={team.name}
+                    className={styles.logoImg}
+                  />
+
+                  <span
+                    className={`${styles.logoName} ${
+                      isSelected ? styles.selected : ""
+                    }`}
+                  >
                     {team.name}
                   </span>
                 </button>
@@ -178,7 +190,12 @@ export default function Historia() {
         <>
           <section ref={teamHeaderRef} className={styles.teamHeader}>
             <div className={styles.teamMainInfo}>
-              <img src={selectedTeam.logo} alt={selectedTeam.name} className={styles.teamHeaderLogo} />
+              <img
+                src={selectedTeam.logo}
+                alt={selectedTeam.name}
+                className={styles.teamHeaderLogo}
+              />
+
               <h2 className={styles.teamHeaderName}>{selectedTeam.name}</h2>
             </div>
           </section>
@@ -202,6 +219,58 @@ export default function Historia() {
           </section>
         </>
       )}
+
+{/* Botón volver arriba */}
+<button
+  type="button"
+  onClick={() => {
+    const start = window.scrollY;
+    const duration = 900;
+    const startTime = performance.now();
+
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeInOutCubic(progress);
+
+      window.scrollTo(0, start * (1 - easedProgress));
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+
+    requestAnimationFrame(animateScroll);
+  }}
+  style={{
+    display: "block",
+    margin: "2rem auto 0",
+    padding: "0.8rem 2.2rem",
+    borderRadius: 999,
+    border: "1px solid rgba(255,255,255,0.18)",
+    background: "linear-gradient(135deg, #1a2d42, #243b55)",
+    color: "#fff",
+    fontWeight: 700,
+    fontSize: "0.88rem",
+    cursor: "pointer",
+    letterSpacing: "0.05em",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.22)",
+    transition: "transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease",
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-2px)";
+    e.currentTarget.style.boxShadow = "0 14px 30px rgba(0,0,0,0.28)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.22)";
+  }}
+>
+  Regresar
+</button>
     </div>
   );
 }
@@ -240,6 +309,7 @@ function TimelineRow({
   const textBlock = (
     <div className={styles.textBlock} data-year={event.year}>
       <h3 className={styles.eventTitle}>{event.title}</h3>
+
       {event.description && (
         <p className={styles.eventDesc}>{event.description}</p>
       )}
@@ -267,9 +337,7 @@ function TimelineRow({
         ${visible ? styles.visible : styles.hidden}
       `}
     >
-      <div className={styles.cardHalf}>
-        {isLeft ? imgBlock : textBlock}
-      </div>
+      <div className={styles.cardHalf}>{isLeft ? imgBlock : textBlock}</div>
 
       <div className={styles.timelineDot}>
         <div ref={dotRef} className={styles.dotCircle}>
@@ -277,9 +345,7 @@ function TimelineRow({
         </div>
       </div>
 
-      <div className={styles.cardHalf}>
-        {isLeft ? textBlock : imgBlock}
-      </div>
+      <div className={styles.cardHalf}>{isLeft ? textBlock : imgBlock}</div>
     </article>
   );
 }
