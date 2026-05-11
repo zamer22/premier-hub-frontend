@@ -190,7 +190,7 @@ export default function Wordle() {
         const json: DailyResponse = await res.json();
 
         if (!res.ok || !json.success || !json.data) {
-          setErrorMsg(json.error || "No se pudo cargar el desafio");
+          setErrorMsg(json.error || "No se pudo cargar el desafío");
           return;
         }
 
@@ -310,7 +310,7 @@ export default function Wordle() {
   if (loading) {
     return (
       <div className="wordle-container">
-        <p className="wordle-instructions">Cargando desafio...</p>
+        <p className="wordle-instructions">Cargando desafío...</p>
       </div>
     );
   }
@@ -347,7 +347,7 @@ export default function Wordle() {
                   isDragging={draggingPos === posIndex}
                   isDragTarget={dragOverPos === posIndex && draggingPos !== posIndex}
                   onDragStart={(e) => handleDragStart(e, posIndex)}
-                  onDragOver={(e) => handleDragOver(e, posIndex)}
+                  onDragOver={(e) => handleDragOver(e, posIndex)} 
                   onDrop={(e) => handleDrop(e, posIndex)}
                   onDragEnd={handleDragEnd}
                 />
@@ -363,7 +363,7 @@ export default function Wordle() {
             Confirmar
           </button>
         ) : (
-          <p className="wordle-next-msg">Vuelve manana para el proximo desafio</p>
+          <p className="wordle-next-msg">Vuelve mañana para el próximo desafío</p>
         )}
       </div>
     </div>

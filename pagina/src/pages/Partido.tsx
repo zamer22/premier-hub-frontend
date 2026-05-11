@@ -186,7 +186,7 @@ export default function Partido() {
         <div className="partido_standings">
           <div className="partido_section-header">
             <div className="partido_accent" />
-            <h2 className="partido_title">Tabla de Posiciones</h2>
+            <h2 className="partido_title">Tabla de posiciones</h2>
           </div>
 
           {standings.length > 0 ? (
@@ -236,7 +236,7 @@ export default function Partido() {
         <div className="partido_live-section">
           <div className="partido_section-header partido_section-header--small">
             <div className="partido_accent" />
-            <h3 className="partido_subtitle">Partidos en Vivo</h3>
+            <h3 className="partido_subtitle">Partidos en vivo</h3>
           </div>
 
           {enVivo.length === 0 && <p className="partido_empty">No hay partidos en vivo</p>}
@@ -275,7 +275,7 @@ export default function Partido() {
         <div>
           <div className="partido_section-header partido_section-header--small">
             <div className="partido_accent" />
-            <h3 className="partido_subtitle">Próximos Partidos</h3>
+            <h3 className="partido_subtitle">Próximos partidos</h3>
           </div>
           {proximos.length === 0 && <p className="partido_empty">Sin próximos partidos</p>}
           {proximos.map((m) => (
@@ -290,7 +290,7 @@ export default function Partido() {
         <div>
           <div className="partido_section-header partido_section-header--small">
             <div className="partido_accent" />
-            <h3 className="partido_subtitle">Resultados Recientes</h3>
+            <h3 className="partido_subtitle">Resultados recientes</h3>
           </div>
           {pasados.length === 0 && <p className="partido_empty">Sin resultados recientes</p>}
           {pasados.map((m) => (
