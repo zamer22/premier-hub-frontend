@@ -115,7 +115,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
     setGeoSearch("");
     setGeoResults([]);
     setGeoError(null);
-  }, [selected?.id_pedido]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selected?.id_pedido]); //
 
   // PUT /api/admin/pedido/:id — manda todos los cambios pendientes del form de una vez.
   const aplicarUpdate = async (body: Record<string, any>) => {
