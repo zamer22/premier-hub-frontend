@@ -18,7 +18,7 @@ function FitBounds({ points }: { points: [number, number][] }) {
     if (points.length === 0) return;
     if (points.length === 1) { map.setView(points[0], 13); return; }
     map.fitBounds(points, { padding: [40, 40] });
-  }, [JSON.stringify(points)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(points)]); 
   return null;
 }
 
