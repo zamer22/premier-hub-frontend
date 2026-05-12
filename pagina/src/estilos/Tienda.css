@@ -1,0 +1,138 @@
+/* ── Cards ── */
+.t-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+.t-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+.t-card--perfil {
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.t-card--perfil:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+.t-card--pedido {
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.t-card--pedido:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+}
+
+/* ── Badges ── */
+.t-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  z-index: 1;
+}
+.t-badge--nuevo { background: #E90052; color: #fff; }
+.t-badge--owned { background: #16a34a; color: #fff; font-size: 0.6rem; }
+.t-badge--real  { left: auto; right: 10px; background: #263a55; color: #fff; font-size: 0.6rem; }
+
+/* ── Modal overlay ── */
+.t-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.t-overlay--scroll { overflow-y: auto; }
+
+/* Modal box sizes */
+.t-modal        { background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+.t-modal--sm    { border-radius: 14px; padding: 1.75rem; width: 360px; max-width: 90vw; }
+.t-modal--md    { border-radius: 14px; padding: 1.75rem; width: 380px; max-width: 90vw; }
+.t-modal--lg    { border-radius: 16px; width: 480px; max-width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+.t-modal--xl    { border-radius: 16px; width: 520px; max-width: 100%; max-height: 92vh; overflow-y: auto; }
+.t-modal--xxl   { border-radius: 16px; width: 560px; max-width: 100%; max-height: 92vh; overflow-y: auto; }
+
+/* ── Sub-tabs navigation ── */
+.t-tab {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  cursor: pointer;
+  background: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #84878F;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.t-tab--active { font-weight: 700; color: #E90052; border-bottom-color: #E90052; }
+
+/* ── Filter chips ── */
+.t-chip {
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #84878F;
+  font-size: 0.78rem;
+  font-weight: 400;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: all 0.15s ease;
+}
+.t-chip--active { border-color: #263a55; background: #263a55; color: #fff; font-weight: 700; }
+
+/* ── Header controls ── */
+.t-saldo {
+  background: linear-gradient(135deg, #263a55, #1a2a3f);
+  color: #fff;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.t-bonus-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #E90052;
+  background: transparent;
+  color: #E90052;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.t-bonus-btn:hover { background: #E90052; color: #fff; }
+
+/* ── Market inner toggle ── */
+.t-market-toggle { display: inline-flex; background: #f0f2f5; border-radius: 10px; padding: 4px; margin-bottom: 1.25rem; }
+.t-market-btn { padding: 0.45rem 1.1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 500; background: none; color: #84878F; transition: all 0.2s ease; }
+.t-market-btn--active { font-weight: 700; background: #fff; color: #263a55; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+/* ── Product grids ── */
+.t-grid         { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1rem; }
+.t-grid--perfil { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
+.t-grid--inv    { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+
+/* ── Status pill ── */
+.t-status { padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ── Geo-search dropdown ── */
+.t-geo-item { display: block; width: 100%; text-align: left; padding: 0.55rem 0.75rem; border: none; background: transparent; font-size: 0.78rem; color: #263a55; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+.t-geo-item:hover { background: #f8f9fa; }
