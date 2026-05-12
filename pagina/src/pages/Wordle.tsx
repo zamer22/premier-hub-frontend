@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../estilos/Wordle.css";
 
+// Tipos de datos que usa el juego.
 interface Player {
   id: string;
   name: string;
@@ -51,12 +52,14 @@ interface SubmitResponse {
   data?: Attempt;
 }
 
+// Configuracion basica de la API y filas del tablero.
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 const BOARD_ROWS = [
   [0, 1, 2, 3, 4],
   [5, 6, 7, 8, 9],
 ];
 
+// Cuenta cuantas posiciones estan correctas.
 function calculateCorrectCount(players: Player[]): number {
   return players.reduce((total, player, index) => {
     const correctRank = player.correctRank ?? player.correct_rank;
@@ -64,6 +67,7 @@ function calculateCorrectCount(players: Player[]): number {
   }, 0);
 }
 
+// Agrega el resultado del intento a cada jugador.
 function applyAttemptResults(players: Player[], results?: AttemptResult[]): Player[] {
   if (!results?.length) return players;
 
@@ -84,6 +88,7 @@ function applyAttemptResults(players: Player[], results?: AttemptResult[]): Play
   });
 }
 
+// Props que recibe la tarjeta de cada jugador.
 interface CardProps {
   player: Player;
   posIndex: number;
@@ -97,6 +102,7 @@ interface CardProps {
   onDragEnd: () => void;
 }
 
+// Tarjeta visual para mostrar un jugador.
 function PlayerCard({
   player,
   posIndex,
@@ -109,6 +115,7 @@ function PlayerCard({
   onDrop,
   onDragEnd,
 }: CardProps) {
+  // Estado y clases visuales de la tarjeta.
   const [imgError, setImgError] = useState(false);
   const correctRank = player.correctRank ?? player.correct_rank;
   const isCorrect = submitted && (player.correct ?? player.is_correct ?? posIndex + 1 === correctRank);
@@ -124,6 +131,7 @@ function PlayerCard({
   const imgWrapClasses = `wordle-img-wrap${submitted ? " wordle-img-wrap--submitted" : ""}`;
   const resultBarClasses = `wordle-result-bar ${isCorrect ? "wordle-result-bar--correct" : "wordle-result-bar--wrong"}`;
 
+  // Estructura HTML de la tarjeta.
   return (
     <div
       draggable={!submitted}
@@ -164,7 +172,9 @@ function PlayerCard({
   );
 }
 
+// Pantalla principal del Wordle.
 export default function Wordle() {
+  // Estados principales del juego.
   const [order, setOrder] = useState<Player[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
@@ -177,6 +187,7 @@ export default function Wordle() {
   const [errorMsg, setErrorMsg] = useState("");
   const dragPosRef = useRef<number | null>(null);
 
+  // Carga el desafio diario al abrir la pagina.
   useEffect(() => {
     const loadDaily = async () => {
       try {
@@ -230,18 +241,21 @@ export default function Wordle() {
     loadDaily();
   }, []);
 
+  // Empieza a arrastrar una tarjeta.
   const handleDragStart = (e: React.DragEvent, posIndex: number) => {
     dragPosRef.current = posIndex;
     setDraggingPos(posIndex);
     e.dataTransfer.effectAllowed = "move";
   };
 
+  // Marca la posicion sobre la que se esta arrastrando.
   const handleDragOver = (e: React.DragEvent, posIndex: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     setDragOverPos(posIndex);
   };
 
+  // Intercambia dos tarjetas cuando se suelta una.
   const handleDrop = (e: React.DragEvent, targetPos: number) => {
     e.preventDefault();
     const fromPos = dragPosRef.current;
@@ -258,12 +272,14 @@ export default function Wordle() {
     setDragOverPos(null);
   };
 
+  // Limpia el estado del arrastre.
   const handleDragEnd = () => {
     dragPosRef.current = null;
     setDraggingPos(null);
     setDragOverPos(null);
   };
 
+  // Envia el orden elegido a la API.
   const handleSubmit = async () => {
     if (!challengeId) return;
 
@@ -307,6 +323,7 @@ export default function Wordle() {
     score >= 8 ? "high" : score >= 5 ? "mid" : "low"
   }`;
 
+  // Pantalla mientras se carga el desafio.
   if (loading) {
     return (
       <div className="wordle-container">
@@ -315,6 +332,7 @@ export default function Wordle() {
     );
   }
 
+  // Pantalla si ocurre un error.
   if (errorMsg) {
     return (
       <div className="wordle-container">
@@ -323,6 +341,7 @@ export default function Wordle() {
     );
   }
 
+  // Vista principal del tablero y el boton.
   return (
     <div className="wordle-container">
       <span className="wordle-theme">{theme}</span>

@@ -1,4 +1,5 @@
 /* ── Wordle: layout ── */
+/* Layout general de la pagina. */
 .wordle-container {
   display: flex;
   flex-direction: column;
@@ -6,6 +7,7 @@
   padding: 8px 32px 0;
 }
 
+/* Titulo/tema del desafio. */
 .wordle-theme {
   font-weight: 800;
   font-size: 1.45rem;
@@ -16,6 +18,7 @@
   position: relative;
 }
 
+/* Linea decorativa debajo del tema. */
 .wordle-theme::after {
   content: "";
   display: block;
@@ -26,12 +29,14 @@
   background: #E90052;
 }
 
+/* Texto de instrucciones. */
 .wordle-instructions {
   color: #84878f;
   font-size: 0.82rem;
   margin: 0 0 20px;
 }
 
+/* Badge que muestra el puntaje final. */
 .wordle-score-badge {
   color: white;
   padding: 6px 22px;
@@ -44,6 +49,7 @@
 .wordle-score-badge--mid  { background: #f59e0b; }
 .wordle-score-badge--low  { background: #E90052; }
 
+/* Contenedor del tablero. */
 .wordle-board {
   display: flex;
   flex-direction: column;
@@ -57,6 +63,7 @@
   box-shadow: 0 18px 48px rgba(38, 58, 85, 0.08);
 }
 
+/* Filas de cards dentro del tablero. */
 .wordle-row {
   display: grid;
   width: 100%;
@@ -64,6 +71,7 @@
   gap: 14px;
 }
 
+/* Contenedor del boton o mensaje final. */
 .wordle-btn-wrap {
   margin-top: 24px;
   margin-bottom: 32px;
@@ -71,6 +79,7 @@
   max-width: 420px;
 }
 
+/* Boton para confirmar respuesta. */
 .wordle-btn-confirm {
   width: 100%;
   padding: 14px 0;
@@ -85,6 +94,7 @@
   box-shadow: 0 4px 18px rgba(233, 0, 82, 0.38);
 }
 
+/* Mensaje que aparece despues de jugar. */
 .wordle-next-msg {
   text-align: center;
   color: #84878f;
@@ -94,6 +104,7 @@
   padding: 14px 0;
 }
 
+/* Spinner de carga. */
 .wordle-spinner {
   width: 32px;
   height: 32px;
@@ -104,16 +115,19 @@
   margin-top: 60px;
 }
 
+/* Animacion del spinner. */
 @keyframes wordle-spin {
   to { transform: rotate(360deg); }
 }
 
+/* Texto de error. */
 .wordle-error {
   color: #dc2626;
   font-size: 0.9rem;
   margin-top: 60px;
 }
 
+/* Boton para volver a jugar. */
 .wordle-btn-replay {
   width: 100%;
   padding: 14px 0;
@@ -127,6 +141,7 @@
 }
 
 /* ── Wordle: card ── */
+/* Card principal de cada jugador. */
 .wordle-card {
   width: 100%;
   height: 178px;
@@ -143,15 +158,18 @@
   cursor: grab;
 }
 
+/* Hover de las cards antes de enviar. */
 .wordle-card:not(.wordle-card--submitted):hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 26px rgba(38, 58, 85, 0.26);
 }
 
+/* Cursor cuando se arrastra una card. */
 .wordle-card:not(.wordle-card--submitted):active {
   cursor: grabbing;
 }
 
+/* Estados visuales de la card. */
 .wordle-card--submitted  { cursor: default; }
 .wordle-card--default    { background: linear-gradient(160deg, #E90052 0%, #871d54 100%); }
 .wordle-card--correct    { background: linear-gradient(160deg, #22c55e 0%, #16a34a 100%); }
@@ -163,6 +181,7 @@
   outline: 2px solid rgba(255, 255, 255, 0.6);
 }
 
+/* Numero de posicion de la card. */
 .wordle-card-rank {
   position: absolute;
   top: 8px;
@@ -180,6 +199,7 @@
   text-align: center;
 }
 
+/* Contenedor de la imagen del jugador. */
 .wordle-img-wrap {
   position: absolute;
   top: 0;
@@ -195,6 +215,7 @@
 }
 .wordle-img-wrap--submitted { bottom: 46px; }
 
+/* Imagen del jugador. */
 .wordle-card-img {
   width: 100%;
   height: 100%;
@@ -202,6 +223,7 @@
   object-position: center 15%;
 }
 
+/* Iniciales cuando no hay imagen. */
 .wordle-card-initials {
   font-weight: 800;
   font-size: 1.4rem;
@@ -209,6 +231,7 @@
   letter-spacing: 0.05em;
 }
 
+/* Parte inferior de la card. */
 .wordle-card-bottom {
   position: absolute;
   bottom: 0;
@@ -216,6 +239,7 @@
   right: 0;
 }
 
+/* Barra que muestra si fue correcto o incorrecto. */
 .wordle-result-bar {
   padding: 3px 5px;
   display: flex;
@@ -226,16 +250,19 @@
 .wordle-result-bar--correct { background: rgba(34, 197, 94, 0.95); }
 .wordle-result-bar--wrong   { background: rgba(220, 38, 38, 0.95); }
 
+/* Textos dentro de la barra de resultado. */
 .wordle-result-icon  { font-size: 0.6rem;  color: white; }
 .wordle-result-stat  { font-weight: 800; font-size: 0.75rem; color: white; }
 .wordle-result-label { font-size: 0.52rem; color: rgba(255, 255, 255, 0.8); }
 
+/* Barra donde aparece el nombre. */
 .wordle-card-name-bar {
   padding: 4px 6px;
   background: rgba(0, 0, 0, 0.28);
   text-align: center;
 }
 
+/* Nombre del jugador. */
 .wordle-card-name {
   font-weight: 700;
   font-size: 0.58rem;
