@@ -73,32 +73,24 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-      <div style={{ display: "flex", gap: "0.4rem", position: "relative" }}>
+    <div className="t-loc-picker">
+      <div className="t-loc-picker__row">
         <input
           type="text" value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); buscar(search, true); } }}
           placeholder="Buscar dirección o lugar (ej. Av. Reforma 222, CDMX)"
-          style={{ flex: 1, padding: "0.5rem 0.7rem", border: "1.5px solid #e0e0e0", borderRadius: "8px", fontSize: "0.82rem", outline: "none", color: "#263a55", background: "#fff" }}
+          className="t-loc-picker__input"
         />
-        <button type="button" onClick={() => buscar(search, true)} disabled={searching || !search.trim()}
-          style={{
-            padding: "0.5rem 0.95rem", borderRadius: "8px", border: "none",
-            background: searching || !search.trim() ? "#e0e0e0" : "#263a55",
-            color: searching || !search.trim() ? "#999" : "#fff",
-            fontSize: "0.78rem", fontWeight: 700,
-            cursor: searching || !search.trim() ? "not-allowed" : "pointer",
-            whiteSpace: "nowrap",
-          }}>
+        <button
+          type="button" onClick={() => buscar(search, true)}
+          disabled={searching || !search.trim()}
+          className={`t-loc-picker__btn${searching || !search.trim() ? " t-loc-picker__btn--off" : " t-loc-picker__btn--on"}`}
+        >
           {searching ? "..." : "Buscar"}
         </button>
         {results.length > 0 && (
-          <div style={{
-            position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem",
-            background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.12)", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
-          }}>
+          <div className="t-loc-picker__dropdown">
             {results.map(r => (
               <button key={r.place_id} type="button" onClick={() => elegir(r)} className="t-geo-item">
                 {r.display_name}
@@ -107,8 +99,8 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
           </div>
         )}
       </div>
-      {searchError && <p style={{ fontSize: "0.72rem", color: "#dc2626" }}>{searchError}</p>}
-      <MapContainer center={center} zoom={11} style={{ height: "200px", width: "100%", borderRadius: "8px" }}>
+      {searchError && <p className="t-geo-error">{searchError}</p>}
+      <MapContainer center={center} zoom={11} className="t-map-sm">
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {lat != null && lng != null && <Marker position={[lat, lng]} />}
         <RecenterMap lat={lat} lng={lng} />

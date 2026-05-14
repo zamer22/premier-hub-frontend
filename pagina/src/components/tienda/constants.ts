@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import type { NewDireccionForm } from "./types";
 
 // Vite bakea VITE_API_URL en build. En dev apunta a localhost:4001.
@@ -22,17 +21,5 @@ export const ESTADO_PEDIDO_COLOR: Record<string, { bg: string; fg: string }> = {
 };
 // Orden del timeline en PedidoModal — cancelado no aparece en la barra de progreso.
 export const ESTADO_FLOW = ["procesando", "enviado", "en_camino", "entregado"] as const;
-
-export const inputStyle: CSSProperties = {
-  padding: "0.6rem 0.7rem",
-  border: "1.5px solid #e0e0e0",
-  borderRadius: "8px",
-  fontSize: "0.85rem",
-  outline: "none",
-  width: "100%",
-  boxSizing: "border-box",
-  color: "#263a55",
-  background: "#fff",
-};
 
 export const TIPOS_REAL = ["todos", "jersey", "balonazo", "ropa", "accesorio"];

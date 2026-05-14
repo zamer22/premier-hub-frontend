@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import "leaflet/dist/leaflet.css";
 
 import type { AdminPedido, AdminEnviosProps } from "../components/admin/types";
-import { ESTADOS, ESTADO_LABEL, ESTADO_COLOR, inputBase } from "../components/admin/constants";
+import { ESTADOS, ESTADO_LABEL, ESTADO_COLOR } from "../components/admin/constants";
 import AdminTrackingMap from "../components/admin/map/AdminTrackingMap";
+import "../estilos/Admin.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -115,7 +116,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
     setGeoSearch("");
     setGeoResults([]);
     setGeoError(null);
-  }, [selected?.id_pedido]); //
+  }, [selected?.id_pedido]);
 
   // PUT /api/admin/pedido/:id — manda todos los cambios pendientes del form de una vez.
   const aplicarUpdate = async (body: Record<string, any>) => {
@@ -190,45 +191,36 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f4f6f8" }}>
-      <div style={{ background: "linear-gradient(135deg, #263a55, #1a2a3f)", color: "#fff", padding: "1rem 2rem", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
-        <div>
-          <h1 style={{ fontSize: "1.2rem", fontWeight: 800, letterSpacing: "-0.01em" }}>
-            <span style={{ color: "#E90052" }}>PREMIER</span>
-            <span style={{ color: "#fff" }}>HUB</span>
-            <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 500, marginLeft: "0.6rem", fontSize: "0.95rem" }}>· Admin Envíos</span>
+    <div className="adm-page">
+      <div className="adm-header">
+        <div className="adm-header__left">
+          <h1 className="adm-header__brand">
+            <span className="adm-header__brand-accent">PREMIER</span>
+            <span className="adm-header__brand-name">HUB</span>
+            <span className="adm-header__brand-section">· Admin Envíos</span>
           </h1>
-          <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.7)" }}>Gestión manual de pedidos</p>
+          <p className="adm-header__sub">Gestión manual de pedidos</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
-          <span style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)" }}>{user.nickname}</span>
-          <button
-            onClick={onLogout}
-            style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "6px", color: "#fff", padding: "0.4rem 0.95rem", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}
-          >
-            Salir
-          </button>
+        <div className="adm-header__right">
+          <span className="adm-header__user">{user.nickname}</span>
+          <button onClick={onLogout} className="adm-header__logout">Salir</button>
         </div>
       </div>
 
       {toast && (
-        <div style={{ position: "fixed", top: "80px", right: "2rem", padding: "0.75rem 1.25rem", background: toast.ok ? "#16a34a" : "#dc2626", color: "#fff", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", zIndex: 9999 }}>
+        <div className={`adm-toast${toast.ok ? " adm-toast--ok" : " adm-toast--err"}`}>
           {toast.ok ? "✓ " : "✗ "}{toast.msg}
         </div>
       )}
 
-      <div style={{ padding: "1.25rem 2rem", display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", borderBottom: "1px solid #e5e7eb", background: "#fff" }}>
-        <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+      <div className="adm-filters">
+        <div className="adm-filters__chips">
           {["todos", ...ESTADOS].map(e => (
-            <button key={e} onClick={() => setFiltroEstado(e)}
-              style={{
-                padding: "0.4rem 0.85rem", borderRadius: "20px",
-                border: "1px solid", borderColor: filtroEstado === e ? "#263a55" : "#e0e0e0",
-                background: filtroEstado === e ? "#263a55" : "#fff",
-                color: filtroEstado === e ? "#fff" : "#84878F",
-                fontSize: "0.78rem", fontWeight: filtroEstado === e ? 700 : 500,
-                cursor: "pointer", textTransform: "capitalize",
-              }}>
+            <button
+              key={e}
+              onClick={() => setFiltroEstado(e)}
+              className={`adm-chip${filtroEstado === e ? " adm-chip--active" : ""}`}
+            >
               {e === "todos" ? "Todos" : ESTADO_LABEL[e]}
             </button>
           ))}
@@ -237,120 +229,100 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
           placeholder="Buscar por # de pedido o tracking..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{ ...inputBase, flex: "1", minWidth: "240px", maxWidth: "360px" }}
+          className="adm-input adm-search"
         />
-        <span style={{ fontSize: "0.78rem", color: "#84878F", fontWeight: 600 }}>
-          {pedidos.length} pedido{pedidos.length === 1 ? "" : "s"}
-        </span>
+        <span className="adm-count">{pedidos.length} pedido{pedidos.length === 1 ? "" : "s"}</span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 380px) 1fr", gap: "1.25rem", padding: "1.25rem 2rem", alignItems: "start" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", maxHeight: "calc(100vh - 220px)", overflowY: "auto", paddingRight: "0.4rem" }}>
-          {loading && pedidos.length === 0 && <p style={{ color: "#84878F", fontSize: "0.85rem", textAlign: "center", padding: "2rem" }}>Cargando...</p>}
+      <div className="adm-layout">
+        <div className="adm-list">
+          {loading && pedidos.length === 0 && <p className="adm-list__loading">Cargando...</p>}
           {!loading && pedidos.length === 0 && (
-            <p style={{ color: "#84878F", fontSize: "0.85rem", textAlign: "center", padding: "2rem", background: "#fff", borderRadius: "10px" }}>Sin pedidos para los filtros aplicados</p>
+            <p className="adm-list__empty">Sin pedidos para los filtros aplicados</p>
           )}
           {pedidos.map(p => {
             const isSel = selected?.id_pedido === p.id_pedido;
             const color = ESTADO_COLOR[p.estado] || ESTADO_COLOR.procesando;
             return (
-              <div key={p.id_pedido} onClick={() => setSelected(p)}
-                style={{
-                  background: "#fff", borderRadius: "10px", padding: "0.85rem 1rem",
-                  border: isSel ? "2px solid #E90052" : "1px solid #e5e7eb",
-                  boxShadow: isSel ? "0 4px 12px rgba(233,0,82,0.15)" : "0 1px 3px rgba(0,0,0,0.05)",
-                  cursor: "pointer", display: "flex", flexDirection: "column", gap: "0.3rem",
-                }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ background: "#263a55", color: "#fff", padding: "0.15rem 0.5rem", borderRadius: "6px", fontSize: "0.72rem", fontWeight: 800 }}>#{p.id_pedido}</span>
-                  <span style={{ background: color.bg, color: color.fg, padding: "0.18rem 0.55rem", borderRadius: "999px", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              <div
+                key={p.id_pedido}
+                onClick={() => setSelected(p)}
+                className={`adm-order${isSel ? " adm-order--sel" : ""}`}
+              >
+                <div className="adm-order__top">
+                  <span className="adm-order__id">#{p.id_pedido}</span>
+                  <span className="adm-order__status" style={{ background: color.bg, color: color.fg }}>
                     {ESTADO_LABEL[p.estado]}
                   </span>
                 </div>
-                <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "#263a55" }}>{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
-                <p style={{ fontSize: "0.74rem", color: "#84878F" }}>
+                <p className="adm-order__name">{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
+                <p className="adm-order__user">
                   {p.usuario?.nickname || p.usuario?.correo || `User #${p.id_usuario}`}
                   {p.variante ? ` · talla ${p.variante.talla}` : ""}
                 </p>
-                <p style={{ fontSize: "0.7rem", color: "#9ca3af" }}>{new Date(p.fecha_pedido).toLocaleString("es-MX")}</p>
+                <p className="adm-order__date">{new Date(p.fecha_pedido).toLocaleString("es-MX")}</p>
               </div>
             );
           })}
         </div>
 
         {!selected ? (
-          <div style={{ background: "#fff", borderRadius: "12px", padding: "4rem 2rem", textAlign: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-            <p style={{ color: "#84878F", fontSize: "0.9rem" }}>Seleccioná un pedido para gestionarlo</p>
+          <div className="adm-detail--empty">
+            <p className="adm-detail__empty-text">Seleccioná un pedido para gestionarlo</p>
           </div>
         ) : (() => {
           const dirSnap = selected.direccion_snapshot || {};
           const color = ESTADO_COLOR[selected.estado] || ESTADO_COLOR.procesando;
           const isLocked = selected.estado === "entregado" || selected.estado === "cancelado";
           return (
-            <div style={{ background: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", borderBottom: "1px solid #f0f0f0", paddingBottom: "1rem" }}>
+            <div className="adm-detail">
+              <div className="adm-detail__header">
                 <div>
-                  <span style={{ background: "#263a55", color: "#fff", padding: "0.25rem 0.7rem", borderRadius: "6px", fontSize: "0.85rem", fontWeight: 800 }}>#{selected.id_pedido}</span>
-                  <p style={{ fontSize: "1.1rem", fontWeight: 800, color: "#263a55", marginTop: "0.5rem" }}>{selected.producto?.nombre || `Producto #${selected.id_producto}`}</p>
-                  <p style={{ fontSize: "0.82rem", color: "#84878F" }}>
-                    Cliente: <strong style={{ color: "#374151" }}>{selected.usuario?.nickname || selected.usuario?.nombre_usuario || `#${selected.id_usuario}`}</strong>
-                    {selected.usuario?.correo && <span style={{ color: "#84878F" }}> · {selected.usuario.correo}</span>}
+                  <span className="adm-detail__id">#{selected.id_pedido}</span>
+                  <p className="adm-detail__name">{selected.producto?.nombre || `Producto #${selected.id_producto}`}</p>
+                  <p className="adm-detail__client">
+                    Cliente: <strong className="adm-text-mid">{selected.usuario?.nickname || selected.usuario?.nombre_usuario || `#${selected.id_usuario}`}</strong>
+                    {selected.usuario?.correo && <span className="adm-text-soft"> · {selected.usuario.correo}</span>}
                   </p>
-                  <p style={{ fontSize: "0.78rem", color: "#84878F" }}>
+                  <p className="adm-detail__meta">
                     {selected.variante ? `Talla ${selected.variante.talla} · ` : ""}
                     {Number(selected.costo).toLocaleString()} pts · {new Date(selected.fecha_pedido).toLocaleString("es-MX")}
                   </p>
                 </div>
-                <span style={{ background: color.bg, color: color.fg, padding: "0.3rem 0.85rem", borderRadius: "999px", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+                <span className="adm-detail__status" style={{ background: color.bg, color: color.fg }}>
                   {ESTADO_LABEL[selected.estado]}
                 </span>
               </div>
 
               {isLocked && (
-                <div style={{
-                  background: selected.estado === "entregado" ? "#dcfce7" : "#fee2e2",
-                  border: `1px solid ${selected.estado === "entregado" ? "#86efac" : "#fecaca"}`,
-                  borderRadius: "10px", padding: "0.85rem 1rem",
-                  display: "flex", alignItems: "center", gap: "0.6rem",
-                }}>
-                  <span style={{ fontSize: "1.1rem" }}>{selected.estado === "entregado" ? "✓" : "✕"}</span>
+                <div className={`adm-locked${selected.estado === "entregado" ? " adm-locked--delivered" : " adm-locked--canceled"}`}>
+                  <span className="adm-locked__icon">{selected.estado === "entregado" ? "✓" : "✕"}</span>
                   <div>
-                    <p style={{ fontSize: "0.85rem", fontWeight: 700, color: selected.estado === "entregado" ? "#166534" : "#991b1b" }}>
-                      Pedido {ESTADO_LABEL[selected.estado].toLowerCase()}
-                    </p>
-                    <p style={{ fontSize: "0.74rem", color: selected.estado === "entregado" ? "#166534" : "#991b1b" }}>
-                      Este pedido ya está cerrado y no puede modificarse.
-                    </p>
+                    <p className="adm-locked__title">Pedido {ESTADO_LABEL[selected.estado].toLowerCase()}</p>
+                    <p className="adm-locked__text">Este pedido ya está cerrado y no puede modificarse.</p>
                   </div>
                 </div>
               )}
 
               {!isLocked && (
                 <div>
-                  <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
+                  <h4 className="adm-section-title">
                     Cambiar estado
-                    {estadoCambio && (
-                      <span style={{ marginLeft: "0.5rem", fontSize: "0.7rem", fontWeight: 600, color: "#E90052", textTransform: "none", letterSpacing: 0 }}>
-                        · pendiente de guardar
-                      </span>
-                    )}
+                    {estadoCambio && <span className="adm-pending-tag">· pendiente de guardar</span>}
                   </h4>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
+                  <div className="adm-estado-btns">
                     {ESTADOS.map(est => {
                       const sel = estadoPendiente === est;
                       const original = selected.estado === est;
                       const c = ESTADO_COLOR[est];
                       return (
-                        <button key={est} disabled={sel} onClick={() => setEstadoPendiente(est)}
-                          style={{
-                            padding: "0.45rem 0.95rem", borderRadius: "8px",
-                            border: sel ? "2px solid #263a55" : original ? "1px dashed #84878F" : "1px solid #e5e7eb",
-                            background: sel ? c.bg : "#fff",
-                            color: sel ? c.fg : "#374151",
-                            fontSize: "0.78rem", fontWeight: sel ? 800 : 600,
-                            cursor: sel ? "default" : "pointer",
-                            textTransform: "capitalize",
-                          }}>
+                        <button
+                          key={est}
+                          disabled={sel}
+                          onClick={() => setEstadoPendiente(est)}
+                          className={`adm-estado-btn${sel ? " adm-estado-btn--sel" : original ? " adm-estado-btn--orig" : ""}`}
+                          style={sel ? { background: c.bg, color: c.fg } : undefined}
+                        >
                           {ESTADO_LABEL[est]}
                         </button>
                       );
@@ -359,67 +331,53 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                 </div>
               )}
 
-              <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem" }}>
-                <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Dirección de entrega</h4>
-                <p style={{ fontSize: "0.85rem", color: "#263a55", fontWeight: 600 }}>{dirSnap.nombre_destinatario || "—"}{dirSnap.telefono ? ` · ${dirSnap.telefono}` : ""}</p>
-                <p style={{ fontSize: "0.78rem", color: "#374151" }}>{dirSnap.calle || ""}{dirSnap.ciudad ? `, ${dirSnap.ciudad}` : ""}{dirSnap.estado ? `, ${dirSnap.estado}` : ""}{dirSnap.codigo_postal ? ` ${dirSnap.codigo_postal}` : ""}{dirSnap.pais ? ` · ${dirSnap.pais}` : ""}</p>
+              <div className="adm-dir-box">
+                <h4 className="adm-dir-title">Dirección de entrega</h4>
+                <p className="adm-dir-name">{dirSnap.nombre_destinatario || "—"}{dirSnap.telefono ? ` · ${dirSnap.telefono}` : ""}</p>
+                <p className="adm-dir-addr">{dirSnap.calle || ""}{dirSnap.ciudad ? `, ${dirSnap.ciudad}` : ""}{dirSnap.estado ? `, ${dirSnap.estado}` : ""}{dirSnap.codigo_postal ? ` ${dirSnap.codigo_postal}` : ""}{dirSnap.pais ? ` · ${dirSnap.pais}` : ""}</p>
               </div>
 
               {selected.lat_destino != null && selected.lng_destino != null && (
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
-                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      Ubicación del paquete
-                    </h4>
-                    {!isLocked && (
-                      <p style={{ fontSize: "0.7rem", color: "#84878F", fontStyle: "italic" }}>Busca un lugar o haz click en el mapa</p>
-                    )}
+                  <div className="adm-map-header">
+                    <h4 className="adm-section-title">Ubicación del paquete</h4>
+                    {!isLocked && <p className="adm-map-hint">Busca un lugar o haz click en el mapa</p>}
                   </div>
                   {!isLocked && (
-                  <div style={{ display: "flex", gap: "0.4rem", position: "relative", marginBottom: "0.5rem" }}>
-                    <input
-                      type="text"
-                      value={geoSearch}
-                      onChange={(e) => setGeoSearch(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); buscarLugar(geoSearch, true); } }}
-                      placeholder="Buscar lugar (ej. FedEx Polanco 222, CDMX)"
-                      style={{ ...inputBase, flex: 1 }}
-                    />
-                    <button type="button" onClick={() => buscarLugar(geoSearch, true)} disabled={geoSearching || !geoSearch.trim()}
-                      style={{
-                        padding: "0.5rem 0.95rem", borderRadius: "8px", border: "none",
-                        background: geoSearching || !geoSearch.trim() ? "#e0e0e0" : "#263a55",
-                        color: geoSearching || !geoSearch.trim() ? "#999" : "#fff",
-                        fontSize: "0.78rem", fontWeight: 700,
-                        cursor: geoSearching || !geoSearch.trim() ? "not-allowed" : "pointer",
-                        whiteSpace: "nowrap",
-                      }}>
-                      {geoSearching ? "..." : "Buscar"}
-                    </button>
-                    {geoResults.length > 0 && (
-                      <div style={{
-                        position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem",
-                        background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.12)", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
-                      }}>
-                        {geoResults.map(r => (
-                          <button key={r.place_id} type="button" onClick={() => elegirLugar(r)}
-                            style={{
-                              display: "block", width: "100%", textAlign: "left",
-                              padding: "0.55rem 0.75rem", border: "none", background: "transparent",
-                              fontSize: "0.78rem", color: "#263a55", cursor: "pointer",
-                              borderBottom: "1px solid #f0f0f0",
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = "#f8f9fa"}
-                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
-                            {r.display_name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                    <div className="adm-geo-row">
+                      <input
+                        type="text"
+                        value={geoSearch}
+                        onChange={(e) => setGeoSearch(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); buscarLugar(geoSearch, true); } }}
+                        placeholder="Buscar lugar (ej. FedEx Polanco 222, CDMX)"
+                        className="adm-input adm-geo-input"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => buscarLugar(geoSearch, true)}
+                        disabled={geoSearching || !geoSearch.trim()}
+                        className={`adm-geo-btn${geoSearching || !geoSearch.trim() ? " adm-geo-btn--off" : " adm-geo-btn--active"}`}
+                      >
+                        {geoSearching ? "..." : "Buscar"}
+                      </button>
+                      {geoResults.length > 0 && (
+                        <div className="adm-geo-dropdown">
+                          {geoResults.map(r => (
+                            <button
+                              key={r.place_id}
+                              type="button"
+                              onClick={() => elegirLugar(r)}
+                              className="adm-geo-item"
+                            >
+                              {r.display_name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   )}
-                  {!isLocked && geoError && <p style={{ fontSize: "0.72rem", color: "#dc2626", marginBottom: "0.5rem" }}>{geoError}</p>}
+                  {!isLocked && geoError && <p className="adm-geo-error">{geoError}</p>}
                   <AdminTrackingMap
                     destLat={Number(selected.lat_destino)}
                     destLng={Number(selected.lng_destino)}
@@ -427,67 +385,62 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                     actualLng={lngActual}
                     onMovePackage={isLocked ? () => {} : (la, ln) => { setLatActual(la); setLngActual(ln); }}
                   />
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
-                    <p style={{ fontSize: "0.72rem", color: "#84878F" }}>
+                  <div className="adm-map-coords-row">
+                    <p className="adm-map-coords">
                       {latActual != null && lngActual != null
                         ? `${latActual.toFixed(4)}, ${lngActual.toFixed(4)}`
                         : "Paquete sin ubicación"}
                     </p>
-                    {ubicacionCambio && (
-                      <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "#E90052" }}>
-                        · pendiente de guardar
-                      </span>
-                    )}
+                    {ubicacionCambio && <span className="adm-map-pending">· pendiente de guardar</span>}
                   </div>
                 </div>
               )}
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-                <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <div className="adm-info-section">
+                <h4 className="adm-section-title">
                   Información de envío
-                  {infoCambio && (
-                    <span style={{ marginLeft: "0.5rem", fontSize: "0.7rem", fontWeight: 600, color: "#E90052", textTransform: "none", letterSpacing: 0 }}>
-                      · pendiente de guardar
-                    </span>
-                  )}
+                  {infoCambio && <span className="adm-pending-tag">· pendiente de guardar</span>}
                 </h4>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
-                  <input placeholder="Número de tracking" value={tracking}
+                <div className="adm-info-grid">
+                  <input
+                    placeholder="Número de tracking"
+                    value={tracking}
                     onChange={(e) => setTracking(e.target.value)}
                     disabled={isLocked}
-                    style={{ ...inputBase, background: isLocked ? "#f4f6f8" : "#fff", color: isLocked ? "#84878F" : "#263a55" }} />
-                  <input type="date" value={fechaEstimada}
+                    className="adm-input"
+                  />
+                  <input
+                    type="date"
+                    value={fechaEstimada}
                     onChange={(e) => setFechaEstimada(e.target.value)}
                     disabled={isLocked}
-                    style={{ ...inputBase, background: isLocked ? "#f4f6f8" : "#fff", color: isLocked ? "#84878F" : "#263a55" }} />
+                    className="adm-input"
+                  />
                 </div>
-                <textarea placeholder="Notas para el cliente (opcional)" rows={3}
+                <textarea
+                  placeholder="Notas para el cliente (opcional)"
+                  rows={3}
                   value={notas}
                   onChange={(e) => setNotas(e.target.value)}
                   disabled={isLocked}
-                  style={{ ...inputBase, resize: "vertical", fontFamily: "inherit", background: isLocked ? "#f4f6f8" : "#fff", color: isLocked ? "#84878F" : "#263a55" }} />
+                  className="adm-input adm-textarea"
+                />
               </div>
 
               {!isLocked && (
-                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "0.6rem", borderTop: "1px solid #f0f0f0", paddingTop: "1rem" }}>
-                  <button onClick={descartarCambios} disabled={!hayCambios || saving}
-                    style={{
-                      padding: "0.55rem 1.2rem", borderRadius: "8px",
-                      border: "1px solid #e5e7eb", background: "#fff",
-                      color: !hayCambios || saving ? "#bbb" : "#374151",
-                      fontWeight: 600, fontSize: "0.82rem",
-                      cursor: !hayCambios || saving ? "not-allowed" : "pointer",
-                    }}>
+                <div className="adm-actions">
+                  <button
+                    onClick={descartarCambios}
+                    disabled={!hayCambios || saving}
+                    className="adm-btn adm-btn--discard"
+                  >
                     Descartar
                   </button>
-                  <button onClick={guardarTodo} disabled={!hayCambios || saving}
-                    style={{
-                      padding: "0.55rem 1.5rem", borderRadius: "8px", border: "none",
-                      background: !hayCambios || saving ? "#e0e0e0" : "#E90052",
-                      color: !hayCambios || saving ? "#999" : "#fff",
-                      fontWeight: 700, fontSize: "0.85rem",
-                      cursor: !hayCambios || saving ? "not-allowed" : "pointer",
-                    }}>
+                  <button
+                    onClick={guardarTodo}
+                    disabled={!hayCambios || saving}
+                    className="adm-btn adm-btn--save"
+                  >
                     {saving ? "Guardando..." : "Guardar cambios"}
                   </button>
                 </div>
