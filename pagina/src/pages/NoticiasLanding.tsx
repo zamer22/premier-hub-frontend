@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../estilos/EstiloNoticiasLanding.css";
 import {
   DEFAULT_FILTER,
@@ -8,7 +9,6 @@ import {
   formatRelative,
   getCachedNewsSnapshot,
   mergeNewsItems,
-  navigateTo,
   setCachedNewsSnapshot,
   truncateText,
 } from "./noticiasShared";
@@ -98,6 +98,7 @@ function NewsCard({
 }
 
 export default function NoticiasLanding() {
+  const navigate = useNavigate();
   const cachedNewsSnapshot = getCachedNewsSnapshot();
   const initialCachedSnapshotRef = useRef(cachedNewsSnapshot);
   const [news, setNews] = useState<NewsItem[]>(() => cachedNewsSnapshot?.news || []);
@@ -201,7 +202,7 @@ export default function NoticiasLanding() {
   }, [teamFilter]);
 
   const openNews = (item: NewsItem) => {
-    navigateTo(`/noticias/${item.id}`);
+    navigate(`/noticias/${item.id}`);
   };
 
   const handleLoadMore = async (): Promise<void> => {

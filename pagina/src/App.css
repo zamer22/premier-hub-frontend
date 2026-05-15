@@ -13,11 +13,13 @@
 
 .app-logo {
   letter-spacing: -0.02em;
+  text-decoration: none;
 }
 
 .app-tab {
   color: #84878F;
   font-weight: 500;
+  text-decoration: none;
 }
 
 .app-tab.is-active {
@@ -45,6 +47,7 @@
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.82rem;
   font-weight: 700;
+  text-decoration: none;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
