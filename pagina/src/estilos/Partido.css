@@ -160,6 +160,10 @@
   animation: fadeIn 0.3s ease;
 }
 
+.partido_match-click {
+  cursor: pointer;
+}
+
 .partido_match-side {
   display: flex;
   align-items: center;

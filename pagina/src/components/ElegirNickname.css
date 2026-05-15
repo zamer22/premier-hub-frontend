@@ -1,0 +1,81 @@
+.nickname {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  background: #263a55;
+}
+
+.nickname__card {
+  background: #fff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.nickname__title {
+  color: #263a55;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.nickname__subtitle {
+  color: #84878F;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.nickname__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nickname__label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #263a55;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+.nickname__input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.nickname__hint {
+  font-size: 0.75rem;
+  color: #84878F;
+  margin-top: 0.3rem;
+}
+
+.nickname__error {
+  color: #E90052;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.nickname__button {
+  background: #E90052;
+  color: #fff;
+  border: none;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+  opacity: 1;
+}
+
+.nickname__button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

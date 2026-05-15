@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./ElegirNickname.css";
 
 interface Props {
   correo: string;
@@ -37,15 +38,15 @@ export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComple
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", justifyContent: "center", alignItems: "center", background: "#263a55" }}>
-      <div style={{ background: "#fff", padding: "2.5rem", borderRadius: "12px", width: "100%", maxWidth: "400px", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
-        <h2 style={{ color: "#263a55", fontWeight: 800, marginBottom: "0.5rem" }}>Casi listo</h2>
-        <p style={{ color: "#84878F", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
+    <div className="nickname">
+      <div className="nickname__card">
+        <h2 className="nickname__title">Casi listo</h2>
+        <p className="nickname__subtitle">
           Hola <strong>{nombre}</strong>, elige un nickname para tu cuenta en PremierHub.
         </p>
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <form onSubmit={handleSubmit} className="nickname__form">
           <div>
-            <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "#263a55", marginBottom: "0.4rem", textTransform: "uppercase" }}>
+            <label className="nickname__label">
               Nickname
             </label>
             <input
@@ -54,16 +55,16 @@ export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComple
               onChange={(e) => setNickname(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
               placeholder="ej. PremierFan99"
               maxLength={20}
-              style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #ddd", fontSize: "0.9rem", boxSizing: "border-box" }}
+              className="nickname__input"
               required
             />
-            <p style={{ fontSize: "0.75rem", color: "#84878F", marginTop: "0.3rem" }}>Solo letras, numeros y guiones bajos. Max. 20 caracteres.</p>
+            <p className="nickname__hint">Solo letras, numeros y guiones bajos. Max. 20 caracteres.</p>
           </div>
-          {error && <p style={{ color: "#E90052", fontSize: "0.85rem", margin: 0 }}>{error}</p>}
+          {error && <p className="nickname__error">{error}</p>}
           <button
             type="submit"
             disabled={loading}
-            style={{ background: "#E90052", color: "#fff", border: "none", padding: "0.8rem", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "0.95rem", opacity: loading ? 0.7 : 1 }}
+            className="nickname__button"
           >
             {loading ? "Creando cuenta..." : "Entrar a PremierHub"}
           </button>

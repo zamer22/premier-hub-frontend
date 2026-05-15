@@ -297,7 +297,7 @@ export default function Partido() {
             <div
               key={m.id}
               onClick={() => setSelectedPastMatch(m)}
-              style={{ cursor: "pointer" }}
+              className="partido_match-click"
             >
               <p className="partido_match-date">{formatDate(m.date)}</p>
               <div className="partido_match-card">
