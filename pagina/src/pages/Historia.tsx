@@ -220,57 +220,35 @@ export default function Historia() {
         </>
       )}
 
-{/* Botón volver arriba */}
-<button
-  type="button"
-  onClick={() => {
-    const start = window.scrollY;
-    const duration = 900;
-    const startTime = performance.now();
+      {/* Botón volver arriba */}
+      <button
+        type="button"
+        onClick={() => {
+          const start = window.scrollY;
+          const duration = 900;
+          const startTime = performance.now();
 
-    const easeInOutCubic = (t: number) =>
-      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          const easeInOutCubic = (t: number) =>
+            t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-    const animateScroll = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easedProgress = easeInOutCubic(progress);
+          const animateScroll = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeInOutCubic(progress);
 
-      window.scrollTo(0, start * (1 - easedProgress));
+            window.scrollTo(0, start * (1 - easedProgress));
 
-      if (progress < 1) {
-        requestAnimationFrame(animateScroll);
-      }
-    };
+            if (progress < 1) {
+              requestAnimationFrame(animateScroll);
+            }
+          };
 
-    requestAnimationFrame(animateScroll);
-  }}
-  style={{
-    display: "block",
-    margin: "2rem auto 0",
-    padding: "0.8rem 2.2rem",
-    borderRadius: 999,
-    border: "1px solid rgba(255,255,255,0.18)",
-    background: "linear-gradient(135deg, #1a2d42, #243b55)",
-    color: "#fff",
-    fontWeight: 700,
-    fontSize: "0.88rem",
-    cursor: "pointer",
-    letterSpacing: "0.05em",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.22)",
-    transition: "transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease",
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = "translateY(-2px)";
-    e.currentTarget.style.boxShadow = "0 14px 30px rgba(0,0,0,0.28)";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = "translateY(0)";
-    e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.22)";
-  }}
->
-  Regresar
-</button>
+          requestAnimationFrame(animateScroll);
+        }}
+        className={styles.backButton}
+      >
+        Regresar
+      </button>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "../estilos/PartidoPasado.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -127,29 +128,14 @@ function FilterBar({
   onChange: (f: EventFilter) => void;
 }) {
   return (
-    <div style={{
-      display: "flex",
-      gap: "0.5rem",
-      marginBottom: "1.25rem",
-      flexWrap: "wrap",
-    }}>
+    <div className="past-match__filters">
       {FILTERS.map(({ key, label }) => {
         const isActive = active === key;
         return (
           <button
             key={key}
             onClick={() => onChange(key)}
-            style={{
-              padding: "0.45rem 0.9rem",
-              borderRadius: 999,
-              border: `1.5px solid ${isActive ? "#e90052" : "#e5e7eb"}`,
-              background: isActive ? "#e90052" : "#f9fafb",
-              color: isActive ? "#fff" : "#6b7280",
-              fontWeight: 700,
-              fontSize: "0.82rem",
-              cursor: "pointer",
-              transition: "all 0.18s ease",
-            }}
+            className={`past-match__filter ${isActive ? "is-active" : ""}`}
           >
             {label}
           </button>
@@ -162,23 +148,8 @@ function FilterBar({
 // ── HalfSeparator ─────────────────────────────────────────────────────────────
 function HalfSeparator({ label }: { label: string }) {
   return (
-    <div style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      margin: "1.25rem -1.5rem",
-      padding: "1rem 1.5rem",
-      background: "linear-gradient(135deg, #1a2d42 0%, #263a55 100%)",
-      position: "relative",
-      zIndex: 2,
-    }}>
-      <span style={{
-        color: "#fff",
-        fontSize: "0.95rem",
-        fontWeight: 800,
-        letterSpacing: "0.1em",
-        textTransform: "uppercase" as const,
-      }}>{label}</span>
+    <div className="past-match__half">
+      <span className="past-match__half-label">{label}</span>
     </div>
   );
 }
@@ -190,95 +161,48 @@ function EventRow({ event, match }: { event: MatchEvent; match: PastMatch }) {
   const isGoal = event.type === "Goal";
 
   const content = (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: isHome ? "flex-end" : "flex-start",
-      gap: 5,
-      padding: "0 0.5rem",
-    }}>
-      <span style={{
-        fontWeight: 800,
-        fontSize: "1.1rem",
-        color: isGoal ? "#1a2d42" : "#111827",
-        lineHeight: 1.2,
-      }}>{event.player}</span>
-      <span style={{
-        fontSize: "0.85rem",
-        color: isGoal ? "#e90052" : "#9ca3af",
-        fontWeight: 700,
-      }}>{eventLabel(event.type, event.detail)}</span>
+    <div className={`past-match__event-content ${isHome ? "is-home" : "is-away"}`}>
+      <span className={`past-match__event-player ${isGoal ? "is-goal" : ""}`}>{event.player}</span>
+      <span className={`past-match__event-label ${isGoal ? "is-goal" : ""}`}>{eventLabel(event.type, event.detail)}</span>
       {event.assist && event.type === "Goal" && (
-        <span style={{ fontSize: "0.82rem", color: "#6b7280" as const }}>
-          Asist. {event.assist}
-        </span>
+        <span className="past-match__event-assist">Asist. {event.assist}</span>
       )}
       {event.type === "subst" && event.assist && (
-        <span style={{ fontSize: "0.82rem", color: "#22c55e", fontWeight: 600 }}>
-          ↑ {event.assist}
-        </span>
+        <span className="past-match__event-sub">↑ {event.assist}</span>
       )}
     </div>
   );
 
-  return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "1fr 100px 1fr",
-      alignItems: "center",
-      gap: "0.5rem",
-      padding: "1.1rem 0",
-      position: "relative",
-      zIndex: 1,
-    }}>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>{isHome ? content : null}</div>
+  const typeClass = event.type === "Goal"
+    ? "is-goal"
+    : event.type === "Card"
+    ? "is-card"
+    : event.type === "subst"
+    ? "is-subst"
+    : "is-default";
 
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-        <div style={{
-          width: 80,
-          height: 80,
-          borderRadius: "50%",
-          background:
-            event.type === "Goal"  ? "#ffffff"
-            : event.type === "Card"  ? "#fff7ed"
-            : event.type === "subst" ? "#f0fdf4"
-            : "#f8fafc",
-          border: `4px solid ${
-            event.type === "Goal"  ? "#e90052"
-            : event.type === "Card"  ? "#f97316"
-            : event.type === "subst" ? "#22c55e"
-            : "#e5e7eb"
-          }`,
-          boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-          overflow: "hidden",
-        }}>
+  return (
+    <div className="past-match__event-row">
+      <div className="past-match__event-side past-match__event-side--left">{isHome ? content : null}</div>
+
+      <div className="past-match__event-center">
+        <div className={`past-match__event-icon ${typeClass}`}>
           {iconUrl ? (
             <img
               src={iconUrl}
               alt={eventLabel(event.type, event.detail)}
-              style={{ width: 48, height: 48, objectFit: "contain" }}
+              className="past-match__event-icon-img"
             />
           ) : (
-            <span style={{ fontSize: "1.2rem", color: "#9ca3af" }}>•</span>
+            <span className="past-match__event-icon-dot">•</span>
           )}
         </div>
-        <span style={{
-          fontSize: "0.8rem",
-          color: "#4b5563",
-          fontWeight: 800,
-          background: "#f3f4f6",
-          borderRadius: 6,
-          padding: "2px 8px",
-        }}>
+        <span className="past-match__event-minute">
           {event.minute}{event.extra ? `+${event.extra}` : ""}′
         </span>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-start" }}>{!isHome ? content : null}</div>
+      <div className="past-match__event-side past-match__event-side--right">{!isHome ? content : null}</div>
     </div>
   );
 }
@@ -340,70 +264,43 @@ export default function PartidoPasado({ match, onBack }: Props) {
   });
 
   return (
-    <div style={{
-      fontFamily: "'Inter', 'Segoe UI', sans-serif",
-      background: "#f4f6f9",
-      minHeight: "100%",
-      padding: "1.25rem",
-      boxSizing: "border-box",
-    }}>
+    <div className="past-match">
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-        <button type="button" onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: "#263a55", fontWeight: 700, fontSize: "1rem", padding: 0 }}>
+      <div className="past-match__header">
+        <button type="button" onClick={onBack} className="past-match__back">
           ← Volver
         </button>
-        <span style={{ background: "#263a55", color: "#fff", fontSize: "0.75rem", fontWeight: 700, padding: "0.3rem 0.9rem", borderRadius: 999 }}>
+        <span className="past-match__status">
           Partido finalizado
         </span>
       </div>
 
       {/* Scoreboard */}
-      <div style={{
-        background: "#fff",
-        borderRadius: 16,
-        padding: "1.75rem 1.5rem",
-        marginBottom: "1rem",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-        display: "grid",
-        gridTemplateColumns: "1fr auto 1fr",
-        alignItems: "center",
-        gap: "0.75rem",
-      }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-          <img src={match.homeTeam.logo} alt={match.homeTeam.name} style={{ width: 72, height: 72, objectFit: "contain" }} />
-          <span style={{ fontWeight: 700, fontSize: "1rem", textAlign: "center", color: "#111827" }}>{match.homeTeam.name}</span>
+      <div className="past-match__scoreboard">
+        <div className="past-match__team">
+          <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="past-match__team-logo" />
+          <span className="past-match__team-name">{match.homeTeam.name}</span>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-          <div style={{ background: "#1a2d42", borderRadius: 14, padding: "0.9rem 2rem", color: "#fff", fontSize: "3rem", fontWeight: 800, letterSpacing: "0.04em" }}>
+        <div className="past-match__score-center">
+          <div className="past-match__score-box">
             {match.homeTeam.score} - {match.awayTeam.score}
           </div>
-          <p style={{ color: "#9ca3af", fontSize: "0.8rem", textAlign: "center", margin: 0 }}>{formattedDate}</p>
-          <div style={{ background: "#263a55", color: "#fff", fontSize: "0.75rem", fontWeight: 600, padding: "0.35rem 0.9rem", borderRadius: 8 }}>{match.stadium}</div>
-          <p style={{ color: "#9ca3af", fontSize: "0.78rem", textAlign: "center", margin: 0 }}>{match.league}</p>
+          <p className="past-match__meta">{formattedDate}</p>
+          <div className="past-match__stadium">{match.stadium}</div>
+          <p className="past-match__league">{match.league}</p>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-          <img src={match.awayTeam.logo} alt={match.awayTeam.name} style={{ width: 72, height: 72, objectFit: "contain" }} />
-          <span style={{ fontWeight: 700, fontSize: "1rem", textAlign: "center", color: "#111827" }}>{match.awayTeam.name}</span>
+        <div className="past-match__team">
+          <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="past-match__team-logo" />
+          <span className="past-match__team-name">{match.awayTeam.name}</span>
         </div>
       </div>
 
       {/* Panel con tabs */}
-      <div style={{ background: "#fff", borderRadius: 16, padding: "1.5rem", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+      <div className="past-match__panel">
         {/* Tabs */}
-        <div style={{ display: "flex", marginBottom: "1.5rem", borderRadius: 12, overflow: "hidden", border: "1px solid #e5e7eb" }}>
+        <div className="past-match__tabs">
           {TABS.map((t) => (
-            <button key={t} onClick={() => setTab(t)} style={{
-              flex: 1,
-              padding: "0.8rem 0",
-              border: "none",
-              borderRight: "1px solid #e5e7eb",
-              cursor: "pointer",
-              background: tab === t ? "#e90052" : "#fff",
-              color: tab === t ? "#fff" : "#84878f",
-              fontWeight: tab === t ? 700 : 500,
-              fontSize: "0.92rem",
-              transition: "all 0.2s",
-            }}>
+            <button key={t} onClick={() => setTab(t)} className={`past-match__tab ${tab === t ? "is-active" : ""}`}>
               {t}
             </button>
           ))}
@@ -413,31 +310,22 @@ export default function PartidoPasado({ match, onBack }: Props) {
         {tab === "Jugadas" && (
           <>
             {loadingEvents ? (
-              <p style={{ color: "#84878f", fontSize: "1rem", padding: "1rem 0" }}>Cargando eventos...</p>
+              <p className="past-match__message">Cargando eventos...</p>
             ) : eventsError ? (
-              <p style={{ color: "#b91c1c", fontSize: "1rem", padding: "1rem 0", fontWeight: 600 }}>{eventsError}</p>
+              <p className="past-match__message past-match__message--error">{eventsError}</p>
             ) : events.length === 0 ? (
-              <p style={{ color: "#84878f", fontSize: "1rem", padding: "1rem 0" }}>No hay eventos registrados.</p>
+              <p className="past-match__message">No hay eventos registrados.</p>
             ) : (
               <>
                 <FilterBar active={eventFilter} onChange={setEventFilter} />
 
                 {filteredEvents.length === 0 ? (
-                  <p style={{ color: "#9ca3af", fontSize: "0.95rem", textAlign: "center", padding: "2rem 0" }}>
+                  <p className="past-match__empty">
                     No hay eventos de este tipo en el partido.
                   </p>
                 ) : (
-                  <div style={{ position: "relative" }}>
-                    <div style={{
-                      position: "absolute",
-                      left: "50%",
-                      top: 0,
-                      bottom: 0,
-                      width: 3,
-                      background: "#e5e7eb",
-                      transform: "translateX(-50%)",
-                      zIndex: 0,
-                    }} />
+                  <div className="past-match__timeline">
+                    <div className="past-match__timeline-line" />
 
                     {firstHalf.length > 0 && (
                       <>
@@ -470,30 +358,23 @@ export default function PartidoPasado({ match, onBack }: Props) {
         {tab === "Estadísticas" && (
           <>
             {loadingStats ? (
-              <p style={{ color: "#84878f", fontSize: "1rem", padding: "1rem 0" }}>Cargando estadísticas...</p>
+              <p className="past-match__message">Cargando estadísticas...</p>
             ) : statsError ? (
-              <p style={{ color: "#b91c1c", fontSize: "1rem", fontWeight: 600 }}>{statsError}</p>
+              <p className="past-match__message past-match__message--error">{statsError}</p>
             ) : stats.length === 0 ? (
-              <p style={{ color: "#84878f", fontSize: "1rem", padding: "1rem 0" }}>No hay estadísticas disponibles.</p>
+              <p className="past-match__message">No hay estadísticas disponibles.</p>
             ) : (
               <>
-                <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", marginBottom: 10, letterSpacing: "0.06em" }}>
+                <p className="past-match__stats-title">
                   Estadísticas del partido
                 </p>
                 {stats.map((s, idx) => (
-                  <div key={`${s.label}-${idx}`} style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto 1fr",
-                    gap: 10,
-                    alignItems: "center",
-                    padding: "0.75rem 0",
-                    borderBottom: "1px solid #f0f0f0",
-                  }}>
-                    <span style={{ fontWeight: 700, color: "#263a55", fontSize: "1rem" }}>{s.home_value}</span>
-                    <span style={{ color: "#9ca3af", fontSize: "0.82rem", textAlign: "center", minWidth: 130 }}>
+                  <div key={`${s.label}-${idx}`} className="past-match__stat-row">
+                    <span className="past-match__stat-home">{s.home_value}</span>
+                    <span className="past-match__stat-label">
                       {STATS_ES[s.label] ?? s.label}
                     </span>
-                    <span style={{ fontWeight: 700, color: "#e90052", textAlign: "right", fontSize: "1rem" }}>{s.away_value}</span>
+                    <span className="past-match__stat-away">{s.away_value}</span>
                   </div>
                 ))}
               </>
@@ -505,30 +386,30 @@ export default function PartidoPasado({ match, onBack }: Props) {
         {tab === "Alineaciones" && (
           <>
             {loadingLineups ? (
-              <p style={{ color: "#84878f", fontSize: "1rem", padding: "1rem 0" }}>Cargando alineaciones...</p>
+              <p className="past-match__message">Cargando alineaciones...</p>
             ) : lineupsError ? (
-              <p style={{ color: "#b91c1c", fontSize: "1rem", fontWeight: 600 }}>{lineupsError}</p>
+              <p className="past-match__message past-match__message--error">{lineupsError}</p>
             ) : lineups.length === 0 ? (
-              <p style={{ color: "#84878f", fontSize: "1rem", padding: "1rem 0" }}>No hay alineaciones disponibles.</p>
+              <p className="past-match__message">No hay alineaciones disponibles.</p>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+              <div className="past-match__lineups">
                 {/* Local */}
-                <div style={{ borderRight: "1px solid #f0f0f0" }}>
-                  <p style={{ fontWeight: 700, fontSize: "0.8rem", color: "#263a55", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, padding: "0 0.75rem" }}>
+                <div className="past-match__lineup-col past-match__lineup-col--left">
+                  <p className="past-match__lineup-title past-match__lineup-title--home">
                     {match.homeTeam.name}
                   </p>
                   {homeStarters.map((p) => (
-                    <div key={p.player_number} style={{ display: "flex", alignItems: "center", gap: 12, padding: "0.7rem 0.75rem", borderBottom: "1px solid #f7f7f7", fontSize: "0.92rem", color: "#1f2937" }}>
-                      <span style={{ color: "#9ca3af", fontSize: "0.8rem", fontWeight: 700, minWidth: 22, textAlign: "right", flexShrink: 0 }}>{p.player_number ?? "-"}</span>
+                    <div key={p.player_number} className="past-match__lineup-row">
+                      <span className="past-match__lineup-num">{p.player_number ?? "-"}</span>
                       <span>{p.player_name}</span>
                     </div>
                   ))}
                   {homeSubs.length > 0 && (
                     <>
-                      <p style={{ fontSize: "0.72rem", color: "#9ca3af", fontWeight: 700, letterSpacing: "0.08em", padding: "0.6rem 0.75rem 0.3rem" }}>SUPLENTES</p>
+                      <p className="past-match__lineup-subtitle">SUPLENTES</p>
                       {homeSubs.map((p) => (
-                        <div key={p.player_number} style={{ display: "flex", alignItems: "center", gap: 12, padding: "0.7rem 0.75rem", borderBottom: "1px solid #f7f7f7", fontSize: "0.92rem", color: "#6b7280" }}>
-                          <span style={{ color: "#9ca3af", fontSize: "0.8rem", fontWeight: 700, minWidth: 22, textAlign: "right", flexShrink: 0 }}>{p.player_number ?? "-"}</span>
+                        <div key={p.player_number} className="past-match__lineup-row past-match__lineup-row--sub">
+                          <span className="past-match__lineup-num">{p.player_number ?? "-"}</span>
                           <span>{p.player_name}</span>
                         </div>
                       ))}
@@ -537,22 +418,22 @@ export default function PartidoPasado({ match, onBack }: Props) {
                 </div>
 
                 {/* Visitante */}
-                <div>
-                  <p style={{ fontWeight: 700, fontSize: "0.8rem", color: "#e90052", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, padding: "0 0.75rem" }}>
+                <div className="past-match__lineup-col">
+                  <p className="past-match__lineup-title past-match__lineup-title--away">
                     {match.awayTeam.name}
                   </p>
                   {awayStarters.map((p) => (
-                    <div key={p.player_number} style={{ display: "flex", alignItems: "center", gap: 12, padding: "0.7rem 0.75rem", borderBottom: "1px solid #f7f7f7", fontSize: "0.92rem", color: "#1f2937" }}>
-                      <span style={{ color: "#9ca3af", fontSize: "0.8rem", fontWeight: 700, minWidth: 22, textAlign: "right", flexShrink: 0 }}>{p.player_number ?? "-"}</span>
+                    <div key={p.player_number} className="past-match__lineup-row">
+                      <span className="past-match__lineup-num">{p.player_number ?? "-"}</span>
                       <span>{p.player_name}</span>
                     </div>
                   ))}
                   {awaySubs.length > 0 && (
                     <>
-                      <p style={{ fontSize: "0.72rem", color: "#9ca3af", fontWeight: 700, letterSpacing: "0.08em", padding: "0.6rem 0.75rem 0.3rem" }}>SUPLENTES</p>
+                      <p className="past-match__lineup-subtitle">SUPLENTES</p>
                       {awaySubs.map((p) => (
-                        <div key={p.player_number} style={{ display: "flex", alignItems: "center", gap: 12, padding: "0.7rem 0.75rem", borderBottom: "1px solid #f7f7f7", fontSize: "0.92rem", color: "#6b7280" }}>
-                          <span style={{ color: "#9ca3af", fontSize: "0.8rem", fontWeight: 700, minWidth: 22, textAlign: "right", flexShrink: 0 }}>{p.player_number ?? "-"}</span>
+                        <div key={p.player_number} className="past-match__lineup-row past-match__lineup-row--sub">
+                          <span className="past-match__lineup-num">{p.player_number ?? "-"}</span>
                           <span>{p.player_name}</span>
                         </div>
                       ))}
@@ -569,19 +450,7 @@ export default function PartidoPasado({ match, onBack }: Props) {
       <button
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        style={{
-          display: "block",
-          margin: "1.5rem auto 0",
-          padding: "0.75rem 2rem",
-          borderRadius: 999,
-          border: "none",
-          background: "#1a2d42",
-          color: "#fff",
-          fontWeight: 700,
-          fontSize: "0.88rem",
-          cursor: "pointer",
-          letterSpacing: "0.05em",
-        }}
+        className="past-match__back-top"
       >
         Regresar
       </button>

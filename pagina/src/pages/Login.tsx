@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./Login.css";
 
 interface LoginPageProps {
   onLoginSuccess: (user: any) => void;
@@ -67,48 +68,36 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden" }}>
+    <div className="login">
 
       {/* ── Panel izquierdo: formulario ── */}
       <div
-        className="flex-1 relative flex justify-center items-center p-8"
-        style={{ background: "#263a55" }}
+        className="flex-1 relative flex justify-center items-center p-8 login__left"
       >
         {/* Decoración: círculos de color difuminados */}
-        <div className="absolute pointer-events-none"
-          style={{ top: "10%", left: "-5%", width: 280, height: 280,
-            background: "radial-gradient(circle, rgba(233,0,82,0.18) 0%, transparent 70%)", borderRadius: "50%" }} />
-        <div className="absolute pointer-events-none"
-          style={{ bottom: "15%", right: "-8%", width: 220, height: 220,
-            background: "radial-gradient(circle, rgba(135,29,84,0.25) 0%, transparent 70%)", borderRadius: "50%" }} />
+        <div className="absolute pointer-events-none login__orb login__orb--one" />
+        <div className="absolute pointer-events-none login__orb login__orb--two" />
 
         {/* Tarjeta del formulario */}
         <div
-          className="relative w-full animate-slide-up"
-          style={{
-            maxWidth: 380, background: "#ffffff",
-            borderRadius: 16, padding: "2.25rem",
-            boxShadow: "0 24px 48px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.1)",
-          }}
+          className="relative w-full animate-slide-up login__card"
         >
           {/* Encabezado */}
-          <div style={{ marginBottom: "1.5rem" }}>
-            <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em",
-              textTransform: "uppercase", color: "#E90052", marginBottom: "0.4rem" }}>
+          <div className="login__header">
+            <p className="login__eyebrow">
               PremierHub
             </p>
-            <h1 style={{ fontSize: "1.7rem", fontWeight: 800, color: "#263a55",
-              letterSpacing: "-0.02em", lineHeight: 1.1, marginBottom: "0.4rem" }}>
+            <h1 className="login__title">
               {isRegister ? "Crear cuenta" : "Bienvenido"}
             </h1>
-            <p style={{ fontSize: "0.82rem", color: "#84878F", lineHeight: 1.5 }}>
+            <p className="login__subtitle">
               {isRegister
                 ? "Regístrate para acceder a la experiencia completa"
                 : "Ingresa tus credenciales para continuar"}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+          <form onSubmit={handleSubmit} className="login__form">
 
             {/* Correo */}
             <Field label="Correo electrónico">
@@ -116,9 +105,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 type="email" required
                 placeholder="correo@ejemplo.com"
                 value={email} onChange={(e) => setEmail(e.target.value)}
-                style={inputStyle}
-                onFocus={(e) => e.currentTarget.style.borderColor = "#263a55"}
-                onBlur={(e) => e.currentTarget.style.borderColor = "#e5e7eb"}
+                  className="login__input"
               />
             </Field>
 
@@ -129,9 +116,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   type="text" required
                   placeholder="ej. JMike99"
                   value={username} onChange={(e) => setUsername(e.target.value)}
-                  style={inputStyle}
-                  onFocus={(e) => e.currentTarget.style.borderColor = "#263a55"}
-                  onBlur={(e) => e.currentTarget.style.borderColor = "#e5e7eb"}
+                  className="login__input"
                 />
               </Field>
             )}
@@ -155,8 +140,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             )}
 
             {!isRegister && (
-              <p style={{ fontSize: "0.76rem", color: "#84878F", textAlign: "right",
-                cursor: "pointer", marginTop: "-0.3rem" }}>
+              <p className="login__forgot">
                 ¿Olvidaste tu contraseña?
               </p>
             )}
@@ -164,50 +148,33 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             {/* Botón principal */}
             <button
               type="submit" disabled={loading}
-              style={{
-                padding: "0.75rem", borderRadius: 10, border: "none", cursor: "pointer",
-                fontWeight: 700, fontSize: "0.9rem", color: "#fff", marginTop: "0.25rem",
-                background: "linear-gradient(135deg, #871d54, #E90052)",
-                opacity: loading ? 0.7 : 1,
-                transition: "opacity 0.2s, transform 0.1s",
-                boxShadow: "0 4px 14px rgba(233,0,82,0.35)",
-              }}
-              onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.98)"; }}
-              onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+              className="login__primary"
             >
               {loading ? "Cargando..." : isRegister ? "Crear cuenta" : "Iniciar sesión"}
             </button>
 
             {/* Divisor */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
-              <span style={{ fontSize: "0.75rem", color: "#84878F" }}>ó</span>
-              <div style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
+            <div className="login__divider">
+              <div className="login__divider-line" />
+              <span className="login__divider-text">ó</span>
+              <div className="login__divider-line" />
             </div>
 
             {/* Google */}
             <button
               type="button" onClick={handleGoogle}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                padding: "0.7rem", borderRadius: 10,
-                background: "#fff", border: "1.5px solid #e5e7eb", cursor: "pointer",
-                fontWeight: 600, fontSize: "0.85rem", color: "#263a55",
-                transition: "border-color 0.2s, background 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#263a55"; e.currentTarget.style.background = "#f8f9fa"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.background = "#fff"; }}
+              className="login__google"
             >
               <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
-                width="18" alt="Google" style={{ display: "block" }} />
+                width="18" alt="Google" className="login__google-icon" />
               Continuar con Google
             </button>
 
             {/* Toggle registro / login */}
-            <p style={{ textAlign: "center", fontSize: "0.82rem", color: "#84878F" }}>
+            <p className="login__toggle">
               {isRegister ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
               <span
-                style={{ color: "#E90052", fontWeight: 700, cursor: "pointer" }}
+                className="login__toggle-link"
                 onClick={() => setIsRegister(!isRegister)}
               >
                 {isRegister ? "Inicia sesión" : "Regístrate"}
@@ -219,25 +186,18 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
       {/* ── Panel derecho: marca ── */}
       <div
-        className="flex-[1.2] hidden md:flex flex-col justify-center items-center gap-6 relative"
-        style={{ background: "#fff", borderLeft: "1px solid #f0f0f0" }}
+        className="flex-[1.2] hidden md:flex flex-col justify-center items-center gap-6 relative login__right"
       >
         {/* Fondo decorativo sutil */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(circle at 1px 1px, #e9ecef 1px, transparent 0)",
-            backgroundSize: "28px 28px",
-            opacity: 0.6,
-          }} />
+        <div className="absolute inset-0 pointer-events-none login__right-bg" />
 
         <div className="relative flex flex-col items-center gap-4">
           <img
             src="https://i.postimg.cc/RhHmYyQx/Logo_Premier_Hub.png"
             alt="PremierHub"
-            style={{ maxWidth: "60%", height: "auto", display: "block" }}
+            className="login__logo"
           />
-          <p style={{ fontSize: "0.8rem", color: "#84878F", letterSpacing: "0.1em",
-            textTransform: "uppercase", fontWeight: 600 }}>
+          <p className="login__slogan">
             La experiencia Premier League
           </p>
         </div>
@@ -247,20 +207,10 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 }
 
 /* ── Helpers de UI ── */
-const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "0.65rem 0.85rem",
-  borderRadius: 8, border: "1.5px solid #e5e7eb",
-  fontSize: "0.88rem", outline: "none",
-  transition: "border-color 0.2s",
-  fontFamily: "inherit", color: "#1a1a2e",
-  background: "#fff",
-};
-
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-      <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#263a55",
-        textTransform: "uppercase", letterSpacing: "0.06em" }}>
+    <div className="login__field">
+      <label className="login__label">
         {label}
       </label>
       {children}
@@ -273,22 +223,16 @@ function PasswordInput({ value, onChange, show, onToggle }: {
   show: boolean; onToggle: () => void;
 }) {
   return (
-    <div style={{ position: "relative" }}>
+    <div className="login__password">
       <input
         type={show ? "text" : "password"} required
         placeholder="••••••••"
         value={value} onChange={(e) => onChange(e.target.value)}
-        style={inputStyle}
-        onFocus={(e) => e.currentTarget.style.borderColor = "#263a55"}
-        onBlur={(e) => e.currentTarget.style.borderColor = "#e5e7eb"}
+        className="login__input"
       />
       <button
         type="button" onClick={onToggle}
-        style={{
-          position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-          background: "none", border: "none", cursor: "pointer",
-          color: "#84878F", display: "flex", alignItems: "center", padding: 0,
-        }}
+        className="login__password-toggle"
       >
         {show ? <EyeOpen /> : <EyeOff />}
       </button>

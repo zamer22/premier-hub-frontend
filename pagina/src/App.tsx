@@ -1,4 +1,5 @@
 import { useEffect, useState, CSSProperties } from "react";
+import "./App.css";
 import Partido          from "./pages/Partido";
 import Tienda           from "./pages/Tienda";
 import Noticias         from "./pages/NoticiasLanding";
@@ -318,23 +319,14 @@ export default function App() {
   if (user.es_admin) return <AdminEnvios user={user} onLogout={logout} />;
 
   return (
-    <div className="min-h-screen bg-surface" style={{ paddingTop: "66px" }}>
+    <div className="min-h-screen bg-surface app-shell">
       {/* ── Navbar ── */}
       <nav
-        className="flex items-center h-[66px] px-8 bg-navy gap-0.5"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          boxShadow: "0 2px 12px rgba(0,0,0,0.18)",
-        }}
+        className="flex items-center h-[66px] px-8 bg-navy gap-0.5 app-nav"
       >
         {/* Logo */}
         <span
-          className="font-extrabold text-[1.25rem] tracking-tight select-none mr-10"
-          style={{ letterSpacing: "-0.02em" }}
+          className="font-extrabold text-[1.25rem] tracking-tight select-none mr-10 app-logo"
         >
           <span className="text-crimson">PREMIER</span>
           <span className="text-white">HUB</span>
@@ -344,16 +336,13 @@ export default function App() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className="relative px-4 py-2 text-[0.82rem] font-medium whitespace-nowrap transition-all duration-200 cursor-pointer border-0 bg-transparent outline-none"
-            style={{ color: tab === t.key ? "#ffffff" : "#84878F", fontWeight: tab === t.key ? 700 : 500 }}
+            className={`relative px-4 py-2 text-[0.82rem] whitespace-nowrap transition-all duration-200 cursor-pointer border-0 bg-transparent outline-none app-tab ${tab === t.key ? "is-active" : ""}`}
           >
             {t.label}
             {tab === t.key && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full"
-                style={{ background: "linear-gradient(90deg, #E90052, #871d54)" }} />
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full app-tab__underline" />
             )}
-            <span className="absolute inset-0 rounded opacity-0 hover:opacity-100 transition-opacity duration-150"
-              style={{ background: "rgba(255,255,255,0.04)" }} />
+            <span className="absolute inset-0 rounded opacity-0 hover:opacity-100 transition-opacity duration-150 app-tab__hover" />
           </button>
         ))}
 
@@ -362,76 +351,20 @@ export default function App() {
             onClick={() => setTab("perfil")}
             aria-label="Abrir perfil"
             title="Abrir perfil"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              minHeight: "42px",
-              padding: "0.25rem 0.75rem 0.25rem 0.28rem",
-              borderRadius: "8px",
-              border:
-                tab === "perfil"
-                  ? "1px solid rgba(233,0,82,0.65)"
-                  : "1px solid transparent",
-              background:
-                tab === "perfil" ? "rgba(233,0,82,0.12)" : "transparent",
-              color: tab === "perfil" ? "#fff" : "rgba(255,255,255,0.7)",
-              fontSize: "0.82rem",
-              fontWeight: 700,
-              transition: "background 0.15s, border-color 0.15s, color 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background =
-                tab === "perfil" ? "rgba(233,0,82,0.12)" : "transparent";
-              e.currentTarget.style.color =
-                tab === "perfil" ? "#fff" : "rgba(255,255,255,0.7)";
-            }}
+            className={`app-profile ${tab === "perfil" ? "is-active" : ""}`}
           >
             <span
-              style={{
-                ...getFrameStyle(profileFrame),
-                width: 34,
-                height: 34,
-                borderRadius: "11px",
-                padding: 3,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flex: "0 0 auto",
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.18)",
-              }}
+              className="app-profile__frame"
+              style={getFrameStyle(profileFrame)}
             >
               <span
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "8px",
-                  overflow: "hidden",
-                  background: profileImage
-                    ? "#fff"
-                    : "linear-gradient(135deg, #E90052, #871d54)",
-                  color: "#fff",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "0.72rem",
-                  fontWeight: 900,
-                }}
+                className={`app-profile__avatar ${profileImage ? "has-image" : "is-empty"}`}
               >
                 {profileImage ? (
                   <img
                     src={profileImage}
                     alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
+                    className="app-profile__img"
                   />
                 ) : (
                   getInitials(user)

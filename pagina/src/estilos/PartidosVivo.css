@@ -1,0 +1,487 @@
+.pv-root {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #f4f6f9;
+  min-height: 100%;
+  padding: 1.25rem;
+  box-sizing: border-box;
+}
+
+.pv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.pv-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #263a55;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0;
+}
+
+.pv-live-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pv-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e90052;
+}
+
+.pv-live-badge {
+  background: #e90052;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+}
+
+.pv-scoreboard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pv-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pv-team-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.pv-team-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  color: #111827;
+}
+
+.pv-score-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pv-score-box {
+  background: #1a2d42;
+  border-radius: 12px;
+  padding: 0.8rem 2.5rem;
+  color: #fff;
+  font-size: 2.8rem;
+  font-weight: 800;
+}
+
+.pv-score-minute {
+  color: #e90052;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.pv-stadium {
+  background: #263a55;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  border-radius: 8px;
+}
+
+.pv-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.pv-panel {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+}
+
+.pv-tabs {
+  display: flex;
+  margin-bottom: 1.25rem;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.pv-tab {
+  flex: 1;
+  padding: 0.6rem 0;
+  border: none;
+  border-right: 1px solid #e5e7eb;
+  cursor: pointer;
+  background: #fff;
+  color: #84878f;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.pv-tab.is-active {
+  background: #e90052;
+  color: #fff;
+  font-weight: 700;
+}
+
+.pv-pitch {
+  border-radius: 10px;
+  height: 180px;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  background: repeating-linear-gradient(90deg, #2d7a4f 0px, #2d7a4f 36px, #317f53 36px, #317f53 72px);
+}
+
+.pv-pitch__mid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.pv-pitch__circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.pv-pitch__center-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+}
+
+.pv-pitch__area {
+  position: absolute;
+  top: 18%;
+  width: 14%;
+  height: 64%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.pv-pitch__area--left {
+  left: 0;
+  border-left: none;
+}
+
+.pv-pitch__area--right {
+  right: 0;
+  border-right: none;
+}
+
+.pv-pitch__area--left-small {
+  top: 33%;
+  left: 0;
+  width: 6%;
+  height: 34%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-left: none;
+}
+
+.pv-pitch__area--right-small {
+  top: 33%;
+  right: 0;
+  width: 6%;
+  height: 34%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-right: none;
+}
+
+.pv-shirt {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  color: #fff;
+}
+
+.pv-shirt--away {
+  color: #e90052;
+}
+
+.pv-shirt__icon {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+.pv-shirt--h1 { left: 5%; top: 50%; }
+.pv-shirt--h2 { left: 20%; top: 15%; }
+.pv-shirt--h3 { left: 20%; top: 38%; }
+.pv-shirt--h4 { left: 20%; top: 62%; }
+.pv-shirt--h5 { left: 20%; top: 85%; }
+.pv-shirt--h6 { left: 36%; top: 25%; }
+.pv-shirt--h7 { left: 36%; top: 50%; }
+.pv-shirt--h8 { left: 36%; top: 75%; }
+.pv-shirt--h9 { left: 50%; top: 18%; }
+.pv-shirt--h10 { left: 50%; top: 50%; }
+.pv-shirt--h11 { left: 50%; top: 82%; }
+
+.pv-shirt--a1 { left: 95%; top: 50%; }
+.pv-shirt--a2 { left: 80%; top: 15%; }
+.pv-shirt--a3 { left: 80%; top: 38%; }
+.pv-shirt--a4 { left: 80%; top: 62%; }
+.pv-shirt--a5 { left: 80%; top: 85%; }
+.pv-shirt--a6 { left: 64%; top: 25%; }
+.pv-shirt--a7 { left: 64%; top: 50%; }
+.pv-shirt--a8 { left: 64%; top: 75%; }
+.pv-shirt--a9 { left: 50%; top: 32%; }
+.pv-shirt--a10 { left: 50%; top: 65%; }
+
+.pv-lineup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.pv-lineup-col--left {
+  border-right: 1px solid #f0f0f0;
+}
+
+.pv-lineup-title {
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  padding: 0 0.75rem;
+}
+
+.pv-lineup-title--home { color: #263a55; }
+.pv-lineup-title--away { color: #e90052; }
+
+.pv-lineup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #f7f7f7;
+  font-size: 0.82rem;
+  color: #1f2937;
+}
+
+.pv-lineup-num {
+  color: #9ca3af;
+  font-size: 0.7rem;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.pv-empty {
+  color: #84878f;
+  font-size: 0.9rem;
+  padding: 0.75rem 0;
+}
+
+.pv-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  padding: 0.75rem 0;
+  font-weight: 600;
+}
+
+.pv-stats-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+
+.pv-stat-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.85rem;
+}
+
+.pv-stat-home {
+  font-weight: 700;
+  color: #263a55;
+}
+
+.pv-stat-label {
+  color: #9ca3af;
+  font-size: 0.78rem;
+  text-align: center;
+  min-width: 120px;
+}
+
+.pv-stat-away {
+  font-weight: 700;
+  color: #e90052;
+  text-align: right;
+}
+
+.pv-h2h-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pv-h2h-date {
+  color: #9ca3af;
+  font-size: 0.78rem;
+}
+
+.pv-h2h-match {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.pv-h2h-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pv-h2h-team--away {
+  justify-content: flex-end;
+}
+
+.pv-h2h-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.pv-h2h-score {
+  color: #263a55;
+}
+
+.pv-subs {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+}
+
+.pv-subs__header {
+  background: #e90052;
+  border-radius: 9px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pv-subs__title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.pv-subs__selector {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1rem;
+  background: #f0f2f5;
+  border-radius: 9px;
+  padding: 4px;
+}
+
+.pv-subs__btn {
+  flex: 1;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.pv-subs__btn.is-active {
+  background: #263a55;
+}
+
+.pv-subs__logo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.pv-subs__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.82rem;
+}
+
+.pv-subs__num {
+  background: #f0f2f5;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+  color: #263a55;
+}
+
+@media (max-width: 900px) {
+  .pv-scoreboard {
+    grid-template-columns: 1fr;
+  }
+
+  .pv-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
