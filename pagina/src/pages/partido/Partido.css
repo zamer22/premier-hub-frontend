@@ -5,11 +5,11 @@
 }
 
 .partido_loading {
-  color: #84878f;
+  color: var(--ph-muted);
 }
 
 .partido_error {
-  color: #dc2626;
+  color: var(--ph-danger-600);
 }
 
 .partido {
@@ -41,18 +41,18 @@
 .partido_accent {
   width: 4px;
   height: 20px;
-  background: #e90052;
+  background: var(--ph-red-600);
   border-radius: 2px;
 }
 
 .partido_title {
-  color: #263a55;
+  color: var(--ph-navy-700);
   font-size: 1.1rem;
   margin: 0;
 }
 
 .partido_subtitle {
-  color: #263a55;
+  color: var(--ph-navy-700);
   font-size: 1rem;
   margin: 0;
 }
@@ -68,14 +68,14 @@
 }
 
 .partido_table-head-row {
-  border-bottom: 2px solid #263a55;
+  border-bottom: 2px solid var(--ph-navy-700);
 }
 
 .partido_th {
   padding: 0.5rem 0.4rem;
   text-align: left;
   font-weight: 700;
-  color: #263a55;
+  color: var(--ph-navy-700);
   font-size: 0.7rem;
   text-transform: uppercase;
 }
@@ -115,11 +115,11 @@
 }
 
 .partido_goal-diff--positive {
-  color: #16a34a;
+  color: var(--ph-green-600);
 }
 
 .partido_goal-diff--negative {
-  color: #dc2626;
+  color: var(--ph-danger-600);
 }
 
 .partido_goal-diff--neutral {
@@ -128,11 +128,11 @@
 
 .partido_points {
   font-weight: 700;
-  color: #e90052;
+  color: var(--ph-red-600);
 }
 
 .partido_empty {
-  color: #84878f;
+  color: var(--ph-muted);
   font-size: 0.85rem;
 }
 
@@ -143,7 +143,7 @@
 
 .partido_match-date {
   font-size: 0.7rem;
-  color: #84878f;
+  color: var(--ph-muted);
   margin-bottom: 0.25rem;
   margin-top: 0.5rem;
 }
@@ -158,10 +158,6 @@
   margin-bottom: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   animation: fadeIn 0.3s ease;
-}
-
-.partido_match-click {
-  cursor: pointer;
 }
 
 .partido_match-side {
@@ -187,7 +183,7 @@
 
 .partido_match-score {
   font-weight: 700;
-  color: #e90052;
+  color: var(--ph-red-600);
   font-size: 0.95rem;
   min-width: 50px;
   text-align: center;
@@ -294,7 +290,7 @@
 
 .partido_upcoming-day {
   width: 78px;
-  background: #e90052;
+  background: var(--ph-red-600);
   color: #fff;
   display: flex;
   align-items: center;
@@ -319,7 +315,7 @@
 }
 
 .partido_upcoming-stadium {
-  background: #263a55;
+  background: var(--ph-navy-700);
   color: #fff;
   border-radius: 12px;
   padding: 0.7rem 1rem;
@@ -372,7 +368,7 @@
 }
 
 .partido_upcoming-vs {
-  background: #263a55;
+  background: var(--ph-navy-700);
   color: #fff;
   padding: 0.35rem 0.9rem;
   border-radius: 10px;
@@ -382,7 +378,7 @@
 }
 
 .partido_upcoming-time {
-  color: #e90052;
+  color: var(--ph-red-600);
   font-weight: 700;
   font-size: 0.9rem;
 }
@@ -417,7 +413,7 @@
 .partido_live-card {
   min-width: 320px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ph-border);
   border-radius: 14px;
   padding: 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -439,7 +435,7 @@
 }
 
 .partido_live-badge {
-  background: #e90052;
+  background: var(--ph-red-600);
   color: #fff;
   font-size: 0.72rem;
   font-weight: 800;
@@ -448,7 +444,7 @@
 }
 
 .partido_live-minute {
-  color: #263a55;
+  color: var(--ph-navy-700);
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -484,7 +480,7 @@
 }
 
 .partido_live-score {
-  background: #263a55;
+  background: var(--ph-navy-700);
   color: #fff;
   padding: 0.45rem 0.8rem;
   border-radius: 10px;
@@ -495,7 +491,7 @@
 
 .partido_live-stadium {
   margin: 0.9rem 0 0 0;
-  color: #84878f;
+  color: var(--ph-muted);
   font-size: 0.8rem;
   text-align: center;
 }
@@ -508,7 +504,7 @@
 .partido-vivo_back {
   border: none;
   background: transparent;
-  color: #263a55;
+  color: var(--ph-navy-700);
   font-weight: 700;
   cursor: pointer;
   margin-bottom: 1rem;
@@ -530,7 +526,7 @@
 }
 
 .partido-vivo_badge {
-  background: #e90052;
+  background: var(--ph-red-600);
   color: #fff;
   font-size: 0.78rem;
   font-weight: 800;
@@ -539,7 +535,7 @@
 }
 
 .partido-vivo_minute {
-  color: #263a55;
+  color: var(--ph-navy-700);
   font-weight: 800;
   font-size: 1rem;
 }
@@ -582,15 +578,15 @@
   gap: 0.75rem;
   font-size: 2rem;
   font-weight: 800;
-  color: #263a55;
+  color: var(--ph-navy-700);
 }
 
 .partido-vivo_score-separator {
-  color: #e90052;
+  color: var(--ph-red-600);
 }
 
 .partido-vivo_info {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--ph-border);
   padding-top: 1rem;
   color: #4b5563;
 }
@@ -628,7 +624,7 @@
 .partido_live-card {
   width: 100%;
   background: #f8fafc;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ph-border);
   border-radius: 14px;
   padding: 1rem;
   cursor: pointer;
@@ -649,7 +645,7 @@
 }
 
 .partido_live-badge {
-  background: #e90052;
+  background: var(--ph-red-600);
   color: #fff;
   font-size: 0.72rem;
   font-weight: 800;
@@ -658,7 +654,7 @@
 }
 
 .partido_live-minute {
-  color: #263a55;
+  color: var(--ph-navy-700);
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -694,7 +690,7 @@
 }
 
 .partido_live-score {
-  background: #263a55;
+  background: var(--ph-navy-700);
   color: #fff;
   padding: 0.45rem 0.8rem;
   border-radius: 10px;
@@ -705,7 +701,7 @@
 
 .partido_live-stadium {
   margin: 0.9rem 0 0 0;
-  color: #84878f;
+  color: var(--ph-muted);
   font-size: 0.8rem;
   text-align: center;
 }
@@ -751,7 +747,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #e90052;
+  background: var(--ph-red-600);
 }
 
 /* Scoreboard */
@@ -777,7 +773,7 @@
 }
 
 .pv_stadium-tag {
-  background: #263a55;
+  background: var(--ph-navy-700);
   border-radius: 8px;
   padding: 0.4rem 1rem;
   color: #fff;
@@ -792,7 +788,7 @@
 }
 
 .pv_minute-accent {
-  color: #e90052;
+  color: var(--ph-red-600);
   font-weight: 700;
   font-size: 0.9rem;
 }
@@ -821,14 +817,14 @@
   border-right: 1px solid #eee;
   cursor: pointer;
   background: #fff;
-  color: #84878f;
+  color: var(--ph-muted);
   font-weight: 500;
   font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 
 .pv_tab--active {
-  background: #e90052;
+  background: var(--ph-red-600);
   color: #fff;
   font-weight: 700;
 }
@@ -895,8 +891,8 @@
   margin-bottom: 0.5rem;
 }
 
-.pv_lineup-title--home { color: #263a55; }
-.pv_lineup-title--away { color: #e90052; }
+.pv_lineup-title--home { color: var(--ph-navy-700); }
+.pv_lineup-title--away { color: var(--ph-red-600); }
 
 .pv_player-row {
   display: flex;
@@ -917,8 +913,8 @@
   color: #fff;
 }
 
-.pv_player-num--home { background: #263a55; }
-.pv_player-num--away { background: #e90052; }
+.pv_player-num--home { background: var(--ph-navy-700); }
+.pv_player-num--away { background: var(--ph-red-600); }
 
 /* Estadísticas */
 .pv_prob-box {
@@ -931,7 +927,7 @@
 .pv_prob-title {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #263a55;
+  color: var(--ph-navy-700);
   margin-bottom: 0.75rem;
   text-align: center;
 }
@@ -943,8 +939,8 @@
   margin-bottom: 0.4rem;
 }
 
-.pv_prob-home { font-weight: 700; color: #263a55; }
-.pv_prob-away { font-weight: 700; color: #e90052; }
+.pv_prob-home { font-weight: 700; color: var(--ph-navy-700); }
+.pv_prob-away { font-weight: 700; color: var(--ph-red-600); }
 
 .pv_prob-bar {
   display: flex;
@@ -953,14 +949,14 @@
   overflow: hidden;
 }
 
-.pv_prob-bar--home { background: #263a55; }
-.pv_prob-bar--draw { background: #84878f; }
-.pv_prob-bar--away { background: #e90052; }
+.pv_prob-bar--home { background: var(--ph-navy-700); }
+.pv_prob-bar--draw { background: var(--ph-muted); }
+.pv_prob-bar--away { background: var(--ph-red-600); }
 
 .pv_stats-section-label {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #84878f;
+  color: var(--ph-muted);
   text-transform: uppercase;
   margin-bottom: 0.5rem;
 }
@@ -975,9 +971,9 @@
   font-size: 0.85rem;
 }
 
-.pv_stat-home { font-weight: 600; color: #263a55; }
-.pv_stat-label { color: #84878f; font-size: 0.75rem; text-align: center; min-width: 110px; }
-.pv_stat-away { font-weight: 600; color: #e90052; text-align: right; }
+.pv_stat-home { font-weight: 600; color: var(--ph-navy-700); }
+.pv_stat-label { color: var(--ph-muted); font-size: 0.75rem; text-align: center; min-width: 110px; }
+.pv_stat-away { font-weight: 600; color: var(--ph-red-600); text-align: right; }
 
 /* H2H */
 .pv_h2h-row {
@@ -1019,8 +1015,8 @@
   text-align: center;
 }
 
-.pv_h2h-goal--winner { background: #263a55; color: #fff; }
-.pv_h2h-goal--loser { background: transparent; color: #84878f; }
+.pv_h2h-goal--winner { background: var(--ph-navy-700); color: #fff; }
+.pv_h2h-goal--loser { background: transparent; color: var(--ph-muted); }
 
 /* Panel sustituciones */
 .pv_subs-panel {
@@ -1031,7 +1027,7 @@
   display: flex;
   gap: 0.25rem;
   margin-bottom: 1rem;
-  background: #f5f6f8;
+  background: var(--ph-surface);
   border-radius: 8px;
   padding: 0.25rem;
 }
@@ -1049,7 +1045,7 @@
   transition: background 0.2s ease;
 }
 
-.pv_subs-btn--active { background: #263a55; }
+.pv_subs-btn--active { background: var(--ph-navy-700); }
 
 .pv_subs-num {
   background: #f0f0f0;
@@ -1073,5 +1069,598 @@
   .pv_scoreboard {
     grid-template-columns: 1fr;
     text-align: center;
+  }
+}
+
+.partido_match-link {
+  cursor: pointer;
+}
+
+.pp-root {
+  width: 100%;
+  display: grid;
+  gap: 1rem;
+  color: var(--ph-text);
+}
+
+.pp-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pp-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ph-text-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pp-back:hover {
+  color: var(--ph-red-600);
+}
+
+.pp-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--ph-radius-pill);
+  background: var(--ph-navy-800);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.pp-scoreboard,
+.pp-panel {
+  background: var(--ph-surface-raised);
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-lg);
+  box-shadow: var(--ph-shadow-xs);
+}
+
+.pp-scoreboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  min-height: 220px;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.pp-team {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.pp-logo {
+  width: clamp(58px, 7vw, 76px);
+  height: clamp(58px, 7vw, 76px);
+  object-fit: contain;
+}
+
+.pp-team-name {
+  max-width: 220px;
+  color: var(--ph-text-strong);
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.pp-score-center {
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+}
+
+.pp-score-box {
+  min-width: 156px;
+  padding: 0.65rem 1.65rem;
+  border-radius: var(--ph-radius-md);
+  background: linear-gradient(135deg, var(--ph-navy-900), var(--ph-navy-700));
+  color: #fff;
+  font-size: clamp(2.1rem, 4vw, 3rem);
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+
+.pp-date,
+.pp-league {
+  margin: 0;
+  color: var(--ph-muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.pp-stadium {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  background: var(--ph-navy-800);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.pp-panel {
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  overflow: hidden;
+}
+
+.pp-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1.35rem;
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-sm);
+  overflow: hidden;
+  background: var(--ph-surface-soft);
+}
+
+.pp-tab {
+  min-height: 48px;
+  border: 0;
+  border-right: 1px solid var(--ph-border);
+  background: transparent;
+  color: var(--ph-muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.pp-tab:last-child {
+  border-right: 0;
+}
+
+.pp-tab:hover {
+  color: var(--ph-text-strong);
+  background: #fff;
+}
+
+.pp-tab--active {
+  background: var(--ph-red-600);
+  color: #fff;
+}
+
+.pp-tab--active:hover {
+  color: #fff;
+  background: var(--ph-red-600);
+}
+
+.pp-state {
+  margin: 0;
+  padding: 1.1rem 0;
+  color: var(--ph-muted);
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.pp-state--error {
+  color: var(--ph-danger-600);
+}
+
+.pp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 1.2rem;
+}
+
+.pp-filter {
+  min-height: 36px;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-pill);
+  background: #fff;
+  color: var(--ph-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.pp-filter:hover {
+  border-color: var(--ph-red-300);
+  color: var(--ph-red-700);
+}
+
+.pp-filter--active {
+  border-color: var(--ph-red-600);
+  background: var(--ph-red-600);
+  color: #fff;
+}
+
+.pp-timeline {
+  position: relative;
+}
+
+.pp-timeline-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 0;
+  width: 2px;
+  background: var(--ph-border);
+  transform: translateX(-50%);
+}
+
+.pp-half-separator {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.15rem -1.5rem;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(135deg, var(--ph-navy-900), var(--ph-navy-700));
+}
+
+.pp-half-separator span {
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pp-event-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.pp-event-side {
+  display: flex;
+  min-width: 0;
+}
+
+.pp-event-side--home {
+  justify-content: flex-end;
+}
+
+.pp-event-side--away {
+  justify-content: flex-start;
+}
+
+.pp-event-content {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+  padding: 0 0.35rem;
+}
+
+.pp-event-content--home {
+  justify-items: end;
+  text-align: right;
+}
+
+.pp-event-content--away {
+  justify-items: start;
+  text-align: left;
+}
+
+.pp-event-player {
+  color: var(--ph-text-strong);
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.22;
+}
+
+.pp-event-player--goal {
+  color: var(--ph-navy-800);
+}
+
+.pp-event-label,
+.pp-event-assist,
+.pp-event-sub {
+  font-size: 0.8rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.pp-event-label {
+  color: var(--ph-muted);
+}
+
+.pp-event-label--goal {
+  color: var(--ph-red-600);
+}
+
+.pp-event-label--card {
+  color: var(--ph-warning-700);
+}
+
+.pp-event-label--subst,
+.pp-event-sub {
+  color: var(--ph-green-600);
+}
+
+.pp-event-assist {
+  color: var(--ph-muted);
+}
+
+.pp-event-center {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+}
+
+.pp-event-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border: 3px solid var(--ph-border);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--ph-shadow-xs);
+  overflow: hidden;
+}
+
+.pp-event-icon--goal {
+  border-color: var(--ph-red-600);
+}
+
+.pp-event-icon--card {
+  border-color: var(--ph-warning-500);
+  background: var(--ph-warning-50);
+}
+
+.pp-event-icon--subst {
+  border-color: var(--ph-green-600);
+  background: var(--ph-green-50);
+}
+
+.pp-event-icon-img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.pp-event-dot {
+  color: var(--ph-muted);
+  font-size: 1.2rem;
+}
+
+.pp-event-minute {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0.16rem 0.5rem;
+  border-radius: 6px;
+  background: var(--ph-surface-soft);
+  color: var(--ph-text);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.pp-section-label {
+  margin: 0 0 0.7rem;
+  color: var(--ph-muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pp-stats-list {
+  display: grid;
+}
+
+.pp-stat-row {
+  display: grid;
+  grid-template-columns: minmax(72px, 1fr) minmax(130px, auto) minmax(72px, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.78rem 0;
+  border-bottom: 1px solid var(--ph-border-subtle);
+}
+
+.pp-stat-value {
+  font-size: 0.98rem;
+  font-weight: 850;
+}
+
+.pp-stat-value--home {
+  color: var(--ph-navy-700);
+}
+
+.pp-stat-value--away {
+  color: var(--ph-red-600);
+  text-align: right;
+}
+
+.pp-stat-label {
+  min-width: 130px;
+  color: var(--ph-muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.pp-lineups-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+.pp-lineup-team {
+  min-width: 0;
+}
+
+.pp-lineup-team--home {
+  border-right: 1px solid var(--ph-border-subtle);
+}
+
+.pp-lineup-title {
+  margin: 0 0 0.55rem;
+  padding: 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.pp-lineup-title--home {
+  color: var(--ph-navy-700);
+}
+
+.pp-lineup-title--away {
+  color: var(--ph-red-600);
+}
+
+.pp-lineup-subtitle {
+  margin: 0;
+  padding: 0.75rem 0.75rem 0.3rem;
+  color: var(--ph-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pp-player-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.68rem 0.75rem;
+  border-bottom: 1px solid var(--ph-border-subtle);
+  color: var(--ph-text);
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.pp-player-row--sub {
+  color: var(--ph-muted);
+}
+
+.pp-player-num {
+  min-width: 24px;
+  flex: 0 0 auto;
+  color: var(--ph-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: right;
+}
+
+.pp-scroll-top {
+  justify-self: center;
+  min-height: 42px;
+  padding: 0.72rem 1.8rem;
+  border: 0;
+  border-radius: var(--ph-radius-pill);
+  background: var(--ph-navy-800);
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: var(--ph-shadow-xs);
+}
+
+.pp-scroll-top:hover {
+  background: var(--ph-navy-700);
+}
+
+@media (max-width: 760px) {
+  .pp-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pp-scoreboard {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .pp-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .pp-tab {
+    border-right: 0;
+    border-bottom: 1px solid var(--ph-border);
+  }
+
+  .pp-tab:last-child {
+    border-bottom: 0;
+  }
+
+  .pp-timeline-line {
+    left: 42px;
+  }
+
+  .pp-half-separator {
+    justify-content: flex-start;
+    margin-inline: 0;
+    border-radius: var(--ph-radius-sm);
+  }
+
+  .pp-event-row {
+    grid-template-columns: 74px minmax(0, 1fr);
+  }
+
+  .pp-event-side--home,
+  .pp-event-side--away {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+
+  .pp-event-side--home {
+    grid-row: 1;
+  }
+
+  .pp-event-center {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .pp-event-content--home,
+  .pp-event-content--away {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .pp-lineups-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pp-lineup-team--home {
+    border-right: 0;
+  }
+
+  .pp-stat-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .pp-stat-value--away,
+  .pp-stat-label {
+    text-align: left;
   }
 }

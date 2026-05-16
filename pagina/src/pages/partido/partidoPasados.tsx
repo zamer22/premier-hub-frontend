@@ -47,47 +47,44 @@ const TABS = ["Jugadas", "Estadísticas", "Alineaciones"];
 type EventFilter = "todos" | "goles" | "amarillas" | "rojas" | "sustituciones";
 
 const FILTERS: { key: EventFilter; label: string }[] = [
-  { key: "todos",         label: "Todos"         },
-  { key: "goles",         label: "Goles"         },
-  { key: "amarillas",     label: "Amarillas"     },
-  { key: "rojas",         label: "Rojas"         },
+  { key: "todos", label: "Todos" },
+  { key: "goles", label: "Goles" },
+  { key: "amarillas", label: "Amarillas" },
+  { key: "rojas", label: "Rojas" },
   { key: "sustituciones", label: "Sustituciones" },
 ];
 
 const STATS_ES: Record<string, string> = {
-  "Shots on Goal":    "Tiros a puerta",
-  "Shots off Goal":   "Tiros fuera",
-  "Total Shots":      "Tiros totales",
-  "Blocked Shots":    "Tiros bloqueados",
-  "Shots insidebox":  "Tiros dentro del área",
+  "Shots on Goal": "Tiros a puerta",
+  "Shots off Goal": "Tiros fuera",
+  "Total Shots": "Tiros totales",
+  "Blocked Shots": "Tiros bloqueados",
+  "Shots insidebox": "Tiros dentro del área",
   "Shots outsidebox": "Tiros fuera del área",
-  "Fouls":            "Faltas",
-  "Corner Kicks":     "Tiros de esquina",
-  "Offsides":         "Fueras de juego",
-  "Ball Possession":  "Posesión del balón",
-  "Yellow Cards":     "Tarjetas amarillas",
-  "Red Cards":        "Tarjetas rojas",
+  Fouls: "Faltas",
+  "Corner Kicks": "Tiros de esquina",
+  Offsides: "Fueras de juego",
+  "Ball Possession": "Posesión del balón",
+  "Yellow Cards": "Tarjetas amarillas",
+  "Red Cards": "Tarjetas rojas",
   "Goalkeeper Saves": "Atajadas",
-  "Total passes":     "Pases totales",
-  "Passes accurate":  "Pases precisos",
-  "Passes %":         "Precisión de pases",
-  "expected_goals":   "Goles esperados (xG)",
-  "goals_prevented":  "Goles evitados",
+  "Total passes": "Pases totales",
+  "Passes accurate": "Pases precisos",
+  "Passes %": "Precisión de pases",
+  expected_goals: "Goles esperados (xG)",
+  goals_prevented: "Goles evitados",
 };
 
 const EVENT_ICONS: Record<string, string> = {
-  goal:   "https://images.vexels.com/media/users/3/158409/isolated/preview/b0af06a4c1a8e7a31ce379250130d26c-pelota-de-futbol-pentagono-silueta.png",
+  goal: "https://images.vexels.com/media/users/3/158409/isolated/preview/b0af06a4c1a8e7a31ce379250130d26c-pelota-de-futbol-pentagono-silueta.png",
   yellow: "https://stylfoot.fr/3641-thickbox_01icon/referee-yellow-card.jpg",
-  red:    "https://stylfoot.fr/3640/referee-red-card.jpg",
-  subst:  "https://images.vexels.com/media/users/3/146860/isolated/lists/bbe607c0831621bfe4606d241ef04f8a-icono-de-sustituto-de-futbol.png",
+  red: "https://stylfoot.fr/3640/referee-red-card.jpg",
+  subst: "https://images.vexels.com/media/users/3/146860/isolated/lists/bbe607c0831621bfe4606d241ef04f8a-icono-de-sustituto-de-futbol.png",
 };
 
 function eventIconUrl(type: string, detail: string): string | null {
   if (type === "Goal") return EVENT_ICONS.goal;
-  if (type === "Card") {
-    if (detail.includes("Red")) return EVENT_ICONS.red;
-    return EVENT_ICONS.yellow;
-  }
+  if (type === "Card") return detail.includes("Red") ? EVENT_ICONS.red : EVENT_ICONS.yellow;
   if (type === "subst") return EVENT_ICONS.subst;
   return null;
 }
@@ -111,15 +108,21 @@ function eventLabel(type: string, detail: string): string {
 }
 
 function matchesFilter(event: MatchEvent, filter: EventFilter): boolean {
-  if (filter === "todos")         return true;
-  if (filter === "goles")         return event.type === "Goal";
-  if (filter === "amarillas")     return event.type === "Card" && !event.detail.includes("Red");
-  if (filter === "rojas")         return event.type === "Card" && (event.detail === "Red Card" || event.detail === "Yellow Red Card");
+  if (filter === "todos") return true;
+  if (filter === "goles") return event.type === "Goal";
+  if (filter === "amarillas") return event.type === "Card" && !event.detail.includes("Red");
+  if (filter === "rojas") return event.type === "Card" && (event.detail === "Red Card" || event.detail === "Yellow Red Card");
   if (filter === "sustituciones") return event.type === "subst";
   return true;
 }
 
-// ── FilterBar ─────────────────────────────────────────────────────────────────
+function eventTone(type: string) {
+  if (type === "Goal") return "goal";
+  if (type === "Card") return "card";
+  if (type === "subst") return "subst";
+  return "default";
+}
+
 function FilterBar({
   active,
   onChange,
@@ -128,100 +131,119 @@ function FilterBar({
   onChange: (f: EventFilter) => void;
 }) {
   return (
-    <div className="past-match__filters">
-      {FILTERS.map(({ key, label }) => {
-        const isActive = active === key;
-        return (
-          <button
-            key={key}
-            onClick={() => onChange(key)}
-            className={`past-match__filter ${isActive ? "is-active" : ""}`}
-          >
-            {label}
-          </button>
-        );
-      })}
+    <div className="pp-filters" aria-label="Filtrar jugadas">
+      {FILTERS.map(({ key, label }) => (
+        <button
+          key={key}
+          type="button"
+          onClick={() => onChange(key)}
+          className={`pp-filter ${active === key ? "pp-filter--active" : ""}`}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 }
 
-// ── HalfSeparator ─────────────────────────────────────────────────────────────
 function HalfSeparator({ label }: { label: string }) {
   return (
-    <div className="past-match__half">
-      <span className="past-match__half-label">{label}</span>
+    <div className="pp-half-separator">
+      <span>{label}</span>
     </div>
   );
 }
 
-// ── EventRow ──────────────────────────────────────────────────────────────────
 function EventRow({ event, match }: { event: MatchEvent; match: PastMatch }) {
   const isHome = event.team.name === match.homeTeam.name;
   const iconUrl = eventIconUrl(event.type, event.detail);
-  const isGoal = event.type === "Goal";
+  const tone = eventTone(event.type);
 
   const content = (
-    <div className={`past-match__event-content ${isHome ? "is-home" : "is-away"}`}>
-      <span className={`past-match__event-player ${isGoal ? "is-goal" : ""}`}>{event.player}</span>
-      <span className={`past-match__event-label ${isGoal ? "is-goal" : ""}`}>{eventLabel(event.type, event.detail)}</span>
-      {event.assist && event.type === "Goal" && (
-        <span className="past-match__event-assist">Asist. {event.assist}</span>
-      )}
-      {event.type === "subst" && event.assist && (
-        <span className="past-match__event-sub">↑ {event.assist}</span>
-      )}
+    <div className={`pp-event-content ${isHome ? "pp-event-content--home" : "pp-event-content--away"}`}>
+      <span className={`pp-event-player ${tone === "goal" ? "pp-event-player--goal" : ""}`}>{event.player}</span>
+      <span className={`pp-event-label pp-event-label--${tone}`}>{eventLabel(event.type, event.detail)}</span>
+      {event.assist && event.type === "Goal" ? <span className="pp-event-assist">Asist. {event.assist}</span> : null}
+      {event.type === "subst" && event.assist ? <span className="pp-event-sub">Entra {event.assist}</span> : null}
     </div>
   );
 
-  const typeClass = event.type === "Goal"
-    ? "is-goal"
-    : event.type === "Card"
-    ? "is-card"
-    : event.type === "subst"
-    ? "is-subst"
-    : "is-default";
-
   return (
-    <div className="past-match__event-row">
-      <div className="past-match__event-side past-match__event-side--left">{isHome ? content : null}</div>
+    <div className="pp-event-row">
+      <div className="pp-event-side pp-event-side--home">{isHome ? content : null}</div>
 
-      <div className="past-match__event-center">
-        <div className={`past-match__event-icon ${typeClass}`}>
+      <div className="pp-event-center">
+        <div className={`pp-event-icon pp-event-icon--${tone}`}>
           {iconUrl ? (
-            <img
-              src={iconUrl}
-              alt={eventLabel(event.type, event.detail)}
-              className="past-match__event-icon-img"
-            />
+            <img src={iconUrl} alt={eventLabel(event.type, event.detail)} className="pp-event-icon-img" />
           ) : (
-            <span className="past-match__event-icon-dot">•</span>
+            <span className="pp-event-dot">•</span>
           )}
         </div>
-        <span className="past-match__event-minute">
-          {event.minute}{event.extra ? `+${event.extra}` : ""}′
+        <span className="pp-event-minute">
+          {event.minute}
+          {event.extra ? `+${event.extra}` : ""}'
         </span>
       </div>
 
-      <div className="past-match__event-side past-match__event-side--right">{!isHome ? content : null}</div>
+      <div className="pp-event-side pp-event-side--away">{!isHome ? content : null}</div>
     </div>
   );
 }
 
-// ── Componente principal ──────────────────────────────────────────────────────
+function StateText({ children, tone = "muted" }: { children: string; tone?: "muted" | "error" }) {
+  return <p className={`pp-state ${tone === "error" ? "pp-state--error" : ""}`}>{children}</p>;
+}
+
+function LineupColumn({
+  tone,
+  title,
+  starters,
+  subs,
+}: {
+  tone: "home" | "away";
+  title: string;
+  starters: LineupPlayer[];
+  subs: LineupPlayer[];
+}) {
+  return (
+    <div className={`pp-lineup-team pp-lineup-team--${tone}`}>
+      <p className={`pp-lineup-title pp-lineup-title--${tone}`}>{title}</p>
+      {starters.map((player) => (
+        <div key={`starter-${tone}-${player.player_number}-${player.player_name}`} className="pp-player-row">
+          <span className="pp-player-num">{player.player_number ?? "-"}</span>
+          <span>{player.player_name}</span>
+        </div>
+      ))}
+      {subs.length > 0 ? (
+        <>
+          <p className="pp-lineup-subtitle">Suplentes</p>
+          {subs.map((player) => (
+            <div key={`sub-${tone}-${player.player_number}-${player.player_name}`} className="pp-player-row pp-player-row--sub">
+              <span className="pp-player-num">{player.player_number ?? "-"}</span>
+              <span>{player.player_name}</span>
+            </div>
+          ))}
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 export default function PartidoPasado({ match, onBack }: Props) {
   const [tab, setTab] = useState("Jugadas");
   const [eventFilter, setEventFilter] = useState<EventFilter>("todos");
 
-  const [events, setEvents]   = useState<MatchEvent[]>([]);
-  const [stats, setStats]     = useState<MatchStat[]>([]);
+  const [events, setEvents] = useState<MatchEvent[]>([]);
+  const [stats, setStats] = useState<MatchStat[]>([]);
   const [lineups, setLineups] = useState<LineupPlayer[]>([]);
 
-  const [loadingEvents,  setLoadingEvents]  = useState(true);
-  const [loadingStats,   setLoadingStats]   = useState(true);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [loadingStats, setLoadingStats] = useState(true);
   const [loadingLineups, setLoadingLineups] = useState(true);
 
-  const [eventsError,  setEventsError]  = useState("");
-  const [statsError,   setStatsError]   = useState("");
+  const [eventsError, setEventsError] = useState("");
+  const [statsError, setStatsError] = useState("");
   const [lineupsError, setLineupsError] = useState("");
 
   useEffect(() => {
@@ -231,230 +253,180 @@ export default function PartidoPasado({ match, onBack }: Props) {
 
     fetch(`${API_URL}/api/partidos/historial/${match.id}/eventos`)
       .then((r) => r.json())
-      .then((json) => { if (json.success) setEvents(json.data); else setEventsError("No se pudieron cargar los eventos."); })
+      .then((json) => {
+        if (json.success) setEvents(json.data);
+        else setEventsError("No se pudieron cargar los eventos.");
+      })
       .catch(() => setEventsError("Error de conexión."))
       .finally(() => setLoadingEvents(false));
 
     fetch(`${API_URL}/api/partidos/historial/${match.id}/stats`)
       .then((r) => r.json())
-      .then((json) => { if (json.success) setStats(json.data); else setStatsError("No se pudieron cargar las estadísticas."); })
+      .then((json) => {
+        if (json.success) setStats(json.data);
+        else setStatsError("No se pudieron cargar las estadísticas.");
+      })
       .catch(() => setStatsError("Error de conexión."))
       .finally(() => setLoadingStats(false));
 
     fetch(`${API_URL}/api/partidos/historial/${match.id}/lineups`)
       .then((r) => r.json())
-      .then((json) => { if (json.success) setLineups(json.data); else setLineupsError("No se pudieron cargar las alineaciones."); })
+      .then((json) => {
+        if (json.success) setLineups(json.data);
+        else setLineupsError("No se pudieron cargar las alineaciones.");
+      })
       .catch(() => setLineupsError("Error de conexión."))
       .finally(() => setLoadingLineups(false));
   }, [match.id]);
 
   const filteredEvents = events.filter((e) => matchesFilter(e, eventFilter));
-
-  const firstHalf  = filteredEvents.filter((e) => e.minute <= 45);
+  const firstHalf = filteredEvents.filter((e) => e.minute <= 45);
   const secondHalf = filteredEvents.filter((e) => e.minute > 45 && e.minute <= 90);
-  const extraTime  = filteredEvents.filter((e) => e.minute > 90);
+  const extraTime = filteredEvents.filter((e) => e.minute > 90);
 
   const homeStarters = lineups.filter((p) => p.team === "home" && !p.is_sub);
   const awayStarters = lineups.filter((p) => p.team === "away" && !p.is_sub);
-  const homeSubs     = lineups.filter((p) => p.team === "home" && p.is_sub);
-  const awaySubs     = lineups.filter((p) => p.team === "away" && p.is_sub);
+  const homeSubs = lineups.filter((p) => p.team === "home" && p.is_sub);
+  const awaySubs = lineups.filter((p) => p.team === "away" && p.is_sub);
 
   const formattedDate = new Date(match.date).toLocaleDateString("es-MX", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 
   return (
-    <div className="past-match">
-      {/* Header */}
-      <div className="past-match__header">
-        <button type="button" onClick={onBack} className="past-match__back">
+    <div className="pp-root">
+      <div className="pp-topbar">
+        <button type="button" onClick={onBack} className="pp-back">
           ← Volver
         </button>
-        <span className="past-match__status">
-          Partido finalizado
-        </span>
+        <span className="pp-status">Partido finalizado</span>
       </div>
 
-      {/* Scoreboard */}
-      <div className="past-match__scoreboard">
-        <div className="past-match__team">
-          <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="past-match__team-logo" />
-          <span className="past-match__team-name">{match.homeTeam.name}</span>
+      <section className="pp-scoreboard" aria-label="Marcador del partido">
+        <div className="pp-team">
+          <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="pp-logo" />
+          <span className="pp-team-name">{match.homeTeam.name}</span>
         </div>
-        <div className="past-match__score-center">
-          <div className="past-match__score-box">
+
+        <div className="pp-score-center">
+          <div className="pp-score-box">
             {match.homeTeam.score} - {match.awayTeam.score}
           </div>
-          <p className="past-match__meta">{formattedDate}</p>
-          <div className="past-match__stadium">{match.stadium}</div>
-          <p className="past-match__league">{match.league}</p>
+          <p className="pp-date">{formattedDate}</p>
+          <span className="pp-stadium">{match.stadium}</span>
+          <p className="pp-league">{match.league}</p>
         </div>
-        <div className="past-match__team">
-          <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="past-match__team-logo" />
-          <span className="past-match__team-name">{match.awayTeam.name}</span>
-        </div>
-      </div>
 
-      {/* Panel con tabs */}
-      <div className="past-match__panel">
-        {/* Tabs */}
-        <div className="past-match__tabs">
-          {TABS.map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`past-match__tab ${tab === t ? "is-active" : ""}`}>
-              {t}
+        <div className="pp-team">
+          <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="pp-logo" />
+          <span className="pp-team-name">{match.awayTeam.name}</span>
+        </div>
+      </section>
+
+      <section className="pp-panel">
+        <div className="pp-tabs" role="tablist" aria-label="Detalle del partido">
+          {TABS.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setTab(item)}
+              className={`pp-tab ${tab === item ? "pp-tab--active" : ""}`}
+            >
+              {item}
             </button>
           ))}
         </div>
 
-        {/* ── Tab: Jugadas ── */}
-        {tab === "Jugadas" && (
+        {tab === "Jugadas" ? (
           <>
             {loadingEvents ? (
-              <p className="past-match__message">Cargando eventos...</p>
+              <StateText>Cargando eventos...</StateText>
             ) : eventsError ? (
-              <p className="past-match__message past-match__message--error">{eventsError}</p>
+              <StateText tone="error">{eventsError}</StateText>
             ) : events.length === 0 ? (
-              <p className="past-match__message">No hay eventos registrados.</p>
+              <StateText>No hay eventos registrados.</StateText>
             ) : (
               <>
                 <FilterBar active={eventFilter} onChange={setEventFilter} />
-
                 {filteredEvents.length === 0 ? (
-                  <p className="past-match__empty">
-                    No hay eventos de este tipo en el partido.
-                  </p>
+                  <StateText>No hay eventos de este tipo en el partido.</StateText>
                 ) : (
-                  <div className="past-match__timeline">
-                    <div className="past-match__timeline-line" />
-
-                    {firstHalf.length > 0 && (
+                  <div className="pp-timeline">
+                    <div className="pp-timeline-line" />
+                    {firstHalf.length > 0 ? (
                       <>
-                        <HalfSeparator label="Primer Tiempo" />
-                        {firstHalf.map((e, i) => <EventRow key={`1h-${i}`} event={e} match={match} />)}
+                        <HalfSeparator label="Primer tiempo" />
+                        {firstHalf.map((event, index) => <EventRow key={`1h-${index}`} event={event} match={match} />)}
                       </>
-                    )}
-
-                    {secondHalf.length > 0 && (
+                    ) : null}
+                    {secondHalf.length > 0 ? (
                       <>
-                        <HalfSeparator label="Segundo Tiempo" />
-                        {secondHalf.map((e, i) => <EventRow key={`2h-${i}`} event={e} match={match} />)}
+                        <HalfSeparator label="Segundo tiempo" />
+                        {secondHalf.map((event, index) => <EventRow key={`2h-${index}`} event={event} match={match} />)}
                       </>
-                    )}
-
-                    {extraTime.length > 0 && (
+                    ) : null}
+                    {extraTime.length > 0 ? (
                       <>
-                        <HalfSeparator label="Tiempo Extra" />
-                        {extraTime.map((e, i) => <EventRow key={`et-${i}`} event={e} match={match} />)}
+                        <HalfSeparator label="Tiempo extra" />
+                        {extraTime.map((event, index) => <EventRow key={`et-${index}`} event={event} match={match} />)}
                       </>
-                    )}
+                    ) : null}
                   </div>
                 )}
               </>
             )}
           </>
-        )}
+        ) : null}
 
-        {/* ── Tab: Estadísticas ── */}
-        {tab === "Estadísticas" && (
+        {tab === "Estadísticas" ? (
           <>
             {loadingStats ? (
-              <p className="past-match__message">Cargando estadísticas...</p>
+              <StateText>Cargando estadísticas...</StateText>
             ) : statsError ? (
-              <p className="past-match__message past-match__message--error">{statsError}</p>
+              <StateText tone="error">{statsError}</StateText>
             ) : stats.length === 0 ? (
-              <p className="past-match__message">No hay estadísticas disponibles.</p>
+              <StateText>No hay estadísticas disponibles.</StateText>
             ) : (
               <>
-                <p className="past-match__stats-title">
-                  Estadísticas del partido
-                </p>
-                {stats.map((s, idx) => (
-                  <div key={`${s.label}-${idx}`} className="past-match__stat-row">
-                    <span className="past-match__stat-home">{s.home_value}</span>
-                    <span className="past-match__stat-label">
-                      {STATS_ES[s.label] ?? s.label}
-                    </span>
-                    <span className="past-match__stat-away">{s.away_value}</span>
-                  </div>
-                ))}
+                <p className="pp-section-label">Estadísticas del partido</p>
+                <div className="pp-stats-list">
+                  {stats.map((stat, index) => (
+                    <div key={`${stat.label}-${index}`} className="pp-stat-row">
+                      <span className="pp-stat-value pp-stat-value--home">{stat.home_value}</span>
+                      <span className="pp-stat-label">{STATS_ES[stat.label] ?? stat.label}</span>
+                      <span className="pp-stat-value pp-stat-value--away">{stat.away_value}</span>
+                    </div>
+                  ))}
+                </div>
               </>
             )}
           </>
-        )}
+        ) : null}
 
-        {/* ── Tab: Alineaciones ── */}
-        {tab === "Alineaciones" && (
+        {tab === "Alineaciones" ? (
           <>
             {loadingLineups ? (
-              <p className="past-match__message">Cargando alineaciones...</p>
+              <StateText>Cargando alineaciones...</StateText>
             ) : lineupsError ? (
-              <p className="past-match__message past-match__message--error">{lineupsError}</p>
+              <StateText tone="error">{lineupsError}</StateText>
             ) : lineups.length === 0 ? (
-              <p className="past-match__message">No hay alineaciones disponibles.</p>
+              <StateText>No hay alineaciones disponibles.</StateText>
             ) : (
-              <div className="past-match__lineups">
-                {/* Local */}
-                <div className="past-match__lineup-col past-match__lineup-col--left">
-                  <p className="past-match__lineup-title past-match__lineup-title--home">
-                    {match.homeTeam.name}
-                  </p>
-                  {homeStarters.map((p) => (
-                    <div key={p.player_number} className="past-match__lineup-row">
-                      <span className="past-match__lineup-num">{p.player_number ?? "-"}</span>
-                      <span>{p.player_name}</span>
-                    </div>
-                  ))}
-                  {homeSubs.length > 0 && (
-                    <>
-                      <p className="past-match__lineup-subtitle">SUPLENTES</p>
-                      {homeSubs.map((p) => (
-                        <div key={p.player_number} className="past-match__lineup-row past-match__lineup-row--sub">
-                          <span className="past-match__lineup-num">{p.player_number ?? "-"}</span>
-                          <span>{p.player_name}</span>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
-
-                {/* Visitante */}
-                <div className="past-match__lineup-col">
-                  <p className="past-match__lineup-title past-match__lineup-title--away">
-                    {match.awayTeam.name}
-                  </p>
-                  {awayStarters.map((p) => (
-                    <div key={p.player_number} className="past-match__lineup-row">
-                      <span className="past-match__lineup-num">{p.player_number ?? "-"}</span>
-                      <span>{p.player_name}</span>
-                    </div>
-                  ))}
-                  {awaySubs.length > 0 && (
-                    <>
-                      <p className="past-match__lineup-subtitle">SUPLENTES</p>
-                      {awaySubs.map((p) => (
-                        <div key={p.player_number} className="past-match__lineup-row past-match__lineup-row--sub">
-                          <span className="past-match__lineup-num">{p.player_number ?? "-"}</span>
-                          <span>{p.player_name}</span>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
+              <div className="pp-lineups-grid">
+                <LineupColumn tone="home" title={match.homeTeam.name} starters={homeStarters} subs={homeSubs} />
+                <LineupColumn tone="away" title={match.awayTeam.name} starters={awayStarters} subs={awaySubs} />
               </div>
             )}
           </>
-        )}
-      </div>
+        ) : null}
+      </section>
 
-      {/* Botón volver arriba */}
-      <button
-        type="button"
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="past-match__back-top"
-      >
+      <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="pp-scroll-top">
         Regresar
       </button>
-
     </div>
   );
 }

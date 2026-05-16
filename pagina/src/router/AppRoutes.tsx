@@ -8,6 +8,8 @@ import Noticia from "../pages/noticias/Noticia";
 import Noticias from "../pages/noticias/NoticiasLanding";
 import Partido from "../pages/partido/Partido";
 import Perfil from "../pages/perfil/Perfil";
+import Simulador from "../pages/simulador/Simulador";
+import Tablero from "../pages/tablero/Tablero";
 import Tienda from "../pages/tienda/Tienda";
 import Wordle from "../pages/wordle/Wordle";
 import {
@@ -95,6 +97,8 @@ export default function AppRoutes({
             />
           }
         />
+        <Route path="tablero" element={<Tablero />} />
+        <Route path="simulador" element={<Simulador />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />
         <Route path="arcade" element={<Arcade />} />

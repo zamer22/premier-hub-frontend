@@ -296,8 +296,8 @@ export default function Partido() {
           {pasados.map((m) => (
             <div
               key={m.id}
+              className="partido_match-link"
               onClick={() => setSelectedPastMatch(m)}
-              className="partido_match-click"
             >
               <p className="partido_match-date">{formatDate(m.date)}</p>
               <div className="partido_match-card">
