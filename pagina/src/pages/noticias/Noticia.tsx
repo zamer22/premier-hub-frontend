@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import "../estilos/EstiloNoticiasLanding.css";
+import { useNavigate, useParams } from "react-router-dom";
+import "./EstiloNoticiasLanding.css";
 import {
   NewsItem,
   buildArticleText,
@@ -7,8 +8,6 @@ import {
   fetchNews,
   formatFullDate,
   getCachedNewsSnapshot,
-  getNewsIdFromPath,
-  navigateTo,
   setCachedNewsSnapshot,
 } from "./noticiasShared";
 
@@ -82,30 +81,27 @@ function RelatedCard({
 }
 
 export default function Noticia() {
+  const navigate = useNavigate();
+  const { newsId: newsIdParam } = useParams<{ newsId: string }>();
+  const newsId = useMemo(() => {
+    const parsed = Number.parseInt(newsIdParam || "", 10);
+    return Number.isFinite(parsed) ? parsed : null;
+  }, [newsIdParam]);
   const cachedNewsSnapshot = getCachedNewsSnapshot();
-  const initialNewsId = getNewsIdFromPath(window.location.pathname);
   const cachedSelectedNews =
-    cachedNewsSnapshot?.news.find((item) => item.id === initialNewsId) ?? null;
+    cachedNewsSnapshot?.news.find((item) => item.id === newsId) ?? null;
   const [news, setNews] = useState<NewsItem[]>(() => cachedNewsSnapshot?.news || []);
   const [loading, setLoading] = useState(() => !cachedSelectedNews);
   const [error, setError] = useState<string | null>(() => cachedNewsSnapshot?.error || null);
-  const [newsId, setNewsId] = useState<number | null>(() => initialNewsId);
 
   useEffect(() => {
-    const syncPath = () => {
-      setNewsId(getNewsIdFromPath(window.location.pathname));
-    };
+    if (newsId === null) {
+      setLoading(false);
+      return;
+    }
 
-    window.addEventListener("popstate", syncPath);
-
-    return () => {
-      window.removeEventListener("popstate", syncPath);
-    };
-  }, []);
-
-  useEffect(() => {
     const selectedNewsInCurrentState =
-      newsId !== null && news.some((item) => item.id === newsId);
+      news.some((item) => item.id === newsId);
 
     if (selectedNewsInCurrentState) {
       setLoading(false);
@@ -203,7 +199,7 @@ export default function Noticia() {
         <button
           type="button"
           className="noticias-back-button"
-          onClick={() => navigateTo("/noticias")}
+          onClick={() => navigate("/noticias")}
         >
           Volver a noticias
         </button>
@@ -271,7 +267,7 @@ export default function Noticia() {
               <RelatedCard
                 key={item.id}
                 item={item}
-                onOpen={(nextItem) => navigateTo(`/noticias/${nextItem.id}`)}
+                onOpen={(nextItem) => navigate(`/noticias/${nextItem.id}`)}
               />
             ))}
           </div>

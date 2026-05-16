@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../estilos/Partido.css";
+import "./Partido.css";
 import PartidosVivo, { type LiveMatch } from "./PartidosVivo";
 import PartidoPasado, { type PastMatch } from "./partidoPasados";
 

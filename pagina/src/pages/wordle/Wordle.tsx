@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import "../estilos/Wordle.css";
+import "./Wordle.css";
 
 interface Player {
   id: string;

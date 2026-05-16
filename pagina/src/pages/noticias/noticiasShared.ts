@@ -734,27 +734,3 @@ export async function fetchNews(
     limit: typeof json.limit === "number" ? json.limit : limit,
   };
 }
-
-
-// Función para construir la sección actual basada en la URL, retornando "tablero" si no se reconoce la sección
-export function getNewsIdFromPath(pathname: string): number | null {
-  const match = pathname.match(/^\/noticias\/(\d+)\/?$/);
-
-  if (!match) {
-    return null;
-  }
-
-  const id = Number.parseInt(match[1], 10);
-  return Number.isFinite(id) ? id : null;
-}
-
-
-// Función para navegar a una ruta específica dentro de la aplicación
-export function navigateTo(pathname: string): void {
-  if (window.location.pathname === pathname) {
-    return;
-  }
-
-  window.history.pushState({}, "", pathname);
-  window.dispatchEvent(new PopStateEvent("popstate"));
-}
