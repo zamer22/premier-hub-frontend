@@ -34,7 +34,7 @@ export const TABS: { key: Section; label: string; path: string }[] = [
   { key: "arcade", label: "Arcade", path: ROUTES.arcade },
 ];
 
-export const PROXIMAMENTE: Section[] = ["tablero", "simulador", "vr-arena"];
+export const PROXIMAMENTE: Section[] = ["vr-arena"];
 
 const VALID_SECTIONS: Section[] = [...TABS.map((tab) => tab.key), "perfil"];
 

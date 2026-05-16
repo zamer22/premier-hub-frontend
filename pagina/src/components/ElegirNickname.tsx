@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./ElegirNickname.css";
+import { Button, Field, Input } from "./ui";
 
 interface Props {
   correo: string;
@@ -17,15 +17,25 @@ export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComple
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (nickname.trim().length < 3) { setError("El nickname debe tener al menos 3 caracteres"); return; }
+    if (nickname.trim().length < 3) {
+      setError("El nickname debe tener al menos 3 caracteres");
+      return;
+    }
+
     setLoading(true);
     setError("");
+
     try {
       const res = await fetch(`${API_URL}/api/auth/google-register`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo, nombre_usuario: nombre, nickname: nickname.trim(), foto_perfil_url: fotoPerfilUrl }),
+        body: JSON.stringify({
+          correo,
+          nombre_usuario: nombre,
+          nickname: nickname.trim(),
+          foto_perfil_url: fotoPerfilUrl,
+        }),
       });
       const data = await res.json();
       if (data.success) onComplete(data.user);
@@ -38,38 +48,36 @@ export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComple
   };
 
   return (
-    <div className="nickname">
-      <div className="nickname__card">
-        <h2 className="nickname__title">Casi listo</h2>
-        <p className="nickname__subtitle">
-          Hola <strong>{nombre}</strong>, elige un nickname para tu cuenta en PremierHub.
+    <main className="min-h-screen grid place-items-center bg-[var(--ph-surface)] p-4">
+      <section className="ph-panel w-full max-w-[430px] animate-slide-up">
+        <span className="ph-badge ph-badge--accent">Perfil nuevo</span>
+        <h1 className="ph-title mt-4">Casi listo</h1>
+        <p className="ph-subtitle text-sm">
+          Hola <strong>{nombre}</strong>, elige el nickname que aparecera en rankings, tienda y comunidad.
         </p>
-        <form onSubmit={handleSubmit} className="nickname__form">
-          <div>
-            <label className="nickname__label">
-              Nickname
-            </label>
-            <input
+
+        <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+          <Field
+            label="Nickname"
+            hint="Solo letras, numeros y guiones bajos. Maximo 20 caracteres."
+          >
+            <Input
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
               placeholder="ej. PremierFan99"
               maxLength={20}
-              className="nickname__input"
               required
             />
-            <p className="nickname__hint">Solo letras, numeros y guiones bajos. Max. 20 caracteres.</p>
-          </div>
-          {error && <p className="nickname__error">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="nickname__button"
-          >
+          </Field>
+
+          {error && <p className="m-0 text-sm font-semibold text-[var(--ph-danger-600)]">{error}</p>}
+
+          <Button type="submit" disabled={loading}>
             {loading ? "Creando cuenta..." : "Entrar a PremierHub"}
-          </button>
+          </Button>
         </form>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

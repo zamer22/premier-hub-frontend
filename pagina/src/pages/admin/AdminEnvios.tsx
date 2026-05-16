@@ -38,16 +38,22 @@ const ESTADOS: AdminPedido["estado"][] = ["procesando", "enviado", "en_camino", 
 const ESTADO_LABEL: Record<string, string> = {
   procesando: "Procesando", enviado: "Enviado", en_camino: "En camino", entregado: "Entregado", cancelado: "Cancelado",
 };
-const estadoClass = (estado: AdminPedido["estado"]) => `admin-envios__status admin-envios__status--${estado}`;
+const ESTADO_COLOR: Record<string, { bg: string; fg: string }> = {
+  procesando: { bg: "#fef3c7", fg: "#92400e" },
+  enviado:    { bg: "#dbeafe", fg: "#1e40af" },
+  en_camino:  { bg: "#e0e7ff", fg: "#4338ca" },
+  entregado:  { bg: "#dcfce7", fg: "var(--ph-green-600)" },
+  cancelado:  { bg: "#fee2e2", fg: "var(--ph-danger-600)" },
+};
 
 /* ── Map helpers ── */
 const destinoIcon = L.divIcon({
-  html: `<div class="admin-envios__map-icon admin-envios__map-icon--home">🏠</div>`,
-  className: "admin-envios__map-icon-wrapper leaflet-div-icon", iconSize: [34, 34], iconAnchor: [17, 17],
+  html: `<div style="background:var(--ph-red-600);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">🏠</div>`,
+  className: "", iconSize: [34, 34], iconAnchor: [17, 17],
 });
 const paqueteIcon = L.divIcon({
-  html: `<div class="admin-envios__map-icon admin-envios__map-icon--package">📦</div>`,
-  className: "admin-envios__map-icon-wrapper leaflet-div-icon", iconSize: [34, 34], iconAnchor: [17, 17],
+  html: `<div style="background:var(--ph-blue-600);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">📦</div>`,
+  className: "", iconSize: [34, 34], iconAnchor: [17, 17],
 });
 
 function FitBounds({ points }: { points: [number, number][] }) {
@@ -76,13 +82,13 @@ function AdminTrackingMap({
     ? [[actualLat as number, actualLng as number], [destLat, destLng]]
     : [[destLat, destLng]];
   return (
-    <MapContainer center={[destLat, destLng]} zoom={4} className="admin-envios__map">
+    <MapContainer center={[destLat, destLng]} zoom={4} style={{ height: "320px", width: "100%", borderRadius: "10px", border: "1px solid var(--ph-border)" }}>
       <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <Marker position={[destLat, destLng]} icon={destinoIcon} />
       {tienePaquete && (
         <>
           <Marker position={[actualLat as number, actualLng as number]} icon={paqueteIcon} />
-          <Polyline positions={puntos} pathOptions={{ color: "#2563eb", dashArray: "8, 6", weight: 3 }} />
+          <Polyline positions={puntos} pathOptions={{ color: "var(--ph-blue-600)", dashArray: "8, 6", weight: 3 }} />
         </>
       )}
       <FitBounds points={puntos} />
@@ -90,6 +96,12 @@ function AdminTrackingMap({
     </MapContainer>
   );
 }
+
+const inputBase: React.CSSProperties = {
+  padding: "0.55rem 0.7rem", border: "1.5px solid #e0e0e0", borderRadius: "8px",
+  fontSize: "0.85rem", outline: "none", width: "100%", boxSizing: "border-box",
+  color: "var(--ph-navy-700)", background: "#fff",
+};
 
 /* ── Component ── */
 export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
@@ -271,22 +283,22 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
   };
 
   return (
-    <div className="admin-envios">
+    <div style={{ minHeight: "100vh", background: "var(--ph-surface)" }}>
       {/* Header */}
-      <div className="admin-envios__header">
+      <div style={{ background: "linear-gradient(135deg, var(--ph-navy-700), #1a2a3f)", color: "#fff", padding: "1rem 2rem", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
         <div>
-          <h1 className="admin-envios__title">
-            <span className="admin-envios__brand">PREMIER</span>
-            <span className="admin-envios__brand-light">HUB</span>
-            <span className="admin-envios__subtitle">· Admin Envíos</span>
+          <h1 style={{ fontSize: "1.2rem", fontWeight: 800, letterSpacing: "-0.01em" }}>
+            <span style={{ color: "var(--ph-red-600)" }}>PREMIER</span>
+            <span style={{ color: "#fff" }}>HUB</span>
+            <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 500, marginLeft: "0.6rem", fontSize: "0.95rem" }}>· Admin Envíos</span>
           </h1>
-          <p className="admin-envios__tagline">Gestión manual de pedidos</p>
+          <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.7)" }}>Gestión manual de pedidos</p>
         </div>
-        <div className="admin-envios__user">
-          <span className="admin-envios__user-name">{user.nickname}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+          <span style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.85)" }}>{user.nickname}</span>
           <button
             onClick={onLogout}
-            className="admin-envios__logout"
+            style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "6px", color: "#fff", padding: "0.4rem 0.95rem", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}
           >
             Salir
           </button>
@@ -295,17 +307,24 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
       {/* Toast */}
       {toast && (
-        <div className={`admin-envios__toast ${toast.ok ? "is-ok" : "is-error"}`}>
+        <div style={{ position: "fixed", top: "80px", right: "2rem", padding: "0.75rem 1.25rem", background: toast.ok ? "var(--ph-green-600)" : "var(--ph-danger-600)", color: "#fff", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", zIndex: 9999 }}>
           {toast.ok ? "✓ " : "✗ "}{toast.msg}
         </div>
       )}
 
       {/* Filtros */}
-      <div className="admin-envios__filters">
-        <div className="admin-envios__filter-list">
+      <div style={{ padding: "1.25rem 2rem", display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", borderBottom: "1px solid var(--ph-border)", background: "#fff" }}>
+        <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
           {["todos", ...ESTADOS].map(e => (
             <button key={e} onClick={() => setFiltroEstado(e)}
-              className={`admin-envios__filter-btn ${filtroEstado === e ? "is-active" : ""}`}>
+              style={{
+                padding: "0.4rem 0.85rem", borderRadius: "20px",
+                border: "1px solid", borderColor: filtroEstado === e ? "var(--ph-navy-700)" : "#e0e0e0",
+                background: filtroEstado === e ? "var(--ph-navy-700)" : "#fff",
+                color: filtroEstado === e ? "#fff" : "var(--ph-muted)",
+                fontSize: "0.78rem", fontWeight: filtroEstado === e ? 700 : 500,
+                cursor: "pointer", textTransform: "capitalize",
+              }}>
               {e === "todos" ? "Todos" : ESTADO_LABEL[e]}
             </button>
           ))}
@@ -314,38 +333,44 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
           placeholder="Buscar por # de pedido o tracking..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="admin-envios__input admin-envios__search"
+          style={{ ...inputBase, flex: "1", minWidth: "240px", maxWidth: "360px" }}
         />
-        <span className="admin-envios__count">
+        <span style={{ fontSize: "0.78rem", color: "var(--ph-muted)", fontWeight: 600 }}>
           {pedidos.length} pedido{pedidos.length === 1 ? "" : "s"}
         </span>
       </div>
 
       {/* Layout */}
-      <div className="admin-envios__layout">
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 380px) 1fr", gap: "1.25rem", padding: "1.25rem 2rem", alignItems: "start" }}>
         {/* Lista */}
-        <div className="admin-envios__list">
-          {loading && pedidos.length === 0 && <p className="admin-envios__empty">Cargando...</p>}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", maxHeight: "calc(100vh - 220px)", overflowY: "auto", paddingRight: "0.4rem" }}>
+          {loading && pedidos.length === 0 && <p style={{ color: "var(--ph-muted)", fontSize: "0.85rem", textAlign: "center", padding: "2rem" }}>Cargando...</p>}
           {!loading && pedidos.length === 0 && (
-            <p className="admin-envios__empty admin-envios__empty--boxed">Sin pedidos para los filtros aplicados</p>
+            <p style={{ color: "var(--ph-muted)", fontSize: "0.85rem", textAlign: "center", padding: "2rem", background: "#fff", borderRadius: "10px" }}>Sin pedidos para los filtros aplicados</p>
           )}
           {pedidos.map(p => {
             const isSel = selected?.id_pedido === p.id_pedido;
+            const color = ESTADO_COLOR[p.estado] || ESTADO_COLOR.procesando;
             return (
               <div key={p.id_pedido} onClick={() => setSelected(p)}
-                className={`admin-envios__card ${isSel ? "is-selected" : ""}`}>
-                <div className="admin-envios__card-header">
-                  <span className="admin-envios__order-id">#{p.id_pedido}</span>
-                  <span className={estadoClass(p.estado)}>
+                style={{
+                  background: "#fff", borderRadius: "10px", padding: "0.85rem 1rem",
+                  border: isSel ? "2px solid var(--ph-red-600)" : "1px solid var(--ph-border)",
+                  boxShadow: isSel ? "0 4px 12px rgba(233,0,82,0.15)" : "0 1px 3px rgba(0,0,0,0.05)",
+                  cursor: "pointer", display: "flex", flexDirection: "column", gap: "0.3rem",
+                }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ background: "var(--ph-navy-700)", color: "#fff", padding: "0.15rem 0.5rem", borderRadius: "6px", fontSize: "0.72rem", fontWeight: 800 }}>#{p.id_pedido}</span>
+                  <span style={{ background: color.bg, color: color.fg, padding: "0.18rem 0.55rem", borderRadius: "999px", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
                     {ESTADO_LABEL[p.estado]}
                   </span>
                 </div>
-                <p className="admin-envios__card-title">{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
-                <p className="admin-envios__card-meta">
+                <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--ph-navy-700)" }}>{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
+                <p style={{ fontSize: "0.74rem", color: "var(--ph-muted)" }}>
                   {p.usuario?.nickname || p.usuario?.correo || `User #${p.id_usuario}`}
                   {p.variante ? ` · talla ${p.variante.talla}` : ""}
                 </p>
-                <p className="admin-envios__card-date">{new Date(p.fecha_pedido).toLocaleString("es-MX")}</p>
+                <p style={{ fontSize: "0.7rem", color: "#9ca3af" }}>{new Date(p.fecha_pedido).toLocaleString("es-MX")}</p>
               </div>
             );
           })}
@@ -353,42 +378,48 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
         {/* Detalle */}
         {!selected ? (
-          <div className="admin-envios__empty-detail">
-            <p className="admin-envios__empty-detail-text">Seleccioná un pedido para gestionarlo</p>
+          <div style={{ background: "#fff", borderRadius: "12px", padding: "4rem 2rem", textAlign: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <p style={{ color: "var(--ph-muted)", fontSize: "0.9rem" }}>Seleccioná un pedido para gestionarlo</p>
           </div>
         ) : (() => {
           const dirSnap = selected.direccion_snapshot || {};
+          const color = ESTADO_COLOR[selected.estado] || ESTADO_COLOR.procesando;
           const isLocked = selected.estado === "entregado" || selected.estado === "cancelado";
           return (
-            <div className="admin-envios__detail">
+            <div style={{ background: "#fff", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               {/* Encabezado */}
-              <div className="admin-envios__detail-header">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", borderBottom: "1px solid #f0f0f0", paddingBottom: "1rem" }}>
                 <div>
-                  <span className="admin-envios__order-id admin-envios__order-id--large">#{selected.id_pedido}</span>
-                  <p className="admin-envios__detail-title">{selected.producto?.nombre || `Producto #${selected.id_producto}`}</p>
-                  <p className="admin-envios__detail-meta">
-                    Cliente: <strong className="admin-envios__detail-strong">{selected.usuario?.nickname || selected.usuario?.nombre_usuario || `#${selected.id_usuario}`}</strong>
-                    {selected.usuario?.correo && <span className="admin-envios__detail-email"> · {selected.usuario.correo}</span>}
+                  <span style={{ background: "var(--ph-navy-700)", color: "#fff", padding: "0.25rem 0.7rem", borderRadius: "6px", fontSize: "0.85rem", fontWeight: 800 }}>#{selected.id_pedido}</span>
+                  <p style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--ph-navy-700)", marginTop: "0.5rem" }}>{selected.producto?.nombre || `Producto #${selected.id_producto}`}</p>
+                  <p style={{ fontSize: "0.82rem", color: "var(--ph-muted)" }}>
+                    Cliente: <strong style={{ color: "#374151" }}>{selected.usuario?.nickname || selected.usuario?.nombre_usuario || `#${selected.id_usuario}`}</strong>
+                    {selected.usuario?.correo && <span style={{ color: "var(--ph-muted)" }}> · {selected.usuario.correo}</span>}
                   </p>
-                  <p className="admin-envios__detail-sub">
+                  <p style={{ fontSize: "0.78rem", color: "var(--ph-muted)" }}>
                     {selected.variante ? `Talla ${selected.variante.talla} · ` : ""}
                     {Number(selected.costo).toLocaleString()} pts · {new Date(selected.fecha_pedido).toLocaleString("es-MX")}
                   </p>
                 </div>
-                <span className={estadoClass(selected.estado)}>
+                <span style={{ background: color.bg, color: color.fg, padding: "0.3rem 0.85rem", borderRadius: "999px", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
                   {ESTADO_LABEL[selected.estado]}
                 </span>
               </div>
 
               {/* Banner: pedido finalizado (no editable) */}
               {isLocked && (
-                <div className={`admin-envios__locked-banner ${selected.estado === "entregado" ? "is-delivered" : "is-cancelled"}`}>
-                  <span className="admin-envios__locked-icon">{selected.estado === "entregado" ? "✓" : "✕"}</span>
+                <div style={{
+                  background: selected.estado === "entregado" ? "#dcfce7" : "#fee2e2",
+                  border: `1px solid ${selected.estado === "entregado" ? "#86efac" : "#fecaca"}`,
+                  borderRadius: "10px", padding: "0.85rem 1rem",
+                  display: "flex", alignItems: "center", gap: "0.6rem",
+                }}>
+                  <span style={{ fontSize: "1.1rem" }}>{selected.estado === "entregado" ? "✓" : "✕"}</span>
                   <div>
-                    <p className="admin-envios__locked-title">
+                    <p style={{ fontSize: "0.85rem", fontWeight: 700, color: selected.estado === "entregado" ? "#166534" : "#991b1b" }}>
                       Pedido {ESTADO_LABEL[selected.estado].toLowerCase()}
                     </p>
-                    <p className="admin-envios__locked-sub">
+                    <p style={{ fontSize: "0.74rem", color: selected.estado === "entregado" ? "#166534" : "#991b1b" }}>
                       Este pedido ya está cerrado y no puede modificarse.
                     </p>
                   </div>
@@ -398,21 +429,30 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
               {/* Estado: botones */}
               {!isLocked && (
                 <div>
-                  <h4 className="admin-envios__section-title">
+                  <h4 style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
                     Cambiar estado
                     {estadoCambio && (
-                      <span className="admin-envios__pending">
+                      <span style={{ marginLeft: "0.5rem", fontSize: "0.7rem", fontWeight: 600, color: "var(--ph-red-600)", textTransform: "none", letterSpacing: 0 }}>
                         · pendiente de guardar
                       </span>
                     )}
                   </h4>
-                  <div className="admin-envios__state-buttons">
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
                     {ESTADOS.map(est => {
                       const sel = estadoPendiente === est;
                       const original = selected.estado === est;
+                      const c = ESTADO_COLOR[est];
                       return (
                         <button key={est} disabled={sel} onClick={() => setEstadoPendiente(est)}
-                          className={`admin-envios__state-btn admin-envios__state-btn--${est} ${sel ? "is-selected" : ""} ${original ? "is-original" : ""}`}>
+                          style={{
+                            padding: "0.45rem 0.95rem", borderRadius: "8px",
+                            border: sel ? "2px solid var(--ph-navy-700)" : original ? "1px dashed var(--ph-muted)" : "1px solid var(--ph-border)",
+                            background: sel ? c.bg : "#fff",
+                            color: sel ? c.fg : "#374151",
+                            fontSize: "0.78rem", fontWeight: sel ? 800 : 600,
+                            cursor: sel ? "default" : "pointer",
+                            textTransform: "capitalize",
+                          }}>
                           {ESTADO_LABEL[est]}
                         </button>
                       );
@@ -422,42 +462,60 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
               )}
 
               {/* Dirección */}
-              <div className="admin-envios__address">
-                <h4 className="admin-envios__section-title admin-envios__section-title--compact">Dirección de entrega</h4>
-                <p className="admin-envios__address-name">{dirSnap.nombre_destinatario || "—"}{dirSnap.telefono ? ` · ${dirSnap.telefono}` : ""}</p>
-                <p className="admin-envios__address-line">{dirSnap.calle || ""}{dirSnap.ciudad ? `, ${dirSnap.ciudad}` : ""}{dirSnap.estado ? `, ${dirSnap.estado}` : ""}{dirSnap.codigo_postal ? ` ${dirSnap.codigo_postal}` : ""}{dirSnap.pais ? ` · ${dirSnap.pais}` : ""}</p>
+              <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem" }}>
+                <h4 style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Dirección de entrega</h4>
+                <p style={{ fontSize: "0.85rem", color: "var(--ph-navy-700)", fontWeight: 600 }}>{dirSnap.nombre_destinatario || "—"}{dirSnap.telefono ? ` · ${dirSnap.telefono}` : ""}</p>
+                <p style={{ fontSize: "0.78rem", color: "#374151" }}>{dirSnap.calle || ""}{dirSnap.ciudad ? `, ${dirSnap.ciudad}` : ""}{dirSnap.estado ? `, ${dirSnap.estado}` : ""}{dirSnap.codigo_postal ? ` ${dirSnap.codigo_postal}` : ""}{dirSnap.pais ? ` · ${dirSnap.pais}` : ""}</p>
               </div>
 
               {/* Mapa */}
               {selected.lat_destino != null && selected.lng_destino != null && (
                 <div>
-                  <div className="admin-envios__map-header">
-                    <h4 className="admin-envios__section-title admin-envios__section-title--compact">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                    <h4 style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                       Ubicación del paquete
                     </h4>
                     {!isLocked && (
-                      <p className="admin-envios__map-hint">Busca un lugar o haz click en el mapa</p>
+                      <p style={{ fontSize: "0.7rem", color: "var(--ph-muted)", fontStyle: "italic" }}>Busca un lugar o haz click en el mapa</p>
                     )}
                   </div>
                   {!isLocked && (
-                  <div className="admin-envios__geo-search">
+                  <div style={{ display: "flex", gap: "0.4rem", position: "relative", marginBottom: "0.5rem" }}>
                     <input
                       type="text"
                       value={geoSearch}
                       onChange={(e) => setGeoSearch(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); buscarLugar(geoSearch, true); } }}
                       placeholder="Buscar lugar (ej. FedEx Polanco 222, CDMX)"
-                      className="admin-envios__input admin-envios__geo-input"
+                      style={{ ...inputBase, flex: 1 }}
                     />
                     <button type="button" onClick={() => buscarLugar(geoSearch, true)} disabled={geoSearching || !geoSearch.trim()}
-                      className="admin-envios__geo-btn">
+                      style={{
+                        padding: "0.5rem 0.95rem", borderRadius: "8px", border: "none",
+                        background: geoSearching || !geoSearch.trim() ? "#e0e0e0" : "var(--ph-navy-700)",
+                        color: geoSearching || !geoSearch.trim() ? "#999" : "#fff",
+                        fontSize: "0.78rem", fontWeight: 700,
+                        cursor: geoSearching || !geoSearch.trim() ? "not-allowed" : "pointer",
+                        whiteSpace: "nowrap",
+                      }}>
                       {geoSearching ? "..." : "Buscar"}
                     </button>
                     {geoResults.length > 0 && (
-                      <div className="admin-envios__geo-results">
+                      <div style={{
+                        position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem",
+                        background: "#fff", border: "1px solid var(--ph-border)", borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.12)", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
+                      }}>
                         {geoResults.map(r => (
                           <button key={r.place_id} type="button" onClick={() => elegirLugar(r)}
-                            className="admin-envios__geo-item">
+                            style={{
+                              display: "block", width: "100%", textAlign: "left",
+                              padding: "0.55rem 0.75rem", border: "none", background: "transparent",
+                              fontSize: "0.78rem", color: "var(--ph-navy-700)", cursor: "pointer",
+                              borderBottom: "1px solid #f0f0f0",
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = "#f8f9fa"}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
                             {r.display_name}
                           </button>
                         ))}
@@ -465,7 +523,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                     )}
                   </div>
                   )}
-                  {!isLocked && geoError && <p className="admin-envios__geo-error">{geoError}</p>}
+                  {!isLocked && geoError && <p style={{ fontSize: "0.72rem", color: "var(--ph-danger-600)", marginBottom: "0.5rem" }}>{geoError}</p>}
                   <AdminTrackingMap
                     destLat={Number(selected.lat_destino)}
                     destLng={Number(selected.lng_destino)}
@@ -473,14 +531,14 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                     actualLng={lngActual}
                     onMovePackage={isLocked ? () => {} : (la, ln) => { setLatActual(la); setLngActual(ln); }}
                   />
-                  <div className="admin-envios__coords">
-                    <p className="admin-envios__coords-text">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                    <p style={{ fontSize: "0.72rem", color: "var(--ph-muted)" }}>
                       {latActual != null && lngActual != null
                         ? `${latActual.toFixed(4)}, ${lngActual.toFixed(4)}`
                         : "Paquete sin ubicación"}
                     </p>
                     {ubicacionCambio && (
-                      <span className="admin-envios__pending">
+                      <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--ph-red-600)" }}>
                         · pendiente de guardar
                       </span>
                     )}
@@ -489,41 +547,53 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
               )}
 
               {/* Info de envío */}
-              <div className="admin-envios__info">
-                <h4 className="admin-envios__section-title admin-envios__section-title--compact">
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                <h4 style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Información de envío
                   {infoCambio && (
-                    <span className="admin-envios__pending">
+                    <span style={{ marginLeft: "0.5rem", fontSize: "0.7rem", fontWeight: 600, color: "var(--ph-red-600)", textTransform: "none", letterSpacing: 0 }}>
                       · pendiente de guardar
                     </span>
                   )}
                 </h4>
-                <div className="admin-envios__info-grid">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
                   <input placeholder="Número de tracking" value={tracking}
                     onChange={(e) => setTracking(e.target.value)}
                     disabled={isLocked}
-                    className="admin-envios__input" />
+                    style={{ ...inputBase, background: isLocked ? "var(--ph-surface)" : "#fff", color: isLocked ? "var(--ph-muted)" : "var(--ph-navy-700)" }} />
                   <input type="date" value={fechaEstimada}
                     onChange={(e) => setFechaEstimada(e.target.value)}
                     disabled={isLocked}
-                    className="admin-envios__input" />
+                    style={{ ...inputBase, background: isLocked ? "var(--ph-surface)" : "#fff", color: isLocked ? "var(--ph-muted)" : "var(--ph-navy-700)" }} />
                 </div>
                 <textarea placeholder="Notas para el cliente (opcional)" rows={3}
                   value={notas}
                   onChange={(e) => setNotas(e.target.value)}
                   disabled={isLocked}
-                  className="admin-envios__textarea" />
+                  style={{ ...inputBase, resize: "vertical", fontFamily: "inherit", background: isLocked ? "var(--ph-surface)" : "#fff", color: isLocked ? "var(--ph-muted)" : "var(--ph-navy-700)" }} />
               </div>
 
               {/* Barra de guardado global */}
               {!isLocked && (
-                <div className="admin-envios__actions">
+                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "0.6rem", borderTop: "1px solid #f0f0f0", paddingTop: "1rem" }}>
                   <button onClick={descartarCambios} disabled={!hayCambios || saving}
-                    className="admin-envios__btn admin-envios__btn--secondary">
+                    style={{
+                      padding: "0.55rem 1.2rem", borderRadius: "8px",
+                      border: "1px solid var(--ph-border)", background: "#fff",
+                      color: !hayCambios || saving ? "#bbb" : "#374151",
+                      fontWeight: 600, fontSize: "0.82rem",
+                      cursor: !hayCambios || saving ? "not-allowed" : "pointer",
+                    }}>
                     Descartar
                   </button>
                   <button onClick={guardarTodo} disabled={!hayCambios || saving}
-                    className="admin-envios__btn admin-envios__btn--primary">
+                    style={{
+                      padding: "0.55rem 1.5rem", borderRadius: "8px", border: "none",
+                      background: !hayCambios || saving ? "#e0e0e0" : "var(--ph-red-600)",
+                      color: !hayCambios || saving ? "#999" : "#fff",
+                      fontWeight: 700, fontSize: "0.85rem",
+                      cursor: !hayCambios || saving ? "not-allowed" : "pointer",
+                    }}>
                     {saving ? "Guardando..." : "Guardar cambios"}
                   </button>
                 </div>

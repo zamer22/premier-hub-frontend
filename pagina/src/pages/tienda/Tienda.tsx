@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { MapContainer, TileLayer, Marker, Polyline, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Button, PageHeader, Tabs } from "../../components/ui";
+import "./Tienda.css";
 
 // Fix default marker icons cuando se usa bundler
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -172,13 +174,13 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
           style={{
             flex: 1, padding: "0.5rem 0.7rem", border: "1.5px solid #e0e0e0",
             borderRadius: "8px", fontSize: "0.82rem", outline: "none",
-            color: "#263a55", background: "#fff",
+            color: "var(--ph-navy-700)", background: "#fff",
           }}
         />
         <button type="button" onClick={() => buscarDireccion(search, true)} disabled={searching || !search.trim()}
           style={{
             padding: "0.5rem 0.95rem", borderRadius: "8px", border: "none",
-            background: searching || !search.trim() ? "#e0e0e0" : "#263a55",
+            background: searching || !search.trim() ? "#e0e0e0" : "var(--ph-navy-700)",
             color: searching || !search.trim() ? "#999" : "#fff",
             fontSize: "0.78rem", fontWeight: 700,
             cursor: searching || !search.trim() ? "not-allowed" : "pointer",
@@ -189,7 +191,7 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
         {results.length > 0 && (
           <div style={{
             position: "absolute", top: "100%", left: 0, right: 0, marginTop: "0.25rem",
-            background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px",
+            background: "#fff", border: "1px solid var(--ph-border)", borderRadius: "8px",
             boxShadow: "0 4px 12px rgba(0,0,0,0.12)", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
           }}>
             {results.map(r => (
@@ -197,7 +199,7 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
                 style={{
                   display: "block", width: "100%", textAlign: "left",
                   padding: "0.55rem 0.75rem", border: "none", background: "transparent",
-                  fontSize: "0.78rem", color: "#263a55", cursor: "pointer",
+                  fontSize: "0.78rem", color: "var(--ph-navy-700)", cursor: "pointer",
                   borderBottom: "1px solid #f0f0f0",
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f8f9fa"}
@@ -208,7 +210,7 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
           </div>
         )}
       </div>
-      {searchError && <p style={{ fontSize: "0.72rem", color: "#dc2626" }}>{searchError}</p>}
+      {searchError && <p style={{ fontSize: "0.72rem", color: "var(--ph-danger-600)" }}>{searchError}</p>}
       <MapContainer center={center} zoom={11} style={{ height: "200px", width: "100%", borderRadius: "8px" }}>
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {lat != null && lng != null && <Marker position={[lat, lng]} />}
@@ -219,13 +221,13 @@ function LocationPicker({ lat, lng, onChange }: { lat: number | null; lng: numbe
   );
 }
 const destinoIcon = L.divIcon({
-  html: `<div style="background:#E90052;color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">🏠</div>`,
+  html: `<div style="background:var(--ph-red-600);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">🏠</div>`,
   className: "",
   iconSize: [34, 34],
   iconAnchor: [17, 17],
 });
 const paqueteIcon = L.divIcon({
-  html: `<div style="background:#2563eb;color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">📦</div>`,
+  html: `<div style="background:var(--ph-blue-600);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">📦</div>`,
   className: "",
   iconSize: [34, 34],
   iconAnchor: [17, 17],
@@ -259,7 +261,7 @@ function TrackingMap({
       {tienePaquete && (
         <>
           <Marker position={[actualLat as number, actualLng as number]} icon={paqueteIcon} />
-          <Polyline positions={puntos} pathOptions={{ color: "#2563eb", dashArray: "8, 6", weight: 3 }} />
+          <Polyline positions={puntos} pathOptions={{ color: "var(--ph-blue-600)", dashArray: "8, 6", weight: 3 }} />
         </>
       )}
       <FitBounds points={puntos} />
@@ -274,8 +276,8 @@ const ESTADO_PEDIDO_COLOR: Record<string, { bg: string; fg: string }> = {
   procesando: { bg: "#fef3c7", fg: "#92400e" },
   enviado:    { bg: "#dbeafe", fg: "#1e40af" },
   en_camino:  { bg: "#e0e7ff", fg: "#4338ca" },
-  entregado:  { bg: "#dcfce7", fg: "#16a34a" },
-  cancelado:  { bg: "#fee2e2", fg: "#dc2626" },
+  entregado:  { bg: "#dcfce7", fg: "var(--ph-green-600)" },
+  cancelado:  { bg: "#fee2e2", fg: "var(--ph-danger-600)" },
 };
 const ESTADO_FLOW = ["procesando", "enviado", "en_camino", "entregado"] as const;
 
@@ -287,7 +289,7 @@ const inputStyle: CSSProperties = {
   outline: "none",
   width: "100%",
   boxSizing: "border-box",
-  color: "#263a55",
+  color: "var(--ph-navy-700)",
   background: "#fff",
 };
 
@@ -749,7 +751,7 @@ const productBackground = (p: Producto | Listado) => {
   const cssBackground = p.css || metadata.background || metadata.css_background;
   if (cssBackground) return String(cssBackground);
   if (p.imagen) return `#eef0f2 url(${p.imagen}) center/contain no-repeat`;
-  if (p.tipo === "marco") return "linear-gradient(135deg, #263a55, #871d54)";
+  if (p.tipo === "marco") return "linear-gradient(135deg, var(--ph-navy-700), var(--ph-bordeaux-700))";
   return "#eef0f2";
 };
 
@@ -767,7 +769,7 @@ const ProductVisual = ({ p, height = 140 }: { p: Producto | Listado; height?: nu
       boxSizing: "border-box",
     }}>
       {isTextItem && (
-        <span style={{ color: "#263a55", fontSize: "1.05rem", fontWeight: 900, textAlign: "center", lineHeight: 1.2 }}>
+        <span style={{ color: "var(--ph-navy-700)", fontSize: "1.05rem", fontWeight: 900, textAlign: "center", lineHeight: 1.2 }}>
           {p.nombre}
         </span>
       )}
@@ -792,39 +794,37 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
     : (p.stock ?? 0);
   return (
     <div
+      className="ph-data-card"
       onClick={() => setProductModal(p)}
       style={{
-        background: "#fff", borderRadius: "12px", overflow: "hidden",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.06)", transition: "transform 0.2s, box-shadow 0.2s",
+        overflow: "hidden",
         cursor: "pointer", position: "relative",
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.12)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; }}
     >
       {p.es_nuevo && (
         <span style={{
-          position: "absolute", top: "10px", left: "10px", background: "#E90052",
+          position: "absolute", top: "10px", left: "10px", background: "var(--ph-red-600)",
           color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.5rem", borderRadius: "4px", fontWeight: 700, zIndex: 1,
         }}>NUEVO</span>
       )}
       {badge && (
         <span style={{
-          position: "absolute", top: "10px", right: "10px", background: "#263a55",
+          position: "absolute", top: "10px", right: "10px", background: "var(--ph-navy-700)",
           color: "#fff", fontSize: "0.6rem", padding: "0.2rem 0.5rem", borderRadius: "4px", fontWeight: 700, zIndex: 1,
         }}>{badge}</span>
       )}
-      <ProductVisual p={p} height={140} />
-      <div style={{ padding: "0.75rem 1rem" }}>
-        <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#263a55", marginBottom: "0.2rem", lineHeight: "1.3" }}>{p.nombre}</p>
-        <p style={{ fontSize: "0.75rem", color: "#84878F", marginBottom: "0.5rem" }}>
+      <ProductVisual p={p} height={164} />
+      <div style={{ padding: "0.95rem 1rem" }}>
+        <p style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--ph-text-strong)", marginBottom: "0.25rem", lineHeight: "1.3" }}>{p.nombre}</p>
+        <p style={{ fontSize: "0.78rem", color: "var(--ph-muted)", marginBottom: "0.65rem" }}>
           {tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}
           {stockTotal === 0
-            ? <span style={{ marginLeft: "0.4rem", background: "#fee2e2", color: "#dc2626", fontSize: "0.65rem", fontWeight: 700, padding: "0.1rem 0.4rem", borderRadius: "4px" }}>Sin stock</span>
-            : <span style={{ marginLeft: "0.4rem", color: "#84878F" }}>· {stockTotal} disp.</span>
+            ? <span style={{ marginLeft: "0.4rem", background: "#fee2e2", color: "var(--ph-danger-600)", fontSize: "0.65rem", fontWeight: 700, padding: "0.1rem 0.4rem", borderRadius: "4px" }}>Sin stock</span>
+            : <span style={{ marginLeft: "0.4rem", color: "var(--ph-muted)" }}>· {stockTotal} disp.</span>
           }
         </p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: "1rem", fontWeight: 800, color: "#263a55" }}>{p.costo} pts</span>
+          <span style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--ph-text-strong)" }}>{p.costo} pts</span>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -834,12 +834,12 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
             }}
             disabled={stockTotal <= 0 || Number(p.costo) > saldo}
             style={{
-              padding: "0.35rem 0.75rem",
-              background: stockTotal > 0 && Number(p.costo) <= saldo ? "#E90052" : "#ddd",
+              padding: "0.42rem 0.8rem",
+              background: stockTotal > 0 && Number(p.costo) <= saldo ? "var(--ph-red-600)" : "#ddd",
               color: stockTotal > 0 && Number(p.costo) <= saldo ? "#fff" : "#999",
-              border: "none", borderRadius: "6px",
+              border: "none", borderRadius: "8px",
               cursor: stockTotal > 0 && Number(p.costo) <= saldo ? "pointer" : "not-allowed",
-              fontSize: "0.8rem", fontWeight: 600, transition: "background 0.2s",
+              fontSize: "0.82rem", fontWeight: 800, transition: "background 0.2s",
             }}>{tieneVariantes ? "Ver tallas" : "Comprar"}</button>
         </div>
       </div>
@@ -849,26 +849,23 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
 
   /* ── Marketplace listing card ── */
   const ListingCard = ({ l, onBuy }: { l: Listado; onBuy: () => void }) => (
-    <div style={{
-      background: "#fff", borderRadius: "12px", overflow: "hidden",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.06)", transition: "transform 0.2s, box-shadow 0.2s",
+    <div className="ph-data-card" style={{
+      overflow: "hidden",
       position: "relative",
     }}
-      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; }}
     >
-      <ProductVisual p={l} height={120} />
-      <div style={{ padding: "0.75rem 1rem" }}>
-        <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#263a55", marginBottom: "0.15rem" }}>{l.nombre}</p>
-        <p style={{ fontSize: "0.7rem", color: "#84878F", marginBottom: "0.4rem" }}>
+      <ProductVisual p={l} height={150} />
+      <div style={{ padding: "0.95rem 1rem" }}>
+        <p style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--ph-text-strong)", marginBottom: "0.2rem" }}>{l.nombre}</p>
+        <p style={{ fontSize: "0.78rem", color: "var(--ph-muted)", marginBottom: "0.55rem" }}>
           Vendedor: {l.vendedor_nickname}{l.equipo ? ` · ${l.equipo}` : ""}
         </p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: "1rem", fontWeight: 800, color: "#263a55" }}>{l.precio} pts</span>
+          <span style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--ph-text-strong)" }}>{l.precio} pts</span>
           <button onClick={() => setConfirmAction({ kind: "buy-listing", listado: l })} disabled={Number(l.precio) > saldo}
             style={{
               padding: "0.35rem 0.75rem",
-              background: Number(l.precio) <= saldo ? "#E90052" : "#ddd",
+              background: Number(l.precio) <= saldo ? "var(--ph-red-600)" : "#ddd",
               color: Number(l.precio) <= saldo ? "#fff" : "#999",
               border: "none", borderRadius: "6px",
               cursor: Number(l.precio) <= saldo ? "pointer" : "not-allowed",
@@ -886,7 +883,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
     <>
       {/* Toast */}
       {toast && (
-        <div style={{ position: "fixed", top: "80px", right: "2rem", padding: "0.75rem 1.25rem", background: toast.ok ? "#16a34a" : "#dc2626", color: "#fff", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", zIndex: 9999 }}>
+        <div style={{ position: "fixed", top: "80px", right: "2rem", padding: "0.75rem 1.25rem", background: toast.ok ? "var(--ph-green-600)" : "var(--ph-danger-600)", color: "#fff", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", zIndex: 9999 }}>
           {toast.ok ? "✓ " : "✗ "}{toast.msg}
         </div>
       )}
@@ -897,16 +894,16 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
           onClick={() => setPublishingItem(null)}>
           <div style={{ background: "#fff", borderRadius: "14px", padding: "1.75rem", width: "360px", maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}
             onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ color: "#263a55", fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.2rem" }}>Publicar en Marketplace</h3>
-            <p style={{ color: "#84878F", fontSize: "0.82rem", marginBottom: "1.25rem" }}>{publishingItem.item.nombre}</p>
-            <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 700, color: "#263a55", marginBottom: "0.4rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Precio (pts)</label>
+            <h3 style={{ color: "var(--ph-navy-700)", fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.2rem" }}>Publicar en Marketplace</h3>
+            <p style={{ color: "var(--ph-muted)", fontSize: "0.82rem", marginBottom: "1.25rem" }}>{publishingItem.item.nombre}</p>
+            <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 700, color: "var(--ph-navy-700)", marginBottom: "0.4rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Precio (pts)</label>
             <input type="number" min="1" value={publishingItem.precio}
               onChange={(e) => setPublishingItem({ ...publishingItem, precio: e.target.value })}
               style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "8px", border: "1.5px solid #e0e0e0", fontSize: "0.95rem", boxSizing: "border-box", marginBottom: "1.25rem", outline: "none" }}
               placeholder="Ej: 500" autoFocus />
             <div style={{ display: "flex", gap: "0.6rem" }}>
-              <button onClick={() => setPublishingItem(null)} style={{ flex: 1, padding: "0.65rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" }}>Cancelar</button>
-              <button onClick={prepararPublicacion} style={{ flex: 1, padding: "0.65rem", borderRadius: "8px", border: "none", background: "#E90052", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>Continuar</button>
+              <button onClick={() => setPublishingItem(null)} style={{ flex: 1, padding: "0.65rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "var(--ph-muted)", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" }}>Cancelar</button>
+              <button onClick={prepararPublicacion} style={{ flex: 1, padding: "0.65rem", borderRadius: "8px", border: "none", background: "var(--ph-red-600)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>Continuar</button>
             </div>
           </div>
         </div>
@@ -917,29 +914,29 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9002 }}>
           <div style={{ background: "#fff", borderRadius: "14px", padding: "1.75rem", width: "380px", maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}
             onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ color: "#263a55", fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.4rem" }}>¿Confirmar acción?</h3>
+            <h3 style={{ color: "var(--ph-navy-700)", fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.4rem" }}>¿Confirmar acción?</h3>
             {confirmAction.kind === "buy-product" && (
-              <p style={{ color: "#84878F", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>
-                Comprarás <strong style={{ color: "#263a55" }}>{confirmAction.producto.nombre}</strong>{confirmAction.variante ? <> (talla <strong style={{ color: "#263a55" }}>{confirmAction.variante.talla}</strong>)</> : null} por <strong style={{ color: "#E90052" }}>{Number(confirmAction.producto.costo).toLocaleString()} pts</strong>. Te quedarán <strong style={{ color: "#263a55" }}>{(saldo - Number(confirmAction.producto.costo)).toLocaleString()} pts</strong>.
+              <p style={{ color: "var(--ph-muted)", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>
+                Comprarás <strong style={{ color: "var(--ph-navy-700)" }}>{confirmAction.producto.nombre}</strong>{confirmAction.variante ? <> (talla <strong style={{ color: "var(--ph-navy-700)" }}>{confirmAction.variante.talla}</strong>)</> : null} por <strong style={{ color: "var(--ph-red-600)" }}>{Number(confirmAction.producto.costo).toLocaleString()} pts</strong>. Te quedarán <strong style={{ color: "var(--ph-navy-700)" }}>{(saldo - Number(confirmAction.producto.costo)).toLocaleString()} pts</strong>.
               </p>
             )}
             {confirmAction.kind === "buy-listing" && (
-              <p style={{ color: "#84878F", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>
-                Comprarás <strong style={{ color: "#263a55" }}>{confirmAction.listado.nombre}</strong> por <strong style={{ color: "#E90052" }}>{Number(confirmAction.listado.precio).toLocaleString()} pts</strong>. Te quedarán <strong style={{ color: "#263a55" }}>{(saldo - Number(confirmAction.listado.precio)).toLocaleString()} pts</strong>.
+              <p style={{ color: "var(--ph-muted)", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>
+                Comprarás <strong style={{ color: "var(--ph-navy-700)" }}>{confirmAction.listado.nombre}</strong> por <strong style={{ color: "var(--ph-red-600)" }}>{Number(confirmAction.listado.precio).toLocaleString()} pts</strong>. Te quedarán <strong style={{ color: "var(--ph-navy-700)" }}>{(saldo - Number(confirmAction.listado.precio)).toLocaleString()} pts</strong>.
               </p>
             )}
             {confirmAction.kind === "publish" && (
-              <p style={{ color: "#84878F", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>
-                Publicarás <strong style={{ color: "#263a55" }}>{confirmAction.item.nombre}</strong> en el marketplace por <strong style={{ color: "#E90052" }}>{confirmAction.precio.toLocaleString()} pts</strong>.
+              <p style={{ color: "var(--ph-muted)", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1.4rem" }}>
+                Publicarás <strong style={{ color: "var(--ph-navy-700)" }}>{confirmAction.item.nombre}</strong> en el marketplace por <strong style={{ color: "var(--ph-red-600)" }}>{confirmAction.precio.toLocaleString()} pts</strong>.
               </p>
             )}
             <div style={{ display: "flex", gap: "0.6rem" }}>
-              <button onClick={() => setConfirmAction(null)} style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" }}>Cancelar</button>
+              <button onClick={() => setConfirmAction(null)} style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "var(--ph-muted)", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" }}>Cancelar</button>
               <button onClick={() => {
                 if (confirmAction.kind === "buy-product") comprar(confirmAction.producto.id_producto, confirmAction.producto.nombre, confirmAction.variante?.id_variante ?? null);
                 else if (confirmAction.kind === "buy-listing") comprarMarketplace(confirmAction.listado.id_listado, confirmAction.listado.nombre);
                 else publicar();
-              }} style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "none", background: "#E90052", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>
+              }} style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "none", background: "var(--ph-red-600)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>
                 {confirmAction.kind === "publish" ? "Publicar" : "Confirmar compra"}
               </button>
             </div>
@@ -953,18 +950,18 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
           onClick={() => { setSuccessMsg(null); setSuccessPedidoId(null); }}>
           <div style={{ background: "#fff", borderRadius: "14px", padding: "2rem", width: "380px", maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.4)", textAlign: "center" }}
             onClick={(e) => e.stopPropagation()}>
-            <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: "linear-gradient(135deg, #E90052, #871d54)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem" }}>
+            <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: "linear-gradient(135deg, var(--ph-red-600), var(--ph-bordeaux-700))", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem" }}>
               <span style={{ color: "#fff", fontSize: "1.5rem", fontWeight: 900 }}>✓</span>
             </div>
-            <h3 style={{ color: "#263a55", fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.45rem" }}>¡Operación exitosa!</h3>
-            <p style={{ color: "#84878F", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: successPedidoId ? "0.85rem" : "1.4rem" }}>{successMsg}</p>
+            <h3 style={{ color: "var(--ph-navy-700)", fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.45rem" }}>¡Operación exitosa!</h3>
+            <p style={{ color: "var(--ph-muted)", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: successPedidoId ? "0.85rem" : "1.4rem" }}>{successMsg}</p>
             {successPedidoId && (
               <div style={{ background: "linear-gradient(135deg, rgba(233,0,82,0.08), rgba(135,29,84,0.08))", border: "1px solid rgba(233,0,82,0.2)", borderRadius: "10px", padding: "0.75rem 1rem", marginBottom: "1.4rem" }}>
-                <p style={{ fontSize: "0.65rem", color: "#84878F", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.06em", marginBottom: "0.15rem" }}>Número de pedido</p>
-                <p style={{ fontSize: "1.4rem", color: "#E90052", fontWeight: 900, letterSpacing: "0.02em" }}>#{successPedidoId}</p>
+                <p style={{ fontSize: "0.65rem", color: "var(--ph-muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.06em", marginBottom: "0.15rem" }}>Número de pedido</p>
+                <p style={{ fontSize: "1.4rem", color: "var(--ph-red-600)", fontWeight: 900, letterSpacing: "0.02em" }}>#{successPedidoId}</p>
               </div>
             )}
-            <button onClick={() => { setSuccessMsg(null); setSuccessPedidoId(null); }} style={{ padding: "0.65rem 2.5rem", borderRadius: "8px", border: "none", background: "linear-gradient(135deg, #263a55, #1a2a3f)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>
+            <button onClick={() => { setSuccessMsg(null); setSuccessPedidoId(null); }} style={{ padding: "0.65rem 2.5rem", borderRadius: "8px", border: "none", background: "linear-gradient(135deg, var(--ph-navy-700), #1a2a3f)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>
               Cerrar
             </button>
           </div>
@@ -999,20 +996,20 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                 <ProductVisual p={productModal} height={240} />
                 {/* Badges top-left */}
                 <div style={{ position: "absolute", top: "12px", left: "12px", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                  {productModal.es_nuevo && <span style={{ background: "#E90052", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>NUEVO</span>}
-                  {isOwned && !isRealItem && <span style={{ background: "#16a34a", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>EN TU PERFIL</span>}
+                  {productModal.es_nuevo && <span style={{ background: "var(--ph-red-600)", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>NUEVO</span>}
+                  {isOwned && !isRealItem && <span style={{ background: "var(--ph-green-600)", color: "#fff", fontSize: "0.65rem", padding: "0.2rem 0.55rem", borderRadius: "4px", fontWeight: 700 }}>EN TU PERFIL</span>}
                 </div>
                 <button onClick={() => setProductModal(null)} style={{ position: "absolute", top: "10px", right: "10px", background: "rgba(0,0,0,0.45)", border: "none", color: "#fff", width: "28px", height: "28px", borderRadius: "50%", cursor: "pointer", fontSize: "0.9rem", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
               {/* Info */}
               <div style={{ padding: "1.25rem 1.5rem", overflowY: "auto", flex: 1 }}>
-                <h3 style={{ color: "#263a55", fontSize: "1.2rem", fontWeight: 800, marginBottom: "0.3rem" }}>{productModal.nombre}</h3>
+                <h3 style={{ color: "var(--ph-navy-700)", fontSize: "1.2rem", fontWeight: 800, marginBottom: "0.3rem" }}>{productModal.nombre}</h3>
                 {/* Meta pills */}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.85rem" }}>
-                  <span style={{ background: "#f0f2f5", color: "#263a55", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{tipoLabel(productModal.tipo)}</span>
-                  {productModal.equipo && <span style={{ background: "#f0f2f5", color: "#263a55", fontSize: "0.68rem", fontWeight: 600, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>{productModal.equipo}</span>}
-                  {productModal.temporada_nombre && <span style={{ background: "rgba(135,29,84,0.1)", color: "#871d54", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>Temporada: {productModal.temporada_nombre}</span>}
-                  {productModal.categoria === "evento" && <span style={{ background: "rgba(233,0,82,0.1)", color: "#E90052", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>DROP EXCLUSIVO</span>}
+                  <span style={{ background: "#f0f2f5", color: "var(--ph-navy-700)", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{tipoLabel(productModal.tipo)}</span>
+                  {productModal.equipo && <span style={{ background: "#f0f2f5", color: "var(--ph-navy-700)", fontSize: "0.68rem", fontWeight: 600, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>{productModal.equipo}</span>}
+                  {productModal.temporada_nombre && <span style={{ background: "rgba(135,29,84,0.1)", color: "var(--ph-bordeaux-700)", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>Temporada: {productModal.temporada_nombre}</span>}
+                  {productModal.categoria === "evento" && <span style={{ background: "rgba(233,0,82,0.1)", color: "var(--ph-red-600)", fontSize: "0.68rem", fontWeight: 700, padding: "0.2rem 0.6rem", borderRadius: "99px" }}>DROP EXCLUSIVO</span>}
                 </div>
                 {/* Descripción (solo en modal) */}
                 {productModal.descripcion && (
@@ -1023,20 +1020,20 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                 {/* Stock info */}
                 <div style={{ background: "#f8f9fa", borderRadius: "8px", padding: "0.6rem 0.85rem", marginBottom: "0.9rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <p style={{ fontSize: "0.65rem", color: "#84878F", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.1rem" }}>Stock</p>
+                    <p style={{ fontSize: "0.65rem", color: "var(--ph-muted)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.1rem" }}>Stock</p>
                     {isRealItem
-                      ? <p style={{ fontSize: "0.82rem", color: stockTotal === 0 ? "#dc2626" : "#263a55", fontWeight: 600 }}>{stockTotal === 0 ? "Sin stock" : `${stockTotal} disponibles`}</p>
-                      : <p style={{ fontSize: "0.82rem", color: "#871d54", fontWeight: 700 }}>Objeto único por usuario</p>
+                      ? <p style={{ fontSize: "0.82rem", color: stockTotal === 0 ? "var(--ph-danger-600)" : "var(--ph-navy-700)", fontWeight: 600 }}>{stockTotal === 0 ? "Sin stock" : `${stockTotal} disponibles`}</p>
+                      : <p style={{ fontSize: "0.82rem", color: "var(--ph-bordeaux-700)", fontWeight: 700 }}>Objeto único por usuario</p>
                     }
                   </div>
                   {isOwned && !isRealItem && (
-                    <div style={{ background: "#dcfce7", color: "#16a34a", fontSize: "0.72rem", fontWeight: 700, padding: "0.25rem 0.7rem", borderRadius: "6px" }}>Ya lo tienes</div>
+                    <div style={{ background: "#dcfce7", color: "var(--ph-green-600)", fontSize: "0.72rem", fontWeight: 700, padding: "0.25rem 0.7rem", borderRadius: "6px" }}>Ya lo tienes</div>
                   )}
                 </div>
                 {/* Selector de talla (solo si tiene variantes) */}
                 {tieneVariantes && (
                   <div style={{ marginBottom: "0.9rem" }}>
-                    <p style={{ fontSize: "0.65rem", color: "#84878F", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Talla</p>
+                    <p style={{ fontSize: "0.65rem", color: "var(--ph-muted)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Talla</p>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                       {(productModal.variantes ?? []).map(v => {
                         const sinStock = v.stock <= 0;
@@ -1048,10 +1045,10 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                             onClick={() => setSelectedVariante(v)}
                             style={{
                               minWidth: "52px", padding: "0.45rem 0.7rem",
-                              border: seleccionada ? "2px solid #E90052" : "1px solid #d1d5db",
+                              border: seleccionada ? "2px solid var(--ph-red-600)" : "1px solid #d1d5db",
                               borderRadius: "8px",
                               background: sinStock ? "#f3f4f6" : seleccionada ? "rgba(233,0,82,0.08)" : "#fff",
-                              color: sinStock ? "#9ca3af" : seleccionada ? "#E90052" : "#263a55",
+                              color: sinStock ? "#9ca3af" : seleccionada ? "var(--ph-red-600)" : "var(--ph-navy-700)",
                               fontWeight: 700, fontSize: "0.85rem",
                               cursor: sinStock ? "not-allowed" : "pointer",
                               textDecoration: sinStock ? "line-through" : "none",
@@ -1059,7 +1056,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                             }}
                           >
                             {v.talla}
-                            <span style={{ display: "block", fontSize: "0.6rem", fontWeight: 500, marginTop: "0.1rem", color: sinStock ? "#9ca3af" : "#84878F" }}>
+                            <span style={{ display: "block", fontSize: "0.6rem", fontWeight: 500, marginTop: "0.1rem", color: sinStock ? "#9ca3af" : "var(--ph-muted)" }}>
                               {sinStock ? "agotada" : `${v.stock} disp.`}
                             </span>
                           </button>
@@ -1071,9 +1068,9 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                 {/* Price + buy */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #f0f0f0", paddingTop: "0.9rem" }}>
                   <div>
-                    <p style={{ fontSize: "0.68rem", color: "#84878F", textTransform: "uppercase", fontWeight: 600, marginBottom: "0.05rem" }}>Precio</p>
-                    <span style={{ fontSize: "1.45rem", fontWeight: 900, color: "#263a55" }}>{Number(productModal.costo).toLocaleString()}</span>
-                    <span style={{ fontSize: "0.82rem", color: "#84878F", marginLeft: "0.25rem" }}>pts</span>
+                    <p style={{ fontSize: "0.68rem", color: "var(--ph-muted)", textTransform: "uppercase", fontWeight: 600, marginBottom: "0.05rem" }}>Precio</p>
+                    <span style={{ fontSize: "1.45rem", fontWeight: 900, color: "var(--ph-navy-700)" }}>{Number(productModal.costo).toLocaleString()}</span>
+                    <span style={{ fontSize: "0.82rem", color: "var(--ph-muted)", marginLeft: "0.25rem" }}>pts</span>
                   </div>
                   <button
                     disabled={!canBuyModal}
@@ -1088,7 +1085,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                         setConfirmAction({ kind: "buy-product", producto: prod, variante: vr });
                       }
                     }}
-                    style={{ padding: "0.65rem 1.75rem", border: "none", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: canBuyModal ? "pointer" : "not-allowed", background: canBuyModal ? "#E90052" : "#e0e0e0", color: canBuyModal ? "#fff" : "#999" }}>
+                    style={{ padding: "0.65rem 1.75rem", border: "none", borderRadius: "10px", fontWeight: 700, fontSize: "0.9rem", cursor: canBuyModal ? "pointer" : "not-allowed", background: canBuyModal ? "var(--ph-red-600)" : "#e0e0e0", color: canBuyModal ? "#fff" : "#999" }}>
                     {isOwned && !isRealItem ? "Ya tienes este"
                       : isRealItem && stockTotal === 0 ? "Sin stock"
                       : tieneVariantes && !selectedVariante ? "Elige una talla"
@@ -1106,13 +1103,13 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                   return (
                     <div style={{ marginTop: "1.25rem", borderTop: "1px solid #f0f0f0", paddingTop: "1rem" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                        <h4 style={{ color: "#263a55", fontSize: "0.95rem", fontWeight: 800 }}>Reseñas</h4>
+                        <h4 style={{ color: "var(--ph-navy-700)", fontSize: "0.95rem", fontWeight: 800 }}>Reseñas</h4>
                         {total > 0 && (
                           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                            <span style={{ color: "#f59e0b", fontSize: "0.95rem", letterSpacing: "0.05em" }}>
+                            <span style={{ color: "var(--ph-amber-500)", fontSize: "0.95rem", letterSpacing: "0.05em" }}>
                               {"★".repeat(Math.round(avg))}{"☆".repeat(5 - Math.round(avg))}
                             </span>
-                            <span style={{ fontSize: "0.78rem", color: "#84878F", fontWeight: 600 }}>{avg.toFixed(1)} · {total} reseña{total === 1 ? "" : "s"}</span>
+                            <span style={{ fontSize: "0.78rem", color: "var(--ph-muted)", fontWeight: 600 }}>{avg.toFixed(1)} · {total} reseña{total === 1 ? "" : "s"}</span>
                           </div>
                         )}
                       </div>
@@ -1120,11 +1117,11 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                       {/* Form (solo si compró y no comentó aún) */}
                       {isOwned && !userComment && (
                         <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem", marginBottom: "0.85rem" }}>
-                          <p style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Tu reseña</p>
+                          <p style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Tu reseña</p>
                           <div style={{ display: "flex", gap: "0.15rem", marginBottom: "0.5rem" }}>
                             {[1, 2, 3, 4, 5].map(n => (
                               <button key={n} onClick={() => setNewReview(r => ({ ...r, calificacion: n }))}
-                                style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.4rem", lineHeight: 1, padding: 0, color: n <= newReview.calificacion ? "#f59e0b" : "#d1d5db" }}>
+                                style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.4rem", lineHeight: 1, padding: 0, color: n <= newReview.calificacion ? "var(--ph-amber-500)" : "#d1d5db" }}>
                                 {n <= newReview.calificacion ? "★" : "☆"}
                               </button>
                             ))}
@@ -1137,7 +1134,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                           <button onClick={enviarReseña} disabled={submittingReview || newReview.comentario.trim().length < 3}
                             style={{
                               padding: "0.5rem 1.1rem", borderRadius: "8px", border: "none",
-                              background: submittingReview || newReview.comentario.trim().length < 3 ? "#e0e0e0" : "#E90052",
+                              background: submittingReview || newReview.comentario.trim().length < 3 ? "#e0e0e0" : "var(--ph-red-600)",
                               color: submittingReview || newReview.comentario.trim().length < 3 ? "#999" : "#fff",
                               fontWeight: 700, fontSize: "0.8rem",
                               cursor: submittingReview || newReview.comentario.trim().length < 3 ? "not-allowed" : "pointer",
@@ -1154,7 +1151,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
 
                       {/* Lista de reseñas */}
                       {loadingComments ? (
-                        <p style={{ fontSize: "0.82rem", color: "#84878F" }}>Cargando reseñas...</p>
+                        <p style={{ fontSize: "0.82rem", color: "var(--ph-muted)" }}>Cargando reseñas...</p>
                       ) : productComments.length === 0 ? (
                         <p style={{ fontSize: "0.82rem", color: "#9ca3af", textAlign: "center", padding: "1rem 0" }}>
                           Aún no hay reseñas. {isOwned && !userComment ? "¡Sé el primero!" : ""}
@@ -1168,8 +1165,8 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                               <div key={c.id_comentario} style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: "10px", padding: "0.75rem 0.9rem" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
                                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                    <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#263a55" }}>{nick}{isMine && <span style={{ marginLeft: "0.4rem", fontSize: "0.62rem", background: "#dbeafe", color: "#1e40af", padding: "0.1rem 0.4rem", borderRadius: "4px", fontWeight: 700 }}>TÚ</span>}</span>
-                                    <span style={{ color: "#f59e0b", fontSize: "0.82rem", letterSpacing: "0.04em" }}>
+                                    <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--ph-navy-700)" }}>{nick}{isMine && <span style={{ marginLeft: "0.4rem", fontSize: "0.62rem", background: "#dbeafe", color: "#1e40af", padding: "0.1rem 0.4rem", borderRadius: "4px", fontWeight: 700 }}>TÚ</span>}</span>
+                                    <span style={{ color: "var(--ph-amber-500)", fontSize: "0.82rem", letterSpacing: "0.04em" }}>
                                       {"★".repeat(c.calificacion)}{"☆".repeat(5 - c.calificacion)}
                                     </span>
                                   </div>
@@ -1178,7 +1175,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                                 <p style={{ fontSize: "0.82rem", color: "#374151", lineHeight: 1.5 }}>{c.comentario}</p>
                                 {isMine && (
                                   <button onClick={() => eliminarReseña(c.id_comentario)}
-                                    style={{ marginTop: "0.4rem", background: "transparent", border: "none", color: "#dc2626", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", padding: 0 }}>
+                                    style={{ marginTop: "0.4rem", background: "transparent", border: "none", color: "var(--ph-danger-600)", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", padding: 0 }}>
                                     Eliminar mi reseña
                                   </button>
                                 )}
@@ -1208,37 +1205,37 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
               onClick={(e) => e.stopPropagation()}>
               {/* Header */}
               <div style={{ padding: "1.1rem 1.5rem", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h3 style={{ color: "#263a55", fontSize: "1.1rem", fontWeight: 800 }}>Finalizar compra</h3>
-                <button onClick={() => { if (!placingOrder) setCheckoutAction(null); }} style={{ background: "transparent", border: "none", color: "#84878F", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
+                <h3 style={{ color: "var(--ph-navy-700)", fontSize: "1.1rem", fontWeight: 800 }}>Finalizar compra</h3>
+                <button onClick={() => { if (!placingOrder) setCheckoutAction(null); }} style={{ background: "transparent", border: "none", color: "var(--ph-muted)", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
               </div>
 
               <div style={{ padding: "1.25rem 1.5rem" }}>
                 {/* Resumen */}
                 <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.9rem 1rem", marginBottom: "1rem", display: "flex", gap: "0.85rem", alignItems: "center" }}>
-                  <div style={{ width: "60px", height: "60px", borderRadius: "8px", background: producto.imagen ? `#fff url(${producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55, #871d54)", flexShrink: 0 }} />
+                  <div style={{ width: "60px", height: "60px", borderRadius: "8px", background: producto.imagen ? `#fff url(${producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, var(--ph-navy-700), var(--ph-bordeaux-700))", flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: "0.88rem", fontWeight: 700, color: "#263a55", marginBottom: "0.15rem" }}>{producto.nombre}</p>
-                    <p style={{ fontSize: "0.72rem", color: "#84878F" }}>
+                    <p style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--ph-navy-700)", marginBottom: "0.15rem" }}>{producto.nombre}</p>
+                    <p style={{ fontSize: "0.72rem", color: "var(--ph-muted)" }}>
                       {tipoLabel(producto.tipo)}{variante ? ` · talla ${variante.talla}` : ""}
                     </p>
-                    <p style={{ fontSize: "0.95rem", color: "#E90052", fontWeight: 800, marginTop: "0.2rem" }}>{costo.toLocaleString()} pts</p>
+                    <p style={{ fontSize: "0.95rem", color: "var(--ph-red-600)", fontWeight: 800, marginTop: "0.2rem" }}>{costo.toLocaleString()} pts</p>
                   </div>
                 </div>
 
                 {/* Direcciones */}
                 <div style={{ marginBottom: "1rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                    <h4 style={{ fontSize: "0.78rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Dirección de envío</h4>
+                    <h4 style={{ fontSize: "0.78rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Dirección de envío</h4>
                     {!showNewDireccion && (
                       <button onClick={() => setShowNewDireccion(true)}
-                        style={{ background: "transparent", border: "none", color: "#E90052", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
+                        style={{ background: "transparent", border: "none", color: "var(--ph-red-600)", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
                         + Nueva dirección
                       </button>
                     )}
                   </div>
 
                   {direcciones.length === 0 && !showNewDireccion && (
-                    <p style={{ fontSize: "0.82rem", color: "#84878F", padding: "0.6rem 0" }}>No tienes direcciones guardadas. Agregá una para continuar.</p>
+                    <p style={{ fontSize: "0.82rem", color: "var(--ph-muted)", padding: "0.6rem 0" }}>No tienes direcciones guardadas. Agregá una para continuar.</p>
                   )}
 
                   {direcciones.length > 0 && !showNewDireccion && (
@@ -1250,24 +1247,24 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                             style={{
                               display: "flex", alignItems: "flex-start", gap: "0.7rem",
                               padding: "0.75rem 0.9rem",
-                              border: sel ? "2px solid #E90052" : "1.5px solid #e5e7eb",
+                              border: sel ? "2px solid var(--ph-red-600)" : "1.5px solid var(--ph-border)",
                               borderRadius: "10px", cursor: "pointer",
                               background: sel ? "rgba(233,0,82,0.04)" : "#fff",
                             }}>
                             <input type="radio" name="direccion" checked={sel} onChange={() => setSelectedDireccionId(dir.id_direccion)}
-                              style={{ marginTop: "0.2rem", accentColor: "#E90052" }} />
+                              style={{ marginTop: "0.2rem", accentColor: "var(--ph-red-600)" }} />
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.1rem" }}>
-                                <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "#263a55" }}>
-                                  {dir.alias} {dir.es_predeterminada && <span style={{ fontSize: "0.65rem", background: "#dcfce7", color: "#16a34a", padding: "0.1rem 0.4rem", borderRadius: "4px", marginLeft: "0.4rem", fontWeight: 700 }}>PREDETERMINADA</span>}
+                                <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--ph-navy-700)" }}>
+                                  {dir.alias} {dir.es_predeterminada && <span style={{ fontSize: "0.65rem", background: "#dcfce7", color: "var(--ph-green-600)", padding: "0.1rem 0.4rem", borderRadius: "4px", marginLeft: "0.4rem", fontWeight: 700 }}>PREDETERMINADA</span>}
                                 </p>
                                 <button type="button" onClick={(e) => { e.preventDefault(); eliminarDireccion(dir.id_direccion); }}
-                                  style={{ background: "transparent", border: "none", color: "#dc2626", fontSize: "0.7rem", cursor: "pointer", fontWeight: 600 }}>
+                                  style={{ background: "transparent", border: "none", color: "var(--ph-danger-600)", fontSize: "0.7rem", cursor: "pointer", fontWeight: 600 }}>
                                   Eliminar
                                 </button>
                               </div>
                               <p style={{ fontSize: "0.78rem", color: "#374151" }}>{dir.nombre_destinatario}{dir.telefono ? ` · ${dir.telefono}` : ""}</p>
-                              <p style={{ fontSize: "0.75rem", color: "#84878F" }}>{dir.calle}, {dir.ciudad}{dir.estado ? `, ${dir.estado}` : ""}{dir.codigo_postal ? ` ${dir.codigo_postal}` : ""}</p>
+                              <p style={{ fontSize: "0.75rem", color: "var(--ph-muted)" }}>{dir.calle}, {dir.ciudad}{dir.estado ? `, ${dir.estado}` : ""}{dir.codigo_postal ? ` ${dir.codigo_postal}` : ""}</p>
                             </div>
                           </label>
                         );
@@ -1277,7 +1274,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
 
                   {/* Form nueva dirección */}
                   {showNewDireccion && (
-                    <div style={{ border: "1.5px solid #e5e7eb", borderRadius: "10px", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                    <div style={{ border: "1.5px solid var(--ph-border)", borderRadius: "10px", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
                         <input placeholder="Alias (Casa, Oficina...)" value={newDireccion.alias}
                           onChange={(e) => setNewDireccion({ ...newDireccion, alias: e.target.value })}
@@ -1306,22 +1303,22 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
 
                       <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" }}>
-                          <label style={{ fontSize: "0.72rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Ubicación en mapa</label>
+                          <label style={{ fontSize: "0.72rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Ubicación en mapa</label>
                           <button type="button" onClick={() => {
                             if (!navigator.geolocation) { showToast("Geolocalización no disponible", false); return; }
                             navigator.geolocation.getCurrentPosition(
                               (pos) => setNewDireccion(prev => ({ ...prev, lat: pos.coords.latitude, lng: pos.coords.longitude })),
                               () => showToast("No se pudo obtener tu ubicación", false),
                             );
-                          }} style={{ background: "transparent", border: "none", color: "#E90052", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>
+                          }} style={{ background: "transparent", border: "none", color: "var(--ph-red-600)", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>
                             Usar mi ubicación
                           </button>
                         </div>
-                        <p style={{ fontSize: "0.7rem", color: "#84878F", marginBottom: "0.4rem" }}>Hacé click en el mapa para fijar la ubicación.</p>
+                        <p style={{ fontSize: "0.7rem", color: "var(--ph-muted)", marginBottom: "0.4rem" }}>Hacé click en el mapa para fijar la ubicación.</p>
                         <LocationPicker lat={newDireccion.lat} lng={newDireccion.lng}
                           onChange={(lat, lng) => setNewDireccion(prev => ({ ...prev, lat, lng }))} />
                         {newDireccion.lat != null && newDireccion.lng != null && (
-                          <p style={{ fontSize: "0.7rem", color: "#84878F", marginTop: "0.3rem" }}>
+                          <p style={{ fontSize: "0.7rem", color: "var(--ph-muted)", marginTop: "0.3rem" }}>
                             {newDireccion.lat.toFixed(5)}, {newDireccion.lng.toFixed(5)}
                           </p>
                         )}
@@ -1330,17 +1327,17 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                       <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.78rem", color: "#374151" }}>
                         <input type="checkbox" checked={newDireccion.es_predeterminada}
                           onChange={(e) => setNewDireccion({ ...newDireccion, es_predeterminada: e.target.checked })}
-                          style={{ accentColor: "#E90052" }} />
+                          style={{ accentColor: "var(--ph-red-600)" }} />
                         Usar como predeterminada
                       </label>
 
                       <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.3rem" }}>
                         <button onClick={() => { setShowNewDireccion(false); setNewDireccion(EMPTY_DIRECCION); }} disabled={savingDireccion}
-                          style={{ flex: 1, padding: "0.6rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: "pointer", fontWeight: 600, fontSize: "0.82rem" }}>
+                          style={{ flex: 1, padding: "0.6rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "var(--ph-muted)", cursor: "pointer", fontWeight: 600, fontSize: "0.82rem" }}>
                           Cancelar
                         </button>
                         <button onClick={guardarDireccion} disabled={savingDireccion}
-                          style={{ flex: 1, padding: "0.6rem", borderRadius: "8px", border: "none", background: "#263a55", color: "#fff", cursor: savingDireccion ? "wait" : "pointer", fontWeight: 700, fontSize: "0.82rem" }}>
+                          style={{ flex: 1, padding: "0.6rem", borderRadius: "8px", border: "none", background: "var(--ph-navy-700)", color: "#fff", cursor: savingDireccion ? "wait" : "pointer", fontWeight: 700, fontSize: "0.82rem" }}>
                           {savingDireccion ? "Guardando..." : "Guardar dirección"}
                         </button>
                       </div>
@@ -1351,21 +1348,21 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                 {/* Totales */}
                 <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem", marginBottom: "1rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", color: "#374151" }}>
-                    <span>Total</span><strong style={{ color: "#E90052" }}>{costo.toLocaleString()} pts</strong>
+                    <span>Total</span><strong style={{ color: "var(--ph-red-600)" }}>{costo.toLocaleString()} pts</strong>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: "#84878F", marginTop: "0.25rem" }}>
-                    <span>Saldo después de la compra</span><span style={{ fontWeight: 700, color: "#263a55" }}>{saldoFinal.toLocaleString()} pts</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: "var(--ph-muted)", marginTop: "0.25rem" }}>
+                    <span>Saldo después de la compra</span><span style={{ fontWeight: 700, color: "var(--ph-navy-700)" }}>{saldoFinal.toLocaleString()} pts</span>
                   </div>
                 </div>
 
                 <div style={{ display: "flex", gap: "0.6rem" }}>
                   <button onClick={() => setCheckoutAction(null)} disabled={placingOrder}
-                    style={{ flex: 1, padding: "0.75rem", borderRadius: "10px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: placingOrder ? "wait" : "pointer", fontWeight: 600, fontSize: "0.88rem" }}>
+                    style={{ flex: 1, padding: "0.75rem", borderRadius: "10px", border: "1px solid #e0e0e0", background: "#fff", color: "var(--ph-muted)", cursor: placingOrder ? "wait" : "pointer", fontWeight: 600, fontSize: "0.88rem" }}>
                     Cancelar
                   </button>
                   <button onClick={confirmarPedido} disabled={!selectedDireccionId || placingOrder || showNewDireccion}
                     style={{ flex: 2, padding: "0.75rem", borderRadius: "10px", border: "none",
-                      background: !selectedDireccionId || showNewDireccion ? "#e0e0e0" : "#E90052",
+                      background: !selectedDireccionId || showNewDireccion ? "#e0e0e0" : "var(--ph-red-600)",
                       color: !selectedDireccionId || showNewDireccion ? "#999" : "#fff",
                       cursor: !selectedDireccionId || placingOrder || showNewDireccion ? "not-allowed" : "pointer",
                       fontWeight: 700, fontSize: "0.88rem" }}>
@@ -1391,22 +1388,22 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
               onClick={(e) => e.stopPropagation()}>
               <div style={{ padding: "1.1rem 1.5rem", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <h3 style={{ color: "#263a55", fontSize: "1.05rem", fontWeight: 800 }}>Pedido #{p.id_pedido}</h3>
-                  <p style={{ color: "#84878F", fontSize: "0.76rem" }}>{new Date(p.fecha_pedido).toLocaleString("es-MX")}</p>
+                  <h3 style={{ color: "var(--ph-navy-700)", fontSize: "1.05rem", fontWeight: 800 }}>Pedido #{p.id_pedido}</h3>
+                  <p style={{ color: "var(--ph-muted)", fontSize: "0.76rem" }}>{new Date(p.fecha_pedido).toLocaleString("es-MX")}</p>
                 </div>
-                <button onClick={() => setPedidoModal(null)} style={{ background: "transparent", border: "none", color: "#84878F", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
+                <button onClick={() => setPedidoModal(null)} style={{ background: "transparent", border: "none", color: "var(--ph-muted)", cursor: "pointer", fontSize: "1.1rem" }}>✕</button>
               </div>
 
               <div style={{ padding: "1.25rem 1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
                 {/* Producto */}
                 <div style={{ display: "flex", gap: "0.85rem", alignItems: "center" }}>
-                  <div style={{ width: "72px", height: "72px", borderRadius: "8px", background: p.producto?.imagen ? `#f5f6f8 url(${p.producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55, #871d54)", flexShrink: 0 }} />
+                  <div style={{ width: "72px", height: "72px", borderRadius: "8px", background: p.producto?.imagen ? `var(--ph-surface) url(${p.producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, var(--ph-navy-700), var(--ph-bordeaux-700))", flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "#263a55" }}>{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
-                    <p style={{ fontSize: "0.78rem", color: "#84878F" }}>
+                    <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--ph-navy-700)" }}>{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
+                    <p style={{ fontSize: "0.78rem", color: "var(--ph-muted)" }}>
                       {p.producto?.tipo ? tipoLabel(p.producto.tipo) : ""}{p.variante ? ` · talla ${p.variante.talla}` : ""}
                     </p>
-                    <p style={{ fontSize: "0.92rem", color: "#E90052", fontWeight: 800, marginTop: "0.15rem" }}>{Number(p.costo).toLocaleString()} pts</p>
+                    <p style={{ fontSize: "0.92rem", color: "var(--ph-red-600)", fontWeight: 800, marginTop: "0.15rem" }}>{Number(p.costo).toLocaleString()} pts</p>
                   </div>
                   <span style={{ background: color.bg, color: color.fg, padding: "0.3rem 0.75rem", borderRadius: "999px", fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
                     {ESTADO_PEDIDO_LABEL[p.estado] || p.estado}
@@ -1416,18 +1413,18 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                 {/* Timeline */}
                 {p.estado !== "cancelado" && (
                   <div>
-                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.6rem" }}>Estado del envío</h4>
+                    <h4 style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.6rem" }}>Estado del envío</h4>
                     <div style={{ display: "flex", justifyContent: "space-between", position: "relative" }}>
-                      <div style={{ position: "absolute", top: "11px", left: "12px", right: "12px", height: "2px", background: "#e5e7eb", zIndex: 0 }} />
-                      <div style={{ position: "absolute", top: "11px", left: "12px", height: "2px", background: "#E90052", zIndex: 1, width: idx > 0 ? `calc(${(idx / (ESTADO_FLOW.length - 1)) * 100}% - 24px)` : "0" }} />
+                      <div style={{ position: "absolute", top: "11px", left: "12px", right: "12px", height: "2px", background: "var(--ph-border)", zIndex: 0 }} />
+                      <div style={{ position: "absolute", top: "11px", left: "12px", height: "2px", background: "var(--ph-red-600)", zIndex: 1, width: idx > 0 ? `calc(${(idx / (ESTADO_FLOW.length - 1)) * 100}% - 24px)` : "0" }} />
                       {ESTADO_FLOW.map((est, i) => {
                         const reached = i <= idx;
                         return (
                           <div key={est} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem", zIndex: 2, flex: 1 }}>
-                            <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: reached ? "#E90052" : "#e5e7eb", color: reached ? "#fff" : "#84878F", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 700 }}>
+                            <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: reached ? "var(--ph-red-600)" : "var(--ph-border)", color: reached ? "#fff" : "var(--ph-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 700 }}>
                               {reached ? "✓" : i + 1}
                             </div>
-                            <p style={{ fontSize: "0.68rem", color: reached ? "#263a55" : "#84878F", fontWeight: reached ? 700 : 500, textAlign: "center" }}>{ESTADO_PEDIDO_LABEL[est]}</p>
+                            <p style={{ fontSize: "0.68rem", color: reached ? "var(--ph-navy-700)" : "var(--ph-muted)", fontWeight: reached ? 700 : 500, textAlign: "center" }}>{ESTADO_PEDIDO_LABEL[est]}</p>
                           </div>
                         );
                       })}
@@ -1438,10 +1435,10 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                 {/* Dirección */}
                 <div style={{ background: "#f8f9fa", borderRadius: "10px", padding: "0.85rem 1rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
-                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Dirección de entrega</h4>
+                    <h4 style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Dirección de entrega</h4>
                     {p.estado === "procesando" && !editingPedidoDireccion && (
                       <button onClick={iniciarEditarPedidoDireccion}
-                        style={{ background: "transparent", border: "none", color: "#E90052", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>
+                        style={{ background: "transparent", border: "none", color: "var(--ph-red-600)", fontSize: "0.74rem", fontWeight: 700, cursor: "pointer" }}>
                         Editar
                       </button>
                     )}
@@ -1449,7 +1446,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
 
                   {!editingPedidoDireccion ? (
                     <>
-                      <p style={{ fontSize: "0.85rem", color: "#263a55", fontWeight: 600 }}>{dirSnap.nombre_destinatario || "—"}{dirSnap.telefono ? ` · ${dirSnap.telefono}` : ""}</p>
+                      <p style={{ fontSize: "0.85rem", color: "var(--ph-navy-700)", fontWeight: 600 }}>{dirSnap.nombre_destinatario || "—"}{dirSnap.telefono ? ` · ${dirSnap.telefono}` : ""}</p>
                       <p style={{ fontSize: "0.78rem", color: "#374151" }}>{dirSnap.calle || ""}{dirSnap.ciudad ? `, ${dirSnap.ciudad}` : ""}{dirSnap.estado ? `, ${dirSnap.estado}` : ""}{dirSnap.codigo_postal ? ` ${dirSnap.codigo_postal}` : ""}</p>
                       {p.estado !== "procesando" && (
                         <p style={{ fontSize: "0.7rem", color: "#9ca3af", marginTop: "0.4rem", fontStyle: "italic" }}>Ya no puedes editar la dirección porque el pedido salió de "procesando".</p>
@@ -1484,14 +1481,14 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                       </div>
                       <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
-                          <label style={{ fontSize: "0.7rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Ubicación en mapa</label>
+                          <label style={{ fontSize: "0.7rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Ubicación en mapa</label>
                           <button type="button" onClick={() => {
                             if (!navigator.geolocation) { showToast("Geolocalización no disponible", false); return; }
                             navigator.geolocation.getCurrentPosition(
                               (pos) => setPedidoDireccionForm(prev => ({ ...prev, lat: pos.coords.latitude, lng: pos.coords.longitude })),
                               () => showToast("No se pudo obtener tu ubicación", false),
                             );
-                          }} style={{ background: "transparent", border: "none", color: "#E90052", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer" }}>
+                          }} style={{ background: "transparent", border: "none", color: "var(--ph-red-600)", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer" }}>
                             Usar mi ubicación
                           </button>
                         </div>
@@ -1500,11 +1497,11 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                       </div>
                       <div style={{ display: "flex", gap: "0.5rem" }}>
                         <button onClick={() => setEditingPedidoDireccion(false)} disabled={savingPedidoDireccion}
-                          style={{ flex: 1, padding: "0.55rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "#84878F", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem" }}>
+                          style={{ flex: 1, padding: "0.55rem", borderRadius: "8px", border: "1px solid #e0e0e0", background: "#fff", color: "var(--ph-muted)", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem" }}>
                           Cancelar
                         </button>
                         <button onClick={guardarPedidoDireccion} disabled={savingPedidoDireccion}
-                          style={{ flex: 1, padding: "0.55rem", borderRadius: "8px", border: "none", background: "#E90052", color: "#fff", cursor: savingPedidoDireccion ? "wait" : "pointer", fontWeight: 700, fontSize: "0.8rem" }}>
+                          style={{ flex: 1, padding: "0.55rem", borderRadius: "8px", border: "none", background: "var(--ph-red-600)", color: "#fff", cursor: savingPedidoDireccion ? "wait" : "pointer", fontWeight: 700, fontSize: "0.8rem" }}>
                           {savingPedidoDireccion ? "Guardando..." : "Guardar cambios"}
                         </button>
                       </div>
@@ -1515,17 +1512,17 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                 {/* Tracking info (si admin la cargó) */}
                 {(p.tracking_numero || p.fecha_estimada || p.notas_admin) && (
                   <div style={{ background: "#f1f5f9", borderRadius: "10px", padding: "0.85rem 1rem" }}>
-                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Información de envío</h4>
+                    <h4 style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.4rem" }}>Información de envío</h4>
                     {p.tracking_numero && (
                       <p style={{ fontSize: "0.82rem", color: "#374151" }}>
-                        <span style={{ color: "#84878F", fontWeight: 600 }}>Tracking: </span>
-                        <span style={{ fontWeight: 700, color: "#263a55", letterSpacing: "0.02em" }}>{p.tracking_numero}</span>
+                        <span style={{ color: "var(--ph-muted)", fontWeight: 600 }}>Tracking: </span>
+                        <span style={{ fontWeight: 700, color: "var(--ph-navy-700)", letterSpacing: "0.02em" }}>{p.tracking_numero}</span>
                       </p>
                     )}
                     {p.fecha_estimada && (
                       <p style={{ fontSize: "0.82rem", color: "#374151" }}>
-                        <span style={{ color: "#84878F", fontWeight: 600 }}>Entrega estimada: </span>
-                        <span style={{ fontWeight: 700, color: "#263a55" }}>{new Date(p.fecha_estimada).toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric" })}</span>
+                        <span style={{ color: "var(--ph-muted)", fontWeight: 600 }}>Entrega estimada: </span>
+                        <span style={{ fontWeight: 700, color: "var(--ph-navy-700)" }}>{new Date(p.fecha_estimada).toLocaleDateString("es-MX", { day: "2-digit", month: "long", year: "numeric" })}</span>
                       </p>
                     )}
                     {p.notas_admin && (
@@ -1539,7 +1536,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                 {/* Mapa de tracking */}
                 {p.lat_destino != null && p.lng_destino != null && (
                   <div>
-                    <h4 style={{ fontSize: "0.74rem", color: "#263a55", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
+                    <h4 style={{ fontSize: "0.74rem", color: "var(--ph-navy-700)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
                       {p.estado === "entregado" ? "Ubicación de entrega" : "Ruta del envío"}
                     </h4>
                     <TrackingMap
@@ -1550,16 +1547,16 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                       mostrarPaquete={p.estado !== "entregado" && p.estado !== "cancelado"}
                     />
                     {p.estado !== "entregado" && p.estado !== "cancelado" && p.lat_actual != null && p.lng_actual != null && (
-                      <p style={{ fontSize: "0.7rem", color: "#84878F", marginTop: "0.3rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><span style={{ width: "10px", height: "10px", background: "#2563eb", borderRadius: "50%" }} /> Paquete</span>
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><span style={{ width: "10px", height: "10px", background: "#E90052", borderRadius: "50%" }} /> Destino</span>
+                      <p style={{ fontSize: "0.7rem", color: "var(--ph-muted)", marginTop: "0.3rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><span style={{ width: "10px", height: "10px", background: "var(--ph-blue-600)", borderRadius: "50%" }} /> Paquete</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><span style={{ width: "10px", height: "10px", background: "var(--ph-red-600)", borderRadius: "50%" }} /> Destino</span>
                       </p>
                     )}
                   </div>
                 )}
 
                 {p.fecha_entrega && (
-                  <p style={{ fontSize: "0.78rem", color: "#16a34a", fontWeight: 600 }}>Entregado el {new Date(p.fecha_entrega).toLocaleString("es-MX")}</p>
+                  <p style={{ fontSize: "0.78rem", color: "var(--ph-green-600)", fontWeight: 600 }}>Entregado el {new Date(p.fecha_entrega).toLocaleString("es-MX")}</p>
                 )}
               </div>
             </div>
@@ -1573,59 +1570,40 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
   return (
     <>
       {modals}
-      <div>
+      <div className="ph-page">
 
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-        <div>
-          <h2 style={{ color: "#263a55", fontSize: "1.25rem", marginBottom: "0.2rem" }}>Tienda</h2>
-          <p style={{ color: "#84878F", fontSize: "0.8rem" }}>Compra con tus puntos</p>
-        </div>
-        <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-          <button
-            onClick={reclamarBonus}
-            style={{
-              padding: "0.5rem 1rem", borderRadius: "8px", border: "1px solid #E90052",
-              background: "transparent", color: "#E90052", fontSize: "0.8rem", fontWeight: 700,
-              cursor: "pointer", transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#E90052"; (e.currentTarget as HTMLButtonElement).style.color = "#fff"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#E90052"; }}
-          >
-            + 500 pts bonus
-          </button>
-          <div style={{ background: "linear-gradient(135deg, #263a55, #1a2a3f)", color: "#fff", padding: "0.5rem 1.25rem", borderRadius: "8px", fontSize: "0.9rem", fontWeight: 700 }}>
-            {saldo.toLocaleString()} pts
+      <PageHeader
+        eyebrow="Fan economy"
+        title="Tienda"
+        subtitle="Compra, vende y administra items con tus puntos PremierHub."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" onClick={reclamarBonus}>+ 500 pts bonus</Button>
+            <span className="ph-badge ph-badge--navy min-h-[40px] px-4 text-sm normal-case">
+              {saldo.toLocaleString()} pts
+            </span>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Sub-tabs */}
-      <div style={{ display: "flex", borderBottom: "2px solid #e9ecef", marginBottom: "1.5rem", gap: "0" }}>
-        {([
-          { key: "perfil" as SubTab,       label: "Objetos de Perfil" },
-          { key: "real" as SubTab,         label: "Objetos Reales"    },
-          { key: "marketplace" as SubTab,  label: "Marketplace"       },
-          { key: "pedidos" as SubTab,      label: "Mis Pedidos"       },
-        ]).map((t) => (
-          <button key={t.key} onClick={() => setSubTab(t.key)}
-            style={{
-              padding: "0.75rem 1.5rem", border: "none", cursor: "pointer", background: "none",
-              fontSize: "0.85rem", fontWeight: subTab === t.key ? 700 : 500,
-              color: subTab === t.key ? "#E90052" : "#84878F",
-              borderBottom: subTab === t.key ? "2px solid #E90052" : "2px solid transparent",
-              marginBottom: "-2px", transition: "all 0.2s ease", whiteSpace: "nowrap",
-            }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={subTab}
+        onChange={(next) => setSubTab(next as SubTab)}
+        items={[
+          { key: "perfil", label: "Objetos de Perfil" },
+          { key: "real", label: "Objetos Reales" },
+          { key: "marketplace", label: "Marketplace" },
+          { key: "pedidos", label: "Mis Pedidos" },
+        ]}
+      />
 
       {/* Buscador + filtros (real y explorar marketplace; perfil tiene su propio buscador) */}
       {subTab !== "perfil" && subTab !== "pedidos" && (subTab !== "marketplace" || marketView === "explorar") && (
         <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
-            <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.75rem", fontWeight: 600 }}>&#x2315;</span>
+            <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--ph-muted)", fontSize: "0.75rem", fontWeight: 600 }}>&#x2315;</span>
             <input
               type="text"
               placeholder="Buscar por nombre, equipo..."
@@ -1643,9 +1621,9 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
               <button key={tipo} onClick={() => setFiltroTipo(tipo)}
                 style={{
                   padding: "0.4rem 0.85rem", borderRadius: "20px", border: "1px solid",
-                  borderColor: filtroTipo === tipo ? "#263a55" : "#e0e0e0",
-                  background: filtroTipo === tipo ? "#263a55" : "#fff",
-                  color: filtroTipo === tipo ? "#fff" : "#84878F",
+                  borderColor: filtroTipo === tipo ? "var(--ph-navy-700)" : "#e0e0e0",
+                  background: filtroTipo === tipo ? "var(--ph-navy-700)" : "#fff",
+                  color: filtroTipo === tipo ? "#fff" : "var(--ph-muted)",
                   fontSize: "0.78rem", fontWeight: filtroTipo === tipo ? 700 : 400,
                   cursor: "pointer", textTransform: "capitalize", transition: "all 0.15s ease",
                 }}>
@@ -1662,13 +1640,13 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
           {/* Search + filters */}
           <div style={{ display: "flex", gap: "0.75rem", marginBottom: "2rem", flexWrap: "wrap", alignItems: "center" }}>
             <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
-              <span style={{ position: "absolute", left: "0.85rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.85rem", pointerEvents: "none" }}>&#x2315;</span>
+              <span style={{ position: "absolute", left: "0.85rem", top: "50%", transform: "translateY(-50%)", color: "var(--ph-muted)", fontSize: "0.85rem", pointerEvents: "none" }}>&#x2315;</span>
               <input
                 type="text"
                 placeholder="Buscar en toda la tienda..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                style={{ width: "100%", padding: "0.7rem 0.9rem 0.7rem 2.4rem", borderRadius: "10px", border: "1.5px solid #e0e0e0", fontSize: "0.88rem", background: "#fff", boxSizing: "border-box", outline: "none", color: "#263a55" }}
+                style={{ width: "100%", padding: "0.7rem 0.9rem 0.7rem 2.4rem", borderRadius: "10px", border: "1.5px solid #e0e0e0", fontSize: "0.88rem", background: "#fff", boxSizing: "border-box", outline: "none", color: "var(--ph-navy-700)" }}
               />
             </div>
             {perfilTipos.length > 1 && (
@@ -1677,9 +1655,9 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                   <button key={tipo} onClick={() => setFiltroPerfilTipo(tipo)}
                     style={{
                       padding: "0.4rem 0.85rem", borderRadius: "20px", border: "1px solid",
-                      borderColor: filtroPerfilTipo === tipo ? "#263a55" : "#e0e0e0",
-                      background: filtroPerfilTipo === tipo ? "#263a55" : "#fff",
-                      color: filtroPerfilTipo === tipo ? "#fff" : "#84878F",
+                      borderColor: filtroPerfilTipo === tipo ? "var(--ph-navy-700)" : "#e0e0e0",
+                      background: filtroPerfilTipo === tipo ? "var(--ph-navy-700)" : "#fff",
+                      color: filtroPerfilTipo === tipo ? "#fff" : "var(--ph-muted)",
                       fontSize: "0.78rem", fontWeight: filtroPerfilTipo === tipo ? 700 : 400,
                       cursor: "pointer", transition: "all 0.15s ease",
                     }}>
@@ -1690,9 +1668,9 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
             )}
           </div>
 
-          {loading && <p style={{ color: "#84878F" }}>Cargando...</p>}
+          {loading && <p style={{ color: "var(--ph-muted)" }}>Cargando...</p>}
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1.25rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1rem" }}>
             {perfilFiltrados.map(p => {
               const owned = ownedIds.has(p.id_producto);
               const canBuy = !owned && Number(p.costo) <= saldo;
@@ -1707,22 +1685,22 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                   <div style={{ position: "relative" }}>
                     <ProductVisual p={p} height={160} />
                     {owned
-                      ? <span style={{ position: "absolute", top: "10px", left: "10px", background: "#16a34a", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800 }}>EN TU PERFIL</span>
-                      : p.es_nuevo && <span style={{ position: "absolute", top: "10px", left: "10px", background: "#E90052", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800 }}>NUEVO</span>
+                      ? <span style={{ position: "absolute", top: "10px", left: "10px", background: "var(--ph-green-600)", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800 }}>EN TU PERFIL</span>
+                      : p.es_nuevo && <span style={{ position: "absolute", top: "10px", left: "10px", background: "var(--ph-red-600)", color: "#fff", fontSize: "0.6rem", padding: "0.18rem 0.5rem", borderRadius: "4px", fontWeight: 800 }}>NUEVO</span>
                     }
                   </div>
                   <div style={{ padding: "0.9rem 1rem" }}>
-                    <p style={{ fontSize: "0.7rem", color: "#84878F", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.2rem" }}>{tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}</p>
-                    <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#263a55", marginBottom: "0.65rem", lineHeight: 1.3 }}>{p.nombre}</p>
+                    <p style={{ fontSize: "0.7rem", color: "var(--ph-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.2rem" }}>{tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}</p>
+                    <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "var(--ph-navy-700)", marginBottom: "0.65rem", lineHeight: 1.3 }}>{p.nombre}</p>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
-                        <span style={{ fontSize: "1rem", fontWeight: 900, color: "#263a55" }}>{Number(p.costo).toLocaleString()}</span>
-                        <span style={{ fontSize: "0.72rem", color: "#84878F", marginLeft: "0.25rem" }}>pts</span>
+                        <span style={{ fontSize: "1rem", fontWeight: 900, color: "var(--ph-navy-700)" }}>{Number(p.costo).toLocaleString()}</span>
+                        <span style={{ fontSize: "0.72rem", color: "var(--ph-muted)", marginLeft: "0.25rem" }}>pts</span>
                       </div>
                       <button
                         onClick={e => { e.stopPropagation(); if (canBuy) setConfirmAction({ kind: "buy-product", producto: p, variante: null }); }}
                         disabled={!canBuy}
-                        style={{ padding: "0.38rem 0.85rem", background: canBuy ? "#E90052" : "#e9ecef", color: canBuy ? "#fff" : "#aaa", border: "none", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 700, cursor: canBuy ? "pointer" : "not-allowed" }}
+                        style={{ padding: "0.38rem 0.85rem", background: canBuy ? "var(--ph-red-600)" : "var(--ph-border)", color: canBuy ? "#fff" : "#aaa", border: "none", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 700, cursor: canBuy ? "pointer" : "not-allowed" }}
                       >
                         {owned ? "Ya tienes este" : "Comprar"}
                       </button>
@@ -1734,7 +1712,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
           </div>
 
           {!loading && perfilFiltrados.length === 0 && (
-            <p style={{ color: "#84878F", textAlign: "center", marginTop: "3rem", fontSize: "0.9rem" }}>No se encontraron productos</p>
+            <p style={{ color: "var(--ph-muted)", textAlign: "center", marginTop: "3rem", fontSize: "0.9rem" }}>No se encontraron productos</p>
           )}
         </div>
       )}
@@ -1742,9 +1720,9 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
       {/* ── Sub-tab: Objetos Reales ── */}
       {subTab === "real" && (
         <div>
-          {loading ? <p style={{ color: "#84878F" }}>Cargando...</p> : (
-            productosFiltrados.length === 0 ? <p style={{ color: "#84878F", textAlign: "center", marginTop: "2rem" }}>No se encontraron productos</p> : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "1rem" }}>
+          {loading ? <p style={{ color: "var(--ph-muted)" }}>Cargando...</p> : (
+            productosFiltrados.length === 0 ? <p style={{ color: "var(--ph-muted)", textAlign: "center", marginTop: "2rem" }}>No se encontraron productos</p> : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1rem" }}>
                 {productosFiltrados.map(p => <ProductCard key={p.id_producto} p={p} badge="OBJETO REAL" />)}
               </div>
             )
@@ -1767,7 +1745,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                   padding: "0.45rem 1.1rem", borderRadius: "8px", border: "none", cursor: "pointer",
                   fontSize: "0.82rem", fontWeight: marketView === v.key ? 700 : 500,
                   background: marketView === v.key ? "#fff" : "none",
-                  color: marketView === v.key ? "#263a55" : "#84878F",
+                  color: marketView === v.key ? "var(--ph-navy-700)" : "var(--ph-muted)",
                   boxShadow: marketView === v.key ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
                   transition: "all 0.2s ease",
                 }}>
@@ -1779,9 +1757,9 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
           {/* Explorar view */}
           {marketView === "explorar" && (
             listadosFiltrados.length === 0 ? (
-              <p style={{ color: "#84878F", textAlign: "center", marginTop: "2rem" }}>No hay listados en el marketplace</p>
+              <p style={{ color: "var(--ph-muted)", textAlign: "center", marginTop: "2rem" }}>No hay listados en el marketplace</p>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1rem" }}>
                 {listadosFiltrados.map(l => (
                   <ListingCard key={l.id_listado} l={l} onBuy={() => comprarMarketplace(l.id_listado, l.nombre)} />
                 ))}
@@ -1793,11 +1771,11 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
           {marketView === "mis-items" && (
             <div>
               {/* My inventory */}
-              <h3 style={{ color: "#263a55", fontSize: "1rem", marginBottom: "0.75rem" }}>Mi Inventario</h3>
+              <h3 style={{ color: "var(--ph-navy-700)", fontSize: "1rem", marginBottom: "0.75rem" }}>Mi Inventario</h3>
               {misItems.length === 0 ? (
-                <p style={{ color: "#84878F", fontSize: "0.85rem", marginBottom: "1.5rem" }}>No tienes items. Compra algo en la tienda primero.</p>
+                <p style={{ color: "var(--ph-muted)", fontSize: "0.85rem", marginBottom: "1.5rem" }}>No tienes items. Compra algo en la tienda primero.</p>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "0.75rem", marginBottom: "2rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
                   {misItems.map(item => (
                     <div key={item.id_inventario} style={{
                       background: "#fff", borderRadius: "10px", padding: "0.75rem",
@@ -1806,16 +1784,16 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                       <div style={{ borderRadius: "8px", overflow: "hidden" }}>
                         <ProductVisual p={item} height={80} />
                       </div>
-                      <p style={{ fontWeight: 600, fontSize: "0.8rem", color: "#263a55" }}>{item.nombre}</p>
-                      <p style={{ fontSize: "0.7rem", color: "#84878F" }}>
+                      <p style={{ fontWeight: 600, fontSize: "0.8rem", color: "var(--ph-navy-700)" }}>{item.nombre}</p>
+                      <p style={{ fontSize: "0.7rem", color: "var(--ph-muted)" }}>
                         {item.tipo}{item.equipo ? ` · ${item.equipo}` : ""}
                       </p>
                       {item.en_marketplace ? (
-                        <span style={{ fontSize: "0.7rem", color: "#E90052", fontWeight: 600 }}>En marketplace</span>
+                        <span style={{ fontSize: "0.7rem", color: "var(--ph-red-600)", fontWeight: 600 }}>En marketplace</span>
                       ) : item.categoria === "perfil" ? (
                         <button onClick={() => setPublishingItem({ item, precio: "" })}
                           style={{
-                            padding: "0.3rem 0.6rem", background: "#E90052", color: "#fff",
+                            padding: "0.3rem 0.6rem", background: "var(--ph-red-600)", color: "#fff",
                             border: "none", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 600,
                             cursor: "pointer", alignSelf: "flex-start",
                           }}>
@@ -1828,9 +1806,9 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
               )}
 
               {/* My active listings */}
-              <h3 style={{ color: "#263a55", fontSize: "1rem", marginBottom: "0.75rem" }}>Mis Publicaciones Activas</h3>
+              <h3 style={{ color: "var(--ph-navy-700)", fontSize: "1rem", marginBottom: "0.75rem" }}>Mis Publicaciones Activas</h3>
               {misListados.length === 0 ? (
-                <p style={{ color: "#84878F", fontSize: "0.85rem" }}>No tienes publicaciones activas</p>
+                <p style={{ color: "var(--ph-muted)", fontSize: "0.85rem" }}>No tienes publicaciones activas</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   {misListados.map(l => (
@@ -1840,16 +1818,16 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                       display: "flex", justifyContent: "space-between", alignItems: "center",
                     }}>
                       <div>
-                        <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#263a55" }}>{l.nombre}</p>
-                        <p style={{ fontSize: "0.75rem", color: "#84878F" }}>
-                          Precio: <span style={{ color: "#263a55", fontWeight: 700 }}>{l.precio} pts</span>
+                        <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--ph-navy-700)" }}>{l.nombre}</p>
+                        <p style={{ fontSize: "0.75rem", color: "var(--ph-muted)" }}>
+                          Precio: <span style={{ color: "var(--ph-navy-700)", fontWeight: 700 }}>{l.precio} pts</span>
                           {" · "}Publicado: {new Date(l.fecha_creacion).toLocaleDateString("es-MX")}
                         </p>
                       </div>
                       <button onClick={() => cancelarListado(l.id_listado)}
                         style={{
-                          padding: "0.35rem 0.75rem", background: "#fff", color: "#dc2626",
-                          border: "1px solid #dc2626", borderRadius: "6px", fontSize: "0.78rem",
+                          padding: "0.35rem 0.75rem", background: "#fff", color: "var(--ph-danger-600)",
+                          border: "1px solid var(--ph-danger-600)", borderRadius: "6px", fontSize: "0.78rem",
                           fontWeight: 600, cursor: "pointer",
                         }}>
                         Cancelar
@@ -1868,7 +1846,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
         <div>
           {pedidos.length === 0 ? (
             <div style={{ background: "#fff", borderRadius: "12px", padding: "3rem 1.5rem", textAlign: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-              <p style={{ color: "#84878F", fontSize: "0.95rem", marginBottom: "0.4rem" }}>Aún no tienes pedidos</p>
+              <p style={{ color: "var(--ph-muted)", fontSize: "0.95rem", marginBottom: "0.4rem" }}>Aún no tienes pedidos</p>
               <p style={{ color: "#9ca3af", fontSize: "0.82rem" }}>Compra un objeto real desde la pestaña "Objetos Reales" y aparecerá aquí.</p>
             </div>
           ) : (
@@ -1886,13 +1864,13 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                     onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.10)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; }}
                   >
-                    <div style={{ width: "64px", height: "64px", borderRadius: "8px", background: p.producto?.imagen ? `#f5f6f8 url(${p.producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55, #871d54)", flexShrink: 0 }} />
+                    <div style={{ width: "64px", height: "64px", borderRadius: "8px", background: p.producto?.imagen ? `var(--ph-surface) url(${p.producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, var(--ph-navy-700), var(--ph-bordeaux-700))", flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ display: "inline-block", background: "#263a55", color: "#fff", padding: "0.2rem 0.55rem", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, letterSpacing: "0.02em" }}>#{p.id_pedido}</span>
-                          <p style={{ fontSize: "0.92rem", color: "#263a55", fontWeight: 700, marginTop: "0.35rem" }}>{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
-                          <p style={{ fontSize: "0.74rem", color: "#84878F" }}>
+                          <span style={{ display: "inline-block", background: "var(--ph-navy-700)", color: "#fff", padding: "0.2rem 0.55rem", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, letterSpacing: "0.02em" }}>#{p.id_pedido}</span>
+                          <p style={{ fontSize: "0.92rem", color: "var(--ph-navy-700)", fontWeight: 700, marginTop: "0.35rem" }}>{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
+                          <p style={{ fontSize: "0.74rem", color: "var(--ph-muted)" }}>
                             {p.producto?.tipo ? tipoLabel(p.producto.tipo) : ""}{p.variante ? ` · talla ${p.variante.talla}` : ""}
                           </p>
                         </div>
@@ -1901,8 +1879,8 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
                         </span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.4rem" }}>
-                        <p style={{ fontSize: "0.72rem", color: "#84878F" }}>{new Date(p.fecha_pedido).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                        <p style={{ fontSize: "0.85rem", color: "#E90052", fontWeight: 800 }}>{Number(p.costo).toLocaleString()} pts</p>
+                        <p style={{ fontSize: "0.72rem", color: "var(--ph-muted)" }}>{new Date(p.fecha_pedido).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                        <p style={{ fontSize: "0.85rem", color: "var(--ph-red-600)", fontWeight: 800 }}>{Number(p.costo).toLocaleString()} pts</p>
                       </div>
                     </div>
                   </div>

@@ -325,13 +325,17 @@ export default function Wordle() {
 
   return (
     <div className="wordle-container">
-      <span className="wordle-theme">{theme}</span>
+      <header className="wordle-page-header">
+        <p className="ph-eyebrow">Arcade</p>
+        <h1 className="wordle-theme">{theme}</h1>
+        {!submitted ? (
+          <p className="wordle-instructions">Ordena de mayor a menor y confirma tu respuesta</p>
+        ) : null}
+      </header>
 
-      {!submitted ? (
-        <p className="wordle-instructions">Ordena de mayor a menor y confirma tu respuesta</p>
-      ) : (
+      {submitted ? (
         <span className={scoreBadgeClass}>{score}/10 correctas</span>
-      )}
+      ) : null}
 
       <div className="wordle-board">
         {BOARD_ROWS.map((rowPositions, rowIdx) => (

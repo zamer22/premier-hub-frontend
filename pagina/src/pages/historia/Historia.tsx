@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import styles from "./historia.module.css";
+import { PageHeader } from "../../components/ui";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -139,9 +140,11 @@ export default function Historia() {
 
   return (
     <div className={styles.root}>
-      <section className={styles.pageHeading}>
-        <h1 className={styles.pageTitle}>Historia</h1>
-      </section>
+      <PageHeader
+        eyebrow="Archivo histórico"
+        title="Historia"
+        subtitle="Explora equipos, escudos y momentos clave con una línea de tiempo visual."
+      />
 
       <section className={styles.panel}>
         <div className={styles.sectionHeader}>
@@ -220,35 +223,35 @@ export default function Historia() {
         </>
       )}
 
-      {/* Botón volver arriba */}
-      <button
-        type="button"
-        onClick={() => {
-          const start = window.scrollY;
-          const duration = 900;
-          const startTime = performance.now();
+{/* Botón volver arriba */}
+<button
+  type="button"
+  onClick={() => {
+    const start = window.scrollY;
+    const duration = 900;
+    const startTime = performance.now();
 
-          const easeInOutCubic = (t: number) =>
-            t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-          const animateScroll = (currentTime: number) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const easedProgress = easeInOutCubic(progress);
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeInOutCubic(progress);
 
-            window.scrollTo(0, start * (1 - easedProgress));
+      window.scrollTo(0, start * (1 - easedProgress));
 
-            if (progress < 1) {
-              requestAnimationFrame(animateScroll);
-            }
-          };
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
 
-          requestAnimationFrame(animateScroll);
-        }}
-        className={styles.backButton}
-      >
-        Regresar
-      </button>
+    requestAnimationFrame(animateScroll);
+  }}
+  className={styles.scrollTopButton}
+>
+  Regresar
+</button>
     </div>
   );
 }
