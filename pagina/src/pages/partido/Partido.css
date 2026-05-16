@@ -1,0 +1,1077 @@
+.partido {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.partido_loading {
+  color: #84878f;
+}
+
+.partido_error {
+  color: #dc2626;
+}
+
+.partido {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.95fr);
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.partido_standings {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  height: 100%;
+}
+
+.partido_section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.partido_section-header--small {
+  margin-bottom: 0.75rem;
+}
+
+.partido_accent {
+  width: 4px;
+  height: 20px;
+  background: #e90052;
+  border-radius: 2px;
+}
+
+.partido_title {
+  color: #263a55;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.partido_subtitle {
+  color: #263a55;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.partido_table-wrapper {
+  overflow-x: auto;
+}
+
+.partido_table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.partido_table-head-row {
+  border-bottom: 2px solid #263a55;
+}
+
+.partido_th {
+  padding: 0.5rem 0.4rem;
+  text-align: left;
+  font-weight: 700;
+  color: #263a55;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.partido_tr--even {
+  background: #fafafa;
+}
+
+.partido_tr--odd {
+  background: #fff;
+}
+
+.partido_td {
+  padding: 0.4rem;
+  border-bottom: 1px solid #eee;
+}
+
+.partido_td--rank {
+  font-weight: 600;
+}
+
+.partido_team-cell {
+  padding: 0.4rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.partido_team-logo--small {
+  width: 18px;
+  height: 18px;
+}
+
+.partido_team-name {
+  font-weight: 500;
+}
+
+.partido_goal-diff--positive {
+  color: #16a34a;
+}
+
+.partido_goal-diff--negative {
+  color: #dc2626;
+}
+
+.partido_goal-diff--neutral {
+  color: #666;
+}
+
+.partido_points {
+  font-weight: 700;
+  color: #e90052;
+}
+
+.partido_empty {
+  color: #84878f;
+  font-size: 0.85rem;
+}
+
+.partido_empty--center {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.partido_match-date {
+  font-size: 0.7rem;
+  color: #84878f;
+  margin-bottom: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.partido_match-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  animation: fadeIn 0.3s ease;
+}
+
+.partido_match-click {
+  cursor: pointer;
+}
+
+.partido_match-side {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.partido_match-side--away {
+  justify-content: flex-end;
+}
+
+.partido_team-logo {
+  width: 24px;
+  height: 24px;
+}
+
+.partido_match-team {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.partido_match-score {
+  font-weight: 700;
+  color: #e90052;
+  font-size: 0.95rem;
+  min-width: 50px;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .partido {
+    grid-template-columns: 1fr;
+  }
+}
+
+.partido_table-wrapper {
+  height: calc(30px + (10 * 40px));
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.partido_table-head-row {
+  height: 44px;
+}
+
+.partido_tr--even,
+.partido_tr--odd {
+  height: 48px;
+}
+
+.partido_table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+}
+
+.partido_th--form,
+.partido_td--form {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.partido_form {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.partido_form-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.partido_form-badge--win {
+  background: #28a745;
+}
+
+.partido_form-badge--draw {
+  background: #8c8c96;
+}
+
+.partido_form-badge--loss {
+  background: #e74c3c;
+}
+
+.partido_form-badge--neutral {
+  background: #bdbdbd;
+}
+
+.partido_form-empty {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.partido_upcoming-card {
+  display: flex;
+  background: #f3f4f6;
+  border: 1px solid #b9c4d3;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+  min-height: 150px;
+}
+
+.partido_upcoming-day {
+  width: 78px;
+  background: #e90052;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.partido_upcoming-day span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.partido_upcoming-content {
+  flex: 1;
+  padding: 1rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.partido_upcoming-stadium {
+  background: #263a55;
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.partido_upcoming-stadium-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.partido_upcoming-match {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.partido_upcoming-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  text-align: center;
+}
+
+.partido_upcoming-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+}
+
+.partido_upcoming-team-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.partido_upcoming-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.partido_upcoming-vs {
+  background: #263a55;
+  color: #fff;
+  padding: 0.35rem 0.9rem;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.partido_upcoming-time {
+  color: #e90052;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 700px) {
+  .partido_upcoming-card {
+    flex-direction: column;
+  }
+
+  .partido_upcoming-day {
+    width: 100%;
+    height: 48px;
+  }
+
+  .partido_upcoming-day span {
+    writing-mode: initial;
+    transform: none;
+  }
+
+  .partido_upcoming-match {
+    grid-template-columns: 1fr;
+  }
+}
+
+.partido_live-list {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.partido_live-card {
+  min-width: 320px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partido_live-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.partido_live-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.partido_live-badge {
+  background: #e90052;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+}
+
+.partido_live-minute {
+  color: #263a55;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.partido_live-league {
+  margin: 0 0 0.85rem 0;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.partido_live-card-match {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.partido_live-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: center;
+  color: #111827;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.partido_live-team-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.partido_live-score {
+  background: #263a55;
+  color: #fff;
+  padding: 0.45rem 0.8rem;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.partido_live-stadium {
+  margin: 0.9rem 0 0 0;
+  color: #84878f;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.partido-vivo {
+  background: #f8fafc;
+  min-height: 100%;
+}
+
+.partido-vivo_back {
+  border: none;
+  background: transparent;
+  color: #263a55;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  padding: 0;
+}
+
+.partido-vivo_card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+}
+
+.partido-vivo_top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.partido-vivo_badge {
+  background: #e90052;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+}
+
+.partido-vivo_minute {
+  color: #263a55;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.partido-vivo_league {
+  color: #6b7280;
+  margin-bottom: 1.2rem;
+}
+
+.partido-vivo_scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.partido-vivo_team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.partido-vivo_logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.partido-vivo_team-name {
+  font-weight: 700;
+  color: #111827;
+}
+
+.partido-vivo_score {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #263a55;
+}
+
+.partido-vivo_score-separator {
+  color: #e90052;
+}
+
+.partido-vivo_info {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  color: #4b5563;
+}
+
+@media (max-width: 700px) {
+  .partido_live-card {
+    min-width: 280px;
+  }
+
+  .partido-vivo_scoreboard {
+    grid-template-columns: 1fr;
+  }
+
+  .partido-vivo_score {
+    justify-content: center;
+  }
+}
+
+.partido_live-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.partido_live-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.25rem;
+  max-height: none;
+  overflow: visible;
+}
+
+.partido_live-card {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partido_live-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.partido_live-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.partido_live-badge {
+  background: #e90052;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+}
+
+.partido_live-minute {
+  color: #263a55;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.partido_live-league {
+  margin: 0 0 0.85rem 0;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.partido_live-card-match {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.partido_live-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: center;
+  color: #111827;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.partido_live-team-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.partido_live-score {
+  background: #263a55;
+  color: #fff;
+  padding: 0.45rem 0.8rem;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.partido_live-stadium {
+  margin: 0.9rem 0 0 0;
+  color: #84878f;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .partido {
+    grid-template-columns: 1fr;
+  }
+
+  .partido_live-list {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+/* partidos en vivo y asi */
+
+/* =============================================
+   PARTIDOS VIVO — agregar al final de Partido.css
+   ============================================= */
+
+/* Layout raíz — override del grid de .partido para esta vista */
+.pv_root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Header */
+.pv_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pv_live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pv_live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e90052;
+}
+
+/* Scoreboard */
+.pv_scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.pv_logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.pv_score-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pv_stadium-tag {
+  background: #263a55;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pv_score-big {
+  font-size: 2rem;
+  font-weight: 800;
+  padding: 0.6rem 2rem;
+}
+
+.pv_minute-accent {
+  color: #e90052;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Grid principal */
+.pv_grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Tabs */
+.pv_tabs {
+  display: flex;
+  margin-bottom: 1.25rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+.pv_tab {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-right: 1px solid #eee;
+  cursor: pointer;
+  background: #fff;
+  color: #84878f;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.pv_tab--active {
+  background: #e90052;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Cancha */
+.pv_pitch {
+  background: #2d7a4f;
+  border-radius: 10px;
+  height: 220px;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.pv_pitch-midline {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.pv_pitch-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.pv_pitch-area {
+  position: absolute;
+  left: 28%;
+  right: 28%;
+  height: 22%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.pv_pitch-area--top { top: 5%; }
+.pv_pitch-area--bottom { bottom: 5%; }
+
+.pv_dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Alineaciones */
+.pv_lineup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pv_lineup-title {
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.pv_lineup-title--home { color: #263a55; }
+.pv_lineup-title--away { color: #e90052; }
+
+.pv_player-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.8rem;
+}
+
+.pv_player-num {
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-weight: 700;
+  font-size: 0.7rem;
+  min-width: 22px;
+  text-align: center;
+  color: #fff;
+}
+
+.pv_player-num--home { background: #263a55; }
+.pv_player-num--away { background: #e90052; }
+
+/* Estadísticas */
+.pv_prob-box {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pv_prob-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #263a55;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.pv_prob-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.pv_prob-home { font-weight: 700; color: #263a55; }
+.pv_prob-away { font-weight: 700; color: #e90052; }
+
+.pv_prob-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pv_prob-bar--home { background: #263a55; }
+.pv_prob-bar--draw { background: #84878f; }
+.pv_prob-bar--away { background: #e90052; }
+
+.pv_stats-section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #84878f;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.pv_stat-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.85rem;
+}
+
+.pv_stat-home { font-weight: 600; color: #263a55; }
+.pv_stat-label { color: #84878f; font-size: 0.75rem; text-align: center; min-width: 110px; }
+.pv_stat-away { font-weight: 600; color: #e90052; text-align: right; }
+
+/* H2H */
+.pv_h2h-row {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pv_h2h-row--bordered { border-bottom: 1px solid #f0f0f0; }
+
+.pv_h2h-date { min-width: 65px; padding-top: 0.4rem; }
+
+.pv_h2h-divider {
+  width: 1px;
+  background: #eee;
+  flex-shrink: 0;
+}
+
+.pv_h2h-matches {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pv_h2h-team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pv_h2h-goal {
+  border-radius: 6px;
+  padding: 0.15rem 0.6rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  min-width: 28px;
+  text-align: center;
+}
+
+.pv_h2h-goal--winner { background: #263a55; color: #fff; }
+.pv_h2h-goal--loser { background: transparent; color: #84878f; }
+
+/* Panel sustituciones */
+.pv_subs-panel {
+  padding: 1.25rem;
+}
+
+.pv_subs-selector {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  background: #f5f6f8;
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.pv_subs-btn {
+  flex: 1;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.pv_subs-btn--active { background: #263a55; }
+
+.pv_subs-num {
+  background: #f0f0f0;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .pv_grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pv_scoreboard {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}

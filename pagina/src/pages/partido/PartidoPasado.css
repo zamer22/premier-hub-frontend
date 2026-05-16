@@ -1,0 +1,481 @@
+.past-match {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #f4f6f9;
+  min-height: 100%;
+  padding: 1.25rem;
+  box-sizing: border-box;
+}
+
+.past-match__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.past-match__back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #263a55;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0;
+}
+
+.past-match__status {
+  background: #263a55;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+}
+
+.past-match__scoreboard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.past-match__team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.past-match__team-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.past-match__team-name {
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: center;
+  color: #111827;
+}
+
+.past-match__score-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.past-match__score-box {
+  background: #1a2d42;
+  border-radius: 14px;
+  padding: 0.9rem 2rem;
+  color: #fff;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.past-match__meta {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 0;
+}
+
+.past-match__stadium {
+  background: #263a55;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  border-radius: 8px;
+}
+
+.past-match__league {
+  color: #9ca3af;
+  font-size: 0.78rem;
+  text-align: center;
+  margin: 0;
+}
+
+.past-match__panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.past-match__tabs {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.past-match__tab {
+  flex: 1;
+  padding: 0.8rem 0;
+  border: none;
+  border-right: 1px solid #e5e7eb;
+  cursor: pointer;
+  background: #fff;
+  color: #84878f;
+  font-weight: 500;
+  font-size: 0.92rem;
+  transition: all 0.2s;
+}
+
+.past-match__tab.is-active {
+  background: #e90052;
+  color: #fff;
+  font-weight: 700;
+}
+
+.past-match__filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.past-match__filter {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
+  background: #f9fafb;
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.past-match__filter.is-active {
+  border-color: #e90052;
+  background: #e90052;
+  color: #fff;
+}
+
+.past-match__message {
+  color: #84878f;
+  font-size: 1rem;
+  padding: 1rem 0;
+}
+
+.past-match__message--error {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.past-match__empty {
+  color: #9ca3af;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.past-match__timeline {
+  position: relative;
+}
+
+.past-match__timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #e5e7eb;
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+.past-match__half {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.25rem -1.5rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #1a2d42 0%, #263a55 100%);
+  position: relative;
+  z-index: 2;
+}
+
+.past-match__half-label {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.past-match__event-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.1rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.past-match__event-side {
+  display: flex;
+}
+
+.past-match__event-side--left {
+  justify-content: flex-end;
+}
+
+.past-match__event-side--right {
+  justify-content: flex-start;
+}
+
+.past-match__event-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 0.5rem;
+}
+
+.past-match__event-content.is-home {
+  align-items: flex-end;
+}
+
+.past-match__event-content.is-away {
+  align-items: flex-start;
+}
+
+.past-match__event-player {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.past-match__event-player.is-goal {
+  color: #1a2d42;
+}
+
+.past-match__event-label {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-weight: 700;
+}
+
+.past-match__event-label.is-goal {
+  color: #e90052;
+}
+
+.past-match__event-assist {
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.past-match__event-sub {
+  font-size: 0.82rem;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.past-match__event-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.past-match__event-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 4px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.past-match__event-icon.is-goal {
+  background: #ffffff;
+  border-color: #e90052;
+}
+
+.past-match__event-icon.is-card {
+  background: #fff7ed;
+  border-color: #f97316;
+}
+
+.past-match__event-icon.is-subst {
+  background: #f0fdf4;
+  border-color: #22c55e;
+}
+
+.past-match__event-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.past-match__event-icon-dot {
+  font-size: 1.2rem;
+  color: #9ca3af;
+}
+
+.past-match__event-minute {
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-weight: 800;
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+.past-match__stats-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  letter-spacing: 0.06em;
+}
+
+.past-match__stat-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.past-match__stat-home {
+  font-weight: 700;
+  color: #263a55;
+  font-size: 1rem;
+}
+
+.past-match__stat-label {
+  color: #9ca3af;
+  font-size: 0.82rem;
+  text-align: center;
+  min-width: 130px;
+}
+
+.past-match__stat-away {
+  font-weight: 700;
+  color: #e90052;
+  text-align: right;
+  font-size: 1rem;
+}
+
+.past-match__lineups {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.past-match__lineup-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.past-match__lineup-col--left {
+  border-right: 1px solid #f0f0f0;
+}
+
+.past-match__lineup-title {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  padding: 0 0.75rem;
+}
+
+.past-match__lineup-title--home {
+  color: #263a55;
+}
+
+.past-match__lineup-title--away {
+  color: #e90052;
+}
+
+.past-match__lineup-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid #f7f7f7;
+  font-size: 0.92rem;
+  color: #1f2937;
+}
+
+.past-match__lineup-row--sub {
+  color: #6b7280;
+}
+
+.past-match__lineup-num {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.past-match__lineup-subtitle {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.6rem 0.75rem 0.3rem;
+}
+
+.past-match__back-top {
+  display: block;
+  margin: 1.5rem auto 0;
+  padding: 0.75rem 2rem;
+  border-radius: 999px;
+  border: none;
+  background: #1a2d42;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 900px) {
+  .past-match__scoreboard {
+    grid-template-columns: 1fr;
+  }
+
+  .past-match__event-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .past-match__event-side {
+    justify-content: center;
+  }
+
+  .past-match__lineups {
+    grid-template-columns: 1fr;
+  }
+
+  .past-match__lineup-col--left {
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+  }
+}
