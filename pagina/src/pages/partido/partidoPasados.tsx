@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../estilos/PartidoPasado.css";
+import "./PartidoPasado.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Login from "./Login";
+import Login from "../login/Login";
 import "./Landing.css";
 
 /* Reemplaza este ID con el de cualquier video de YouTube de highlights PL */

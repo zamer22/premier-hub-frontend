@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../estilos/EstiloNoticiasLanding.css";
+import "./EstiloNoticiasLanding.css";
 import {
   NewsItem,
   buildArticleText,

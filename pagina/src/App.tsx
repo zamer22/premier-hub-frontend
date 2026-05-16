@@ -2,8 +2,8 @@ import "./App.css";
 import ElegirNickname from "./components/ElegirNickname";
 import { useAuthSession } from "./hooks/useAuthSession";
 import { useProfileCustomization } from "./hooks/useProfileCustomization";
-import AdminEnvios from "./pages/AdminEnvios";
-import Landing from "./pages/Landing";
+import AdminEnvios from "./pages/admin/AdminEnvios";
+import Landing from "./pages/landing/Landing";
 import AppRoutes from "./router/AppRoutes";
 
 function LoadingScreen() {

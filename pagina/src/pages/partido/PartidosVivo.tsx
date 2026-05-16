@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import "../estilos/PartidosVivo.css";
+import "./PartidosVivo.css";
 
 export interface LiveMatch {
   id: number;

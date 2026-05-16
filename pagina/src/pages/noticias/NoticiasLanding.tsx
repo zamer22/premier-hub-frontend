@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../estilos/EstiloNoticiasLanding.css";
+import "./EstiloNoticiasLanding.css";
 import {
   DEFAULT_FILTER,
   PREMIER_TEAM_OPTIONS,

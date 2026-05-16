@@ -2,13 +2,13 @@ import { Dispatch, SetStateAction } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AuthenticatedLayout from "../layouts/AuthenticatedLayout";
 import type { InventoryItem } from "../hooks/useProfileCustomization";
-import Historia from "../pages/Historia";
-import Noticia from "../pages/Noticia";
-import Noticias from "../pages/NoticiasLanding";
-import Partido from "../pages/Partido";
-import Perfil from "../pages/Perfil";
-import Tienda from "../pages/Tienda";
-import Wordle from "../pages/Wordle";
+import Historia from "../pages/historia/Historia";
+import Noticia from "../pages/noticias/Noticia";
+import Noticias from "../pages/noticias/NoticiasLanding";
+import Partido from "../pages/partido/Partido";
+import Perfil from "../pages/perfil/Perfil";
+import Tienda from "../pages/tienda/Tienda";
+import Wordle from "../pages/wordle/Wordle";
 import {
   DEFAULT_ROUTE,
   PROXIMAMENTE,
