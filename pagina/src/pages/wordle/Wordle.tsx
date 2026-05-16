@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Wordle.css";
 
 interface Player {
@@ -56,6 +57,22 @@ const BOARD_ROWS = [
   [0, 1, 2, 3, 4],
   [5, 6, 7, 8, 9],
 ];
+
+function WordleHeader() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="wordle-header">
+      <button
+        type="button"
+        onClick={() => navigate("/arcade")}
+        className="wordle-back"
+      >
+        ← Volver
+      </button>
+    </div>
+  );
+}
 
 function calculateCorrectCount(players: Player[]): number {
   return players.reduce((total, player, index) => {
@@ -310,6 +327,7 @@ export default function Wordle() {
   if (loading) {
     return (
       <div className="wordle-container">
+        <WordleHeader />
         <p className="wordle-instructions">Cargando desafio...</p>
       </div>
     );
@@ -318,6 +336,7 @@ export default function Wordle() {
   if (errorMsg) {
     return (
       <div className="wordle-container">
+        <WordleHeader />
         <p className="wordle-instructions">{errorMsg}</p>
       </div>
     );
@@ -325,6 +344,7 @@ export default function Wordle() {
 
   return (
     <div className="wordle-container">
+      <WordleHeader />
       <span className="wordle-theme">{theme}</span>
 
       {!submitted ? (
