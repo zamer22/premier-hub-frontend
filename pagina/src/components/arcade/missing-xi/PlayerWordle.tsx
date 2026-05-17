@@ -14,9 +14,16 @@ interface Props {
   onFailed: (attempts: AttemptRow[]) => void;
   onAttemptsUpdate: (attempts: AttemptRow[]) => void;
   onHintUsed: () => void;
+  compact?: boolean;
 }
 
-function cellSizeClass(answerLen: number): string {
+function cellSizeClass(answerLen: number, compact: boolean): string {
+  if (compact) {
+    if (answerLen <= 6) return "h-10 w-10 text-base";
+    if (answerLen === 7) return "h-9 w-8 text-sm";
+    return "h-9 w-7 text-xs";
+  }
+
   if (answerLen <= 5) return "h-14 w-14 text-xl";
   if (answerLen === 6) return "h-[52px] w-[52px] text-lg";
   if (answerLen === 7) return "h-12 w-10 text-base";
@@ -60,10 +67,11 @@ export default function PlayerWordle({
   onFailed,
   onAttemptsUpdate,
   onHintUsed,
+  compact = false,
 }: Props) {
   const { answer } = player;
   const answerLen = answer.length;
-  const sz = cellSizeClass(answerLen);
+  const sz = cellSizeClass(answerLen, compact);
 
   const [currentLetters, setCurrentLetters] = useState<string[]>([]);
   const [hintShown, setHintShown] = useState(player.usedHint);
@@ -150,10 +158,10 @@ export default function PlayerWordle({
   const keyboardStates = getKeyboardStates(player.attempts);
 
   return (
-    <div className="flex flex-col">
+    <div className={compact ? "flex max-h-[calc(100vh-280px)] min-h-0 flex-col overflow-y-auto rounded-xl border border-[#dde3ec] bg-white shadow-sm" : "flex flex-col"}>
 
       {/* ── Top bar ──────────────────────────────── */}
-      <div className="flex items-center justify-between border-b border-[#edf0f5] px-5 py-3.5">
+      <div className={`flex items-center justify-between border-b border-[#edf0f5] ${compact ? "px-4 py-3" : "px-5 py-3.5"}`}>
         <button
           type="button"
           onClick={onClose}
@@ -180,9 +188,9 @@ export default function PlayerWordle({
       </div>
 
       {/* ── Player info + hint ───────────────────── */}
-      <div className="flex items-start justify-between px-5 pt-5 pb-4">
+      <div className={`flex items-start justify-between ${compact ? "px-4 pb-3 pt-4" : "px-5 pt-5 pb-4"}`}>
         <div>
-          <h2 className="text-[1.5rem] font-black leading-tight text-[#162b4d]">
+          <h2 className={`${compact ? "text-[1.25rem]" : "text-[1.5rem]"} font-black leading-tight text-[#162b4d]`}>
             Jugador #{player.number}
           </h2>
           <p className="mt-1 text-[0.82rem] font-semibold text-[#5f6c80]">
@@ -196,17 +204,17 @@ export default function PlayerWordle({
             <button
               type="button"
               onClick={handleHint}
-              className="rounded-xl border-2 border-[#cf275f]/25 bg-white px-4 py-2.5 text-center shadow-sm transition-all hover:border-[#cf275f]/50 hover:bg-[#fef0f4] hover:shadow-md active:scale-95"
+              className={`${compact ? "px-3 py-2" : "px-4 py-2.5"} rounded-xl border-2 border-[#cf275f]/25 bg-white text-center shadow-sm transition-all hover:border-[#cf275f]/50 hover:bg-[#fef0f4] hover:shadow-md active:scale-95`}
             >
               <p className="text-[0.82rem] font-black text-[#cf275f]">Ver Pista</p>
-              <p className="mt-0.5 text-[0.62rem] font-medium text-[#cf275f]/55">
+              <p className={`${compact ? "hidden sm:block" : ""} mt-0.5 text-[0.62rem] font-medium text-[#cf275f]/55`}>
                 Penalización −50 pts
               </p>
             </button>
           )}
           {hintShown && (
             <div className="flex flex-col items-center gap-1.5">
-              <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[#871d54] shadow-lg">
+              <div className={`${compact ? "h-12 w-12" : "h-16 w-16"} overflow-hidden rounded-full border-2 border-[#871d54] shadow-lg`}>
                 {player.photoUrl && !imgError ? (
                   <img
                     src={player.photoUrl}
@@ -228,7 +236,7 @@ export default function PlayerWordle({
       </div>
 
       {/* ── Grid ─────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-1 px-4 pb-3">
+      <div className={`flex flex-col items-center gap-1 px-4 ${compact ? "pb-2" : "pb-3"}`}>
         {rows.map((row, ri) => (
           <div key={ri} className="flex gap-1">
             {Array.from({ length: answerLen }).map((_, ci) => (
@@ -254,7 +262,7 @@ export default function PlayerWordle({
       {/* ── Result banner ────────────────────────── */}
       {isFinished && (
         <div
-          className={`mx-4 mt-1 rounded-2xl border p-4 text-center ${
+          className={`mx-4 mt-1 rounded-2xl border ${compact ? "p-3" : "p-4"} text-center ${
             player.guessed
               ? "border-green-200 bg-green-50"
               : "border-red-200 bg-red-50"
@@ -283,7 +291,7 @@ export default function PlayerWordle({
       {/* ── Keyboard ─────────────────────────────── */}
       {!isFinished && (
         <div className="mt-1">
-          <WordleKeyboard letterStates={keyboardStates} onKey={handleKey} />
+          <WordleKeyboard letterStates={keyboardStates} onKey={handleKey} compact={compact} />
         </div>
       )}
     </div>

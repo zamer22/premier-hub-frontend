@@ -87,22 +87,6 @@ export default function MissingXI() {
     );
   }
 
-  // ─── Wordle view ─────────────────────────────────────────────
-  if (selectedPlayer) {
-    return (
-      <main className="ph-page !px-0 !pt-0 !pb-0">
-        <PlayerWordle
-          player={selectedPlayer}
-          onClose={() => setSelectedId(null)}
-          onGuessed={handleGuessed}
-          onFailed={handleFailed}
-          onAttemptsUpdate={handleAttemptsUpdate}
-          onHintUsed={handleHintUsed}
-        />
-      </main>
-    );
-  }
-
   // ─── Pitch view ──────────────────────────────────────────────
   return (
     <main className="ph-page">
@@ -130,64 +114,78 @@ export default function MissingXI() {
         {/* RIGHT — info */}
         <div className="flex min-w-0 flex-col gap-4 lg:max-w-[640px] lg:pt-1">
 
-          {/* 1. Match info — título del partido primero */}
-          <MatchHeader match={match} />
+          {selectedPlayer ? (
+            <PlayerWordle
+              player={selectedPlayer}
+              onClose={() => setSelectedId(null)}
+              onGuessed={handleGuessed}
+              onFailed={handleFailed}
+              onAttemptsUpdate={handleAttemptsUpdate}
+              onHintUsed={handleHintUsed}
+              compact
+            />
+          ) : (
+            <>
+              {/* 1. Match info — título del partido primero */}
+              <MatchHeader match={match} />
 
-          {/* 2. Stats: puntos + progreso */}
-          <div className="mx-auto grid w-full max-w-[520px] grid-cols-2 gap-4">
-            <div className="flex min-h-[78px] flex-col justify-center rounded-xl bg-[#162b4d] px-4 py-3 text-white shadow-sm">
-              <p className="mb-1 text-[0.58rem] font-semibold uppercase tracking-widest opacity-55">
-                Puntos
-              </p>
-              <p className="text-[1.65rem] font-black leading-none">{totalPoints}</p>
-            </div>
-            <div className="flex min-h-[78px] flex-col justify-center rounded-xl border border-[#dde3ec] bg-white px-4 py-3 shadow-sm">
-              <p className="mb-1 text-[0.58rem] font-semibold uppercase tracking-widest text-[#9aa3b2]">
-                Progreso
-              </p>
-              <p className="text-[1.65rem] font-black leading-none text-[#162b4d]">
-                {guessedCount}
-                <span className="text-base font-semibold text-[#b0b8c6]">/11</span>
-              </p>
-            </div>
-          </div>
-
-          {/* 3. Progress bar */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-[0.72rem] font-semibold text-[#5f6c80]">Alineación</span>
-              <span className="text-[0.72rem] font-black text-[#162b4d]">
-                {resolvedCount}/11 jugadores
-              </span>
-            </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-[#edf0f5]">
-              <div
-                className="h-full rounded-full bg-[#cf275f] transition-all duration-500"
-                style={{ width: `${(resolvedCount / 11) * 100}%` }}
-              />
-            </div>
-          </div>
-
-          {/* 4. Legend */}
-          <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
-            {[
-              { color: "bg-gradient-to-b from-red-700 to-[#871d54]", label: "Sin adivinar" },
-              { color: "bg-green-500", label: "Acertado" },
-              { color: "bg-red-500", label: "Fallado" },
-            ].map(({ color, label }) => (
-              <div key={label} className="flex items-center gap-1.5">
-                <div className={`h-2.5 w-2.5 rounded-full ${color}`} />
-                <span className="text-[0.72rem] font-medium text-[#5f6c80]">{label}</span>
+              {/* 2. Stats: puntos + progreso */}
+              <div className="mx-auto grid w-full max-w-[520px] grid-cols-2 gap-4">
+                <div className="flex min-h-[78px] flex-col justify-center rounded-xl bg-[#162b4d] px-4 py-3 text-white shadow-sm">
+                  <p className="mb-1 text-[0.58rem] font-semibold uppercase tracking-widest opacity-55">
+                    Puntos
+                  </p>
+                  <p className="text-[1.65rem] font-black leading-none">{totalPoints}</p>
+                </div>
+                <div className="flex min-h-[78px] flex-col justify-center rounded-xl border border-[#dde3ec] bg-white px-4 py-3 shadow-sm">
+                  <p className="mb-1 text-[0.58rem] font-semibold uppercase tracking-widest text-[#9aa3b2]">
+                    Progreso
+                  </p>
+                  <p className="text-[1.65rem] font-black leading-none text-[#162b4d]">
+                    {guessedCount}
+                    <span className="text-base font-semibold text-[#b0b8c6]">/11</span>
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
 
-          {/* 5. Instruction — no emoji */}
-          <div className="mt-auto rounded-xl border border-[#dde3ec] bg-[#f7f8fb] px-4 py-3.5">
-            <p className="text-[0.8rem] font-medium leading-relaxed text-[#5f6c80]">
-              Toca una camiseta en la cancha para adivinar al jugador
-            </p>
-          </div>
+              {/* 3. Progress bar */}
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[0.72rem] font-semibold text-[#5f6c80]">Alineación</span>
+                  <span className="text-[0.72rem] font-black text-[#162b4d]">
+                    {resolvedCount}/11 jugadores
+                  </span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-[#edf0f5]">
+                  <div
+                    className="h-full rounded-full bg-[#cf275f] transition-all duration-500"
+                    style={{ width: `${(resolvedCount / 11) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* 4. Legend */}
+              <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
+                {[
+                  { color: "bg-gradient-to-b from-red-700 to-[#871d54]", label: "Sin adivinar" },
+                  { color: "bg-green-500", label: "Acertado" },
+                  { color: "bg-red-500", label: "Fallado" },
+                ].map(({ color, label }) => (
+                  <div key={label} className="flex items-center gap-1.5">
+                    <div className={`h-2.5 w-2.5 rounded-full ${color}`} />
+                    <span className="text-[0.72rem] font-medium text-[#5f6c80]">{label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 5. Instruction — no emoji */}
+              <div className="mt-auto rounded-xl border border-[#dde3ec] bg-[#f7f8fb] px-4 py-3.5">
+                <p className="text-[0.8rem] font-medium leading-relaxed text-[#5f6c80]">
+                  Toca una camiseta en la cancha para adivinar al jugador
+                </p>
+              </div>
+            </>
+          )}
 
         </div>
       </div>
