@@ -1,0 +1,521 @@
+/* Contenedor general */
+.root {
+  font-family: var(--ph-font-sans);
+  background: transparent;
+  min-height: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.15rem;
+}
+
+/* Paneles */
+.panel {
+  background: var(--ph-surface-raised);
+  border-radius: var(--ph-radius-md);
+  padding: clamp(1rem, 2vw, 1.5rem);
+  box-shadow: var(--ph-shadow-xs);
+  margin-bottom: 0;
+  border: 1px solid var(--ph-border);
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.sectionLabel {
+  font-weight: 900;
+  font-size: 0.72rem;
+  color: var(--ph-red-600);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.sectionHint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ph-muted);
+}
+
+/* Grid de equipos */
+.logosRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.2rem;
+  align-items: stretch;
+}
+
+.logoCard {
+  width: 142px;
+  min-height: 138px;
+  padding: 1.1rem 0.9rem;
+  border-radius: var(--ph-radius-md);
+  border: 1px solid var(--ph-border);
+  background: #ffffff;
+  box-shadow: var(--ph-shadow-xs);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.logoCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(233, 0, 82, 0.35);
+  box-shadow: var(--ph-shadow-sm);
+}
+
+.logoCard.selected {
+  border: 1px solid var(--ph-red-600);
+  background: linear-gradient(180deg, #fff7fa 0%, #ffffff 100%);
+  box-shadow: 0 12px 28px rgba(233, 0, 82, 0.12);
+}
+
+.logoImg {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(15, 23, 42, 0.12));
+}
+
+.logoName {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.logoName.selected {
+  color: var(--ph-red-600);
+  font-weight: 900;
+}
+
+/* Header del equipo */
+.teamHeader {
+  background: #ffffff;
+  border-radius: var(--ph-radius-md);
+  padding: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 1.15rem;
+  box-shadow: var(--ph-shadow-xs);
+  border: 1px solid var(--ph-border);
+}
+
+.teamMainInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3.5rem;
+}
+
+.teamHeaderLogo {
+  width: 250px;
+  height: 250px;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 24px rgba(15, 23, 42, 0.14));
+}
+
+.teamHeaderName {
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 850;
+  color: var(--ph-text-strong);
+  margin: 0;
+  letter-spacing: 0;
+  line-height: 0.9;
+}
+
+/* ── TIMELINE ── */
+.timelineWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+  padding: 1.5rem 0;
+}
+
+/* top y height los setea JS en runtime — va exactamente de dot a dot */
+.timelineLine {
+  position: absolute;
+  left: 50%;
+  width: 6px;
+  background: linear-gradient(to bottom, var(--ph-red-600), #ff7aa8, #1a2d42);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.timelineRow {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.cardHalf {
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+}
+
+/* Card de imagen */
+.imgBlock {
+  flex: 1;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #f0f2f5;
+  min-height: 300px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.imgEl {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+.imgPlaceholder {
+  width: 100%;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  font-weight: 950;
+  color: #d9dde5;
+  user-select: none;
+}
+
+/* Card de texto */
+.textBlock {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  min-height: 300px;
+  padding: 1rem 0.5rem;
+  box-sizing: border-box;
+}
+
+.eventTitle {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--ph-text-strong);
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.eventDesc {
+  font-size: 0.94rem;
+  color: var(--ph-muted);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Dot central */
+.timelineDot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.dotCircle {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle at top, #ffffff 0%, #fff0f5 100%);
+  border: 4px solid var(--ph-red-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
+}
+
+.dotYear {
+  color: var(--ph-red-600);
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+/* Estados */
+.empty {
+  color: #9ca3af;
+  font-size: 0.95rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.error {
+  color: var(--ph-danger-600);
+  font-size: 0.9rem;
+  padding: 0.85rem 1rem;
+  background: #fef2f2;
+  border-radius: 12px;
+  font-weight: 700;
+  border: 1px solid #fecaca;
+  text-align: center;
+}
+
+.loading {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  padding: 1rem 0;
+  text-align: center;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Heading */
+.pageHeading,
+.pageTitle {
+  display: none;
+}
+
+.scrollTopButton {
+  display: block;
+  margin: 2rem auto 0;
+  padding: 0.8rem 2.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--ph-radius-pill);
+  background: linear-gradient(135deg, var(--ph-navy-900), var(--ph-navy-700));
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.scrollTopButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.24);
+}
+
+/* ── ANIMACIONES DE SCROLL ── */
+
+/* Estado inicial oculto — cards fuera de posición */
+.timelineRow.hidden .cardHalf {
+  opacity: 0;
+}
+
+.timelineRow.hidden.rowLeft .cardHalf:first-child {
+  transform: translateX(-70px);
+}
+
+.timelineRow.hidden.rowLeft .cardHalf:last-child {
+  transform: translateX(70px);
+}
+
+.timelineRow.hidden.rowRight .cardHalf:first-child {
+  transform: translateX(-70px);
+}
+
+.timelineRow.hidden.rowRight .cardHalf:last-child {
+  transform: translateX(70px);
+}
+
+/* Dot oculto */
+.timelineRow.hidden .dotCircle {
+  transform: scale(0.4);
+  opacity: 0;
+}
+
+/* Transiciones en las cards */
+.cardHalf {
+  transition:
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.7s ease;
+  padding: 0 1.8rem;
+}
+
+/* La imagen (primer card en rowLeft, segundo en rowRight) sin delay */
+.rowLeft .cardHalf:first-child {
+  transition-delay: 0s;
+}
+
+/* El texto con pequeño delay */
+.rowLeft .cardHalf:last-child {
+  transition-delay: 0.15s;
+}
+
+.rowRight .cardHalf:first-child {
+  transition-delay: 0.15s;
+}
+
+.rowRight .cardHalf:last-child {
+  transition-delay: 0s;
+}
+
+/* Transición del dot */
+.dotCircle {
+  transition:
+    transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s,
+    opacity 0.4s ease 0.3s;
+}
+
+/* Estado visible — todo en su lugar */
+.timelineRow.visible .cardHalf {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.timelineRow.visible .dotCircle {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+  .panel {
+    padding: 1.6rem;
+  }
+
+  .teamHeader {
+    padding: 3rem 1.5rem;
+  }
+
+  .teamMainInfo {
+    flex-direction: column;
+    gap: 1.8rem;
+    text-align: center;
+  }
+
+  .teamHeaderLogo {
+    width: 190px;
+    height: 190px;
+  }
+
+  .teamHeaderName {
+    font-size: clamp(3rem, 15vw, 5rem);
+  }
+
+  .timelineLine {
+    left: 32px;
+  }
+
+  .timelineRow {
+    grid-template-columns: 64px 1fr;
+    grid-template-rows: auto auto;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .timelineDot {
+    grid-column: 1;
+    grid-row: 1;
+    padding-top: 0.3rem;
+  }
+
+  .cardHalf:first-child {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .cardHalf:last-child {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* En móvil las animaciones vienen de abajo, más simple */
+  .timelineRow.hidden .cardHalf {
+    transform: translateY(30px);
+  }
+
+  .timelineRow.hidden.rowLeft .cardHalf:first-child,
+  .timelineRow.hidden.rowLeft .cardHalf:last-child,
+  .timelineRow.hidden.rowRight .cardHalf:first-child,
+  .timelineRow.hidden.rowRight .cardHalf:last-child {
+    transform: translateY(30px);
+  }
+
+  .timelineRow.visible .cardHalf {
+    transform: translateY(0);
+  }
+
+  .imgBlock,
+  .imgEl,
+  .imgPlaceholder {
+    min-height: 240px;
+  }
+
+  .textBlock {
+    min-height: unset;
+    padding: 2rem 1.8rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .logoCard {
+    width: 130px;
+    min-height: 140px;
+  }
+
+  .logoImg {
+    width: 66px;
+    height: 66px;
+  }
+
+  .teamHeader {
+    padding: 2.4rem 1rem;
+  }
+
+  .teamHeaderLogo {
+    width: 150px;
+    height: 150px;
+  }
+
+  .teamHeaderName {
+    font-size: clamp(2.6rem, 17vw, 4rem);
+  }
+
+  .timelineLine {
+    left: 28px;
+  }
+
+  .timelineRow {
+    grid-template-columns: 56px 1fr;
+  }
+
+  .dotCircle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .dotYear {
+    font-size: 0.66rem;
+  }
+
+  .imgBlock,
+  .imgEl,
+  .imgPlaceholder {
+    min-height: 200px;
+  }
+
+  .eventTitle {
+    font-size: 1.2rem;
+  }
+}

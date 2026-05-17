@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button, Field, Input } from "./ui";
 
 interface Props {
   correo: string;
@@ -16,15 +17,25 @@ export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComple
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (nickname.trim().length < 3) { setError("El nickname debe tener al menos 3 caracteres"); return; }
+    if (nickname.trim().length < 3) {
+      setError("El nickname debe tener al menos 3 caracteres");
+      return;
+    }
+
     setLoading(true);
     setError("");
+
     try {
       const res = await fetch(`${API_URL}/api/auth/google-register`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo, nombre_usuario: nombre, nickname: nickname.trim(), foto_perfil_url: fotoPerfilUrl }),
+        body: JSON.stringify({
+          correo,
+          nombre_usuario: nombre,
+          nickname: nickname.trim(),
+          foto_perfil_url: fotoPerfilUrl,
+        }),
       });
       const data = await res.json();
       if (data.success) onComplete(data.user);
@@ -37,38 +48,36 @@ export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComple
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", justifyContent: "center", alignItems: "center", background: "#263a55" }}>
-      <div style={{ background: "#fff", padding: "2.5rem", borderRadius: "12px", width: "100%", maxWidth: "400px", boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}>
-        <h2 style={{ color: "#263a55", fontWeight: 800, marginBottom: "0.5rem" }}>Casi listo</h2>
-        <p style={{ color: "#84878F", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
-          Hola <strong>{nombre}</strong>, elige un nickname para tu cuenta en PremierHub.
+    <main className="min-h-screen grid place-items-center bg-[var(--ph-surface)] p-4">
+      <section className="ph-panel w-full max-w-[430px] animate-slide-up">
+        <span className="ph-badge ph-badge--accent">Perfil nuevo</span>
+        <h1 className="ph-title mt-4">Casi listo</h1>
+        <p className="ph-subtitle text-sm">
+          Hola <strong>{nombre}</strong>, elige el nickname que aparecera en rankings, tienda y comunidad.
         </p>
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <div>
-            <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "#263a55", marginBottom: "0.4rem", textTransform: "uppercase" }}>
-              Nickname
-            </label>
-            <input
+
+        <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+          <Field
+            label="Nickname"
+            hint="Solo letras, numeros y guiones bajos. Maximo 20 caracteres."
+          >
+            <Input
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
               placeholder="ej. PremierFan99"
               maxLength={20}
-              style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #ddd", fontSize: "0.9rem", boxSizing: "border-box" }}
               required
             />
-            <p style={{ fontSize: "0.75rem", color: "#84878F", marginTop: "0.3rem" }}>Solo letras, numeros y guiones bajos. Max. 20 caracteres.</p>
-          </div>
-          {error && <p style={{ color: "#E90052", fontSize: "0.85rem", margin: 0 }}>{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ background: "#E90052", color: "#fff", border: "none", padding: "0.8rem", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "0.95rem", opacity: loading ? 0.7 : 1 }}
-          >
+          </Field>
+
+          {error && <p className="m-0 text-sm font-semibold text-[var(--ph-danger-600)]">{error}</p>}
+
+          <Button type="submit" disabled={loading}>
             {loading ? "Creando cuenta..." : "Entrar a PremierHub"}
-          </button>
+          </Button>
         </form>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
