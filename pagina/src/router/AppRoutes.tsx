@@ -11,6 +11,7 @@ import Perfil from "../pages/perfil/Perfil";
 import Simulador from "../pages/simulador/Simulador";
 import Tablero from "../pages/tablero/Tablero";
 import Tienda from "../pages/tienda/Tienda";
+import MissingXI from "../components/arcade/missing-xi/MissingXI";
 import Wordle from "../pages/wordle/Wordle";
 import {
   DEFAULT_ROUTE,
@@ -103,6 +104,7 @@ export default function AppRoutes({
         <Route path="noticias/:newsId" element={<Noticia />} />
         <Route path="arcade" element={<Arcade />} />
         <Route path="arcade/wordle" element={<Wordle />} />
+        <Route path="arcade/missing-xi" element={<MissingXI />} />
         <Route path="Arcade" element={<Navigate to={ROUTES.arcade} replace />} />
         {PROXIMAMENTE.map((section) => (
           <Route
