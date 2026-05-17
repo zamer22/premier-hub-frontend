@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Badge, Button, Metric, Modal } from "../../components/ui";
 import Login from "../login/Login";
 import "./Landing.css";
 
@@ -9,167 +8,247 @@ interface LandingProps {
   onLoginSuccess: (user: any) => void;
 }
 
-const features = [
-  {
-    title: "Partidos en vivo",
-    text: "Marcadores, tablas, historial y analisis en una vista pensada para consultar rapido.",
-    tone: "accent",
-  },
-  {
-    title: "Progreso fan",
-    text: "Puntos, ranking e inventario convierten la actividad en una experiencia medible.",
-    tone: "navy",
-  },
-  {
-    title: "Tienda y marketplace",
-    text: "Items digitales y objetos reales con estados claros, pedidos y perfil personalizable.",
-    tone: "info",
-  },
-] as const;
-
 export default function Landing({ onLoginSuccess }: LandingProps) {
   const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("ph-modal-open", showLogin);
-    document.body.classList.toggle("ph-modal-open", showLogin);
+    if (!showLogin) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowLogin(false);
+    };
+
+    document.documentElement.classList.add("ph-modal-open");
+    document.body.classList.add("ph-modal-open");
+    window.addEventListener("keydown", closeOnEscape);
 
     return () => {
       document.documentElement.classList.remove("ph-modal-open");
       document.body.classList.remove("ph-modal-open");
+      window.removeEventListener("keydown", closeOnEscape);
     };
   }, [showLogin]);
 
   return (
-    <main className="min-h-screen bg-[var(--ph-surface)] text-[var(--ph-text)]">
-      <section className="relative overflow-hidden bg-white">
-        <div className="mx-auto grid min-h-[86vh] w-full max-w-[1180px] grid-cols-[1.05fr_0.95fr] items-center gap-10 px-6 py-10 max-[860px]:grid-cols-1 max-[860px]:pt-8">
-          <div className="relative z-10">
-            <Badge tone="accent">Sports SaaS para fans PL</Badge>
-            <h1 className="mt-6 max-w-[760px] text-[clamp(2.5rem,7vw,5.6rem)] font-black leading-[0.98] text-[var(--ph-text-strong)]">
-              PremierHub
-            </h1>
-            <p className="mt-5 max-w-[620px] text-lg leading-8 text-[var(--ph-muted)]">
-              Un dashboard moderno para seguir partidos, competir por puntos, administrar tu perfil y vivir la Premier League con una capa ligera de juego.
-            </p>
+    <>
+      <section className="landing-hero">
+        <div className="landing-hero__bg">
+          <div className="landing-hero__orb landing-hero__orb--one" />
+          <div className="landing-hero__orb landing-hero__orb--two" />
+          <div className="landing-hero__grid" />
+        </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button onClick={() => setShowLogin(true)}>Entrar a PremierHub</Button>
-              <a className="ph-button ph-button--secondary" href="#features">Ver experiencia</a>
-            </div>
-
-            <div className="mt-10 grid max-w-[720px] grid-cols-4 gap-3 max-[680px]:grid-cols-2">
-              <Metric value="20" label="Equipos" />
-              <Metric value="380" label="Partidos" />
-              <Metric value="Rank" label="Competencia" />
-              <Metric value="Shop" label="Items" />
-            </div>
+        <div className="landing-hero__content">
+          <div className="lnd-1 landing-hero__badge">
+            <span className="landing-hero__badge-text">
+              Premier League · Temporada 24/25
+            </span>
           </div>
 
-          <div className="relative">
-            <div className="ph-panel relative overflow-hidden p-0 shadow-[var(--ph-shadow-md)]">
-              <div className="border-b border-[var(--ph-border)] bg-[var(--ph-navy-800)] p-4 text-white">
-                <div className="flex items-center justify-between">
-                  <strong>Match Center</strong>
-                  <span className="ph-badge ph-badge--accent">Live</span>
-                </div>
-              </div>
-              <div className="grid gap-4 p-5">
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-xl border border-[var(--ph-border)] bg-[var(--ph-surface)] p-4">
-                  <Team name="Arsenal" score="2" />
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[var(--ph-muted)]">68'</span>
-                  <Team name="Chelsea" score="1" align="right" />
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <Metric value="61%" label="Posesion" />
-                  <Metric value="14" label="Tiros" />
-                  <Metric value="+320" label="Puntos" />
-                </div>
-                <div className="rounded-xl border border-[var(--ph-border)] bg-white p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <strong className="text-sm text-[var(--ph-text-strong)]">Leaderboard</strong>
-                    <Badge tone="warning">Streak x4</Badge>
-                  </div>
-                  {["Migue", "PremierFan99", "NorthBank"].map((name, index) => (
-                    <div key={name} className="flex items-center justify-between border-t border-[var(--ph-border)] py-2 first:border-t-0">
-                      <span className="text-sm font-bold text-[var(--ph-text)]">#{index + 1} {name}</span>
-                      <span className="text-sm font-black text-[var(--ph-red-600)]">{(9200 - index * 740).toLocaleString()} pts</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <h1 className="lnd-2 landing-hero__title">
+            Tu hub de{" "}
+            <span className="landing-hero__title-accent">Premier</span>
+            <br />
+            <span className="landing-hero__title-muted">League</span>
+          </h1>
+
+          <p className="lnd-3 landing-hero__lead">
+            Sigue los partidos en vivo, compite en el leaderboard, consigue objetos exclusivos
+            y demuestra que sabes de fútbol.
+          </p>
+
+          <div className="lnd-4 landing-hero__actions">
+            <button
+              type="button"
+              onClick={() => setShowLogin(true)}
+              className="landing-hero__cta-primary"
+            >
+              Entrar a Premier Hub
+            </button>
+            <a href="#features" className="landing-hero__cta-secondary">
+              Conocer más ↓
+            </a>
           </div>
+        </div>
+
+        <div className="landing-hero__scroll">
+          <span className="landing-hero__scroll-text">Scroll</span>
+          <svg
+            className="landing-hero__scroll-icon"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
         </div>
       </section>
 
-      <section id="features" className="border-y border-[var(--ph-border)] bg-[var(--ph-surface)] px-6 py-20">
-        <div className="mx-auto max-w-[1180px]">
-          <div className="ph-page-header mb-8">
-            <div>
-              <p className="ph-eyebrow">Experiencia</p>
-              <h2 className="ph-title">Una app mas clara, viva y consistente.</h2>
-              <p className="ph-subtitle">
-                La interfaz prioriza lectura rapida y acciones obvias; los detalles gamificados aparecen en puntos, progreso, rankings y colecciones.
-              </p>
+      <div className="landing-stats">
+        <div className="landing-stats__inner">
+          {[
+            { num: "20", label: "Equipos" },
+            { num: "380", label: "Partidos / temporada" },
+            { num: "1992", label: "Año de fundación" },
+            { num: "200+", label: "Países con transmisión" },
+          ].map((stat) => (
+            <div key={stat.label} className="landing-stats__item">
+              <p className="landing-stats__num">{stat.num}</p>
+              <p className="landing-stats__label">{stat.label}</p>
             </div>
+          ))}
+        </div>
+      </div>
+
+      <section id="features" className="landing-features">
+        <div className="landing-container">
+          <div className="landing-section__header">
+            <p className="landing-section__kicker">¿Qué es Premier Hub?</p>
+            <h2 className="landing-section__title">
+              Todo sobre la Premier,{" "}
+              <span className="landing-section__title-muted">en un solo lugar.</span>
+            </h2>
           </div>
-          <div className="ph-grid">
-            {features.map((feature) => (
-              <article key={feature.title} className="ph-data-card p-5">
-                <Badge tone={feature.tone}>{feature.title}</Badge>
-                <p className="mt-4 text-sm leading-7 text-[var(--ph-muted)]">{feature.text}</p>
-              </article>
+
+          <div className="landing-features__grid">
+            {[
+              {
+                accentClass: "landing-feature__title--gold",
+                title: "Leaderboard",
+                desc: "Compite con otros fans. Acumula puntos prediciendo resultados y sube en el ranking global.",
+              },
+              {
+                accentClass: "landing-feature__title--crimson",
+                title: "Partidos en vivo",
+                desc: "Sigue todos los partidos de la temporada con stats en tiempo real y análisis detallados.",
+              },
+              {
+                accentClass: "landing-feature__title--navy",
+                title: "Tienda Premier",
+                desc: "Canjea tus puntos por jerseys, balones y accesorios exclusivos de tus equipos favoritos.",
+              },
+              {
+                accentClass: "landing-feature__title--bordeaux",
+                title: "Marketplace",
+                desc: "Intercambia objetos con otros fans. Compra, vende y colecciona items únicos de temporada.",
+              },
+            ].map((feature) => (
+              <div key={feature.title} className="feat-card landing-feature">
+                <p className={`landing-feature__title ${feature.accentClass}`}>
+                  {feature.title}
+                </p>
+                <p className="landing-feature__desc">{feature.desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-white px-6 py-20">
-        <div className="mx-auto grid max-w-[1180px] grid-cols-[0.9fr_1.1fr] items-center gap-10 max-[860px]:grid-cols-1">
-          <div>
-            <p className="ph-eyebrow">Premier League</p>
-            <h2 className="ph-title">Datos, comunidad y tienda en una misma superficie.</h2>
-            <p className="ph-subtitle">
-              PremierHub deja de sentirse como paginas separadas y pasa a funcionar como una sola app deportiva.
-            </p>
-            <Button className="mt-7" onClick={() => setShowLogin(true)}>Comenzar ahora</Button>
-          </div>
-          <div className="overflow-hidden rounded-[var(--ph-radius-lg)] border border-[var(--ph-border)] bg-[var(--ph-navy-800)] shadow-[var(--ph-shadow-md)]">
-            <div className="aspect-video">
-              <iframe
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${YT_VIDEO_ID}?rel=0&modestbranding=1`}
-                title="Premier League Highlights"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="block h-full w-full border-0"
-              />
+      <section className="landing-info">
+        <div className="landing-container">
+          <div className="pl-two-col landing-info__grid">
+            <div>
+              <p className="landing-section__kicker">La liga más seguida del mundo</p>
+              <h2 className="landing-section__title">
+                ¿Qué es la
+                <br />
+                Premier League?
+              </h2>
+              <p className="landing-info__text">
+                La Premier League es la máxima división del fútbol inglés, fundada en 1992.
+                Participan 20 equipos en un formato de todos contra todos, jugando 38 partidos por temporada.
+              </p>
+              <p className="landing-info__text landing-info__text--spaced">
+                Con clubes como Manchester City, Arsenal, Liverpool y Chelsea,
+                es considerada la liga más competitiva y emocionante del planeta.
+              </p>
+              <button
+                type="button"
+                className="cta-outline"
+                onClick={() => setShowLogin(true)}
+              >
+                Únete gratis →
+              </button>
+            </div>
+
+            <div className="stat-grid landing-info__stats">
+              {[
+                { num: "33", label: "Temporadas PL", sub: "desde 1992" },
+                { num: "#1", label: "Liga mundial", sub: "por audiencia" },
+                { num: "3.2B", label: "Fans globales", sub: "en 200+ países" },
+                { num: "€2.5B", label: "Derechos TV", sub: "por temporada" },
+              ].map((stat) => (
+                <div key={stat.label} className="stat-card landing-info__stat-card">
+                  <p className="landing-info__stat-num">{stat.num}</p>
+                  <p className="landing-info__stat-label">{stat.label}</p>
+                  <p className="landing-info__stat-sub">{stat.sub}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-[rgba(255,255,255,0.08)] bg-[var(--ph-navy-950)] px-6 py-8 text-center">
-        <strong className="text-white"><span className="text-[var(--ph-red-600)]">Premier</span>Hub</strong>
-        <p className="mt-2 text-xs font-semibold text-white/40">Una pagina de fans para fans</p>
+      <section className="landing-video">
+        <div className="landing-video__inner">
+          <p className="landing-section__kicker">La Premier en acción</p>
+          <h2 className="landing-section__title landing-section__title--center">
+            Los mejores momentos
+          </h2>
+          <div className="landing-video__frame">
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube.com/embed/${YT_VIDEO_ID}?rel=0&modestbranding=1`}
+              title="Premier League Highlights"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="landing-video__iframe"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="landing-cta">
+        <div className="landing-cta__grid" />
+        <div className="landing-cta__inner">
+          <div className="landing-cta__line" />
+          <h2 className="landing-cta__title">
+            ¿Listo para
+            <br />
+            <span className="landing-cta__accent">competir?</span>
+          </h2>
+          <p className="landing-cta__text">
+            Únete gratis a Premier Hub y empieza a acumular puntos desde hoy.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowLogin(true)}
+            className="landing-cta__button"
+          >
+            Comenzar ahora →
+          </button>
+        </div>
+      </section>
+
+      <footer className="landing-footer">
+        <span className="landing-footer__brand">
+          <span className="landing-footer__brand-accent">PREMIER</span>
+          <span className="landing-footer__brand-muted">HUB</span>
+        </span>
+        <p className="landing-footer__text">Una página de fans para fans</p>
       </footer>
 
       {showLogin && (
-        <Modal onClose={() => setShowLogin(false)}>
-          <Login onLoginSuccess={onLoginSuccess} />
-        </Modal>
+        <div className="landing-overlay" onClick={() => setShowLogin(false)}>
+          <div className="landing-overlay__card" onClick={(event) => event.stopPropagation()}>
+            <Login onLoginSuccess={onLoginSuccess} />
+          </div>
+        </div>
       )}
-    </main>
-  );
-}
-
-function Team({ name, score, align }: { name: string; score: string; align?: "right" }) {
-  return (
-    <div className={`grid gap-1 ${align === "right" ? "text-right" : ""}`}>
-      <span className="text-xs font-black uppercase tracking-[0.06em] text-[var(--ph-muted)]">{name}</span>
-      <span className="text-4xl font-black text-[var(--ph-text-strong)]">{score}</span>
-    </div>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./Partido.css";
+import { PageHeader } from "../../components/ui";
 import PartidosVivo, { type LiveMatch } from "./PartidosVivo";
 import PartidoPasado, { type PastMatch } from "./partidoPasados";
 
@@ -53,6 +54,16 @@ interface PastMatchApi {
   away_logo: string;
   away_score: number;
   archived_at: string;
+}
+
+function PartidoPageHeader() {
+  return (
+    <PageHeader
+      eyebrow="Partidos"
+      title="Centro de partidos"
+      subtitle="Consulta tabla, partidos en vivo, próximos juegos y resultados recientes de la Premier League."
+    />
+  );
 }
 
 // ── Componente ────────────────────────────────────────────────────────────────
@@ -175,11 +186,27 @@ export default function Partido() {
     return <PartidoPasado match={selectedPastMatch} onBack={() => setSelectedPastMatch(null)} />;
   }
 
-  if (loading) return <p className="partido_loading">Cargando datos...</p>;
-  if (error) return <p className="partido_error">{error}</p>;
+  if (loading) {
+    return (
+      <div className="ph-page">
+        <PartidoPageHeader />
+        <p className="partido_loading">Cargando datos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="ph-page">
+        <PartidoPageHeader />
+        <p className="partido_error">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="ph-page">
+      <PartidoPageHeader />
       <div className="partido">
 
         {/* Tabla de Posiciones */}

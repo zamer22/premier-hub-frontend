@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AuthenticatedLayout from "../layouts/AuthenticatedLayout";
 import type { InventoryItem } from "../hooks/useProfileCustomization";
+import Arcade from "../pages/arcade/Arcade";
 import Historia from "../pages/historia/Historia";
 import Noticia from "../pages/noticias/Noticia";
 import Noticias from "../pages/noticias/NoticiasLanding";
@@ -100,7 +101,8 @@ export default function AppRoutes({
         <Route path="simulador" element={<Simulador />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />
-        <Route path="arcade" element={<Wordle />} />
+        <Route path="arcade" element={<Arcade />} />
+        <Route path="arcade/wordle" element={<Wordle />} />
         <Route path="Arcade" element={<Navigate to={ROUTES.arcade} replace />} />
         {PROXIMAMENTE.map((section) => (
           <Route

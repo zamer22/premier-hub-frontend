@@ -383,17 +383,22 @@
 }
 
 .noticias-back-button {
-  border: none;
-  border-radius: 999px;
-  padding: 0.84rem 1.2rem;
-  font-size: 0.84rem;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  font-size: 1rem;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--noticias-navy);
-  color: #ffffff;
+  background: transparent;
+  color: var(--ph-navy-700);
   cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.noticias-back-button:hover {
+  color: var(--ph-red-600);
 }
 
 .noticias-article {

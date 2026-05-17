@@ -201,7 +201,7 @@ export default function Noticia() {
           className="noticias-back-button"
           onClick={() => navigate("/noticias")}
         >
-          Volver a noticias
+          ← Volver
         </button>
       </div>
 

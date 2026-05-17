@@ -161,7 +161,7 @@ export default function Simulador() {
         </div>
 
         <button type="button" onClick={handleSimular} disabled={loading} className="sim-primary">
-          {loading ? "Procesando modelo..." : "Simular con TensorFlow.js"}
+          {loading ? "Procesando simulación..." : "Simular predicción"}
         </button>
         {error ? <p className="sim-error">{error}</p> : null}
       </section>
