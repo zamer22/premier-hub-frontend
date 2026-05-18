@@ -9,10 +9,10 @@ export default function JerseyPlayer({ player, onClick }: Props) {
   const isClickable = !player.guessed && !player.failed;
 
   const jerseyGradient = player.guessed
-    ? "from-green-500 to-green-700"
+    ? "from-[#b6f000] to-[#16a34a]"
     : player.failed
-      ? "from-red-500 to-red-700"
-      : "from-red-700 to-[#871d54]";
+      ? "from-[#ff334e] to-[#a30f2d]"
+      : "from-[#6f7b8d] to-[#374151]";
 
   const label = player.guessed
     ? player.lastName.toUpperCase()
@@ -21,9 +21,9 @@ export default function JerseyPlayer({ player, onClick }: Props) {
       : player.position;
 
   const labelColor = player.guessed
-    ? "text-green-300"
+    ? "text-lime-200"
     : player.failed
-      ? "text-red-300"
+      ? "text-red-200"
       : "text-white/85";
 
   return (
@@ -68,7 +68,7 @@ export default function JerseyPlayer({ player, onClick }: Props) {
 
         {/* Clickable ring pulse */}
         {isClickable && (
-          <span className="absolute -inset-0.5 animate-ping rounded-[7px] bg-white/10" />
+          <span className="absolute -inset-0.5 animate-ping rounded-[7px] bg-white/15" />
         )}
       </div>
 

@@ -102,17 +102,17 @@ export default function MissingXI() {
       </div>
 
       {/* Pitch + match info layout */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(340px,410px)_minmax(420px,1fr)] lg:items-start xl:grid-cols-[minmax(360px,440px)_minmax(460px,1fr)]">
+      <div className="mx-auto grid w-full max-w-[1120px] gap-7 lg:grid-cols-[minmax(340px,410px)_minmax(460px,1fr)] lg:items-start xl:max-w-[1180px] xl:grid-cols-[minmax(360px,430px)_minmax(520px,1fr)]">
 
         {/* LEFT — pitch */}
-        <div className="flex justify-center lg:justify-end">
+        <div className="flex justify-center">
           <div className="w-full max-w-[360px] xl:max-w-[380px]">
             <Pitch players={players} onSelectPlayer={(id) => setSelectedId(id)} />
           </div>
         </div>
 
         {/* RIGHT — info */}
-        <div className="flex min-w-0 flex-col gap-4 lg:max-w-[640px] lg:pt-1">
+        <div className="flex min-w-0 flex-col gap-4 lg:pt-1">
 
           {selectedPlayer ? (
             <PlayerWordle
@@ -130,14 +130,14 @@ export default function MissingXI() {
               <MatchHeader match={match} />
 
               {/* 2. Stats: puntos + progreso */}
-              <div className="mx-auto grid w-full max-w-[520px] grid-cols-2 gap-4">
-                <div className="flex min-h-[78px] flex-col justify-center rounded-xl bg-[#162b4d] px-4 py-3 text-white shadow-sm">
+              <div className="grid w-full grid-cols-2 gap-6">
+                <div className="flex min-h-[70px] flex-col justify-center rounded-xl bg-[#162b4d] px-4 py-3 text-white shadow-sm">
                   <p className="mb-1 text-[0.58rem] font-semibold uppercase tracking-widest opacity-55">
                     Puntos
                   </p>
                   <p className="text-[1.65rem] font-black leading-none">{totalPoints}</p>
                 </div>
-                <div className="flex min-h-[78px] flex-col justify-center rounded-xl border border-[#dde3ec] bg-white px-4 py-3 shadow-sm">
+                <div className="flex min-h-[70px] flex-col justify-center rounded-xl border border-[#dde3ec] bg-white px-4 py-3 shadow-sm">
                   <p className="mb-1 text-[0.58rem] font-semibold uppercase tracking-widest text-[#9aa3b2]">
                     Progreso
                   </p>
@@ -167,12 +167,12 @@ export default function MissingXI() {
               {/* 4. Legend */}
               <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
                 {[
-                  { color: "bg-gradient-to-b from-red-700 to-[#871d54]", label: "Sin adivinar" },
-                  { color: "bg-green-500", label: "Acertado" },
-                  { color: "bg-red-500", label: "Fallado" },
+                  { color: "bg-[#6f7b8d]", label: "Sin adivinar" },
+                  { color: "bg-[#b6f000]", label: "Acertado" },
+                  { color: "bg-[#ff2d55]", label: "Fallado" },
                 ].map(({ color, label }) => (
                   <div key={label} className="flex items-center gap-1.5">
-                    <div className={`h-2.5 w-2.5 rounded-full ${color}`} />
+                    <div className={`h-3 w-3 rounded-full ring-2 ring-white shadow-sm ${color}`} />
                     <span className="text-[0.72rem] font-medium text-[#5f6c80]">{label}</span>
                   </div>
                 ))}
