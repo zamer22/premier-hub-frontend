@@ -19,6 +19,7 @@ export default function JerseyPlayer({ player, onClick }: Props) {
     : player.failed
       ? player.answer
       : player.position;
+  const jerseyNumber = player.number ?? "?";
 
   const labelColor = player.guessed
     ? "text-lime-200"
@@ -36,7 +37,7 @@ export default function JerseyPlayer({ player, onClick }: Props) {
       }`}
       aria-label={
         isClickable
-          ? `Adivinar #${player.number} ${player.position}`
+          ? `Adivinar #${jerseyNumber} ${player.position}`
           : `${player.firstName} ${player.lastName}`
       }
     >
@@ -63,7 +64,7 @@ export default function JerseyPlayer({ player, onClick }: Props) {
         />
         {/* Number */}
         <span className="relative z-10 text-[0.82rem] font-black leading-none text-white drop-shadow-sm">
-          {player.number}
+          {jerseyNumber}
         </span>
 
         {/* Clickable ring pulse */}

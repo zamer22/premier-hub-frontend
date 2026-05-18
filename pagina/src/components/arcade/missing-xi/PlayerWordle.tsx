@@ -72,6 +72,7 @@ export default function PlayerWordle({
   const { answer } = player;
   const answerLen = answer.length;
   const sz = cellSizeClass(answerLen, compact);
+  const jerseyNumber = player.number ?? "?";
 
   const [currentLetters, setCurrentLetters] = useState<string[]>([]);
   const [hintShown, setHintShown] = useState(player.usedHint);
@@ -191,7 +192,7 @@ export default function PlayerWordle({
       <div className={`flex items-start justify-between ${compact ? "px-4 pb-3 pt-4" : "px-5 pt-5 pb-4"}`}>
         <div>
           <h2 className={`${compact ? "text-[1.25rem]" : "text-[1.5rem]"} font-black leading-tight text-[#162b4d]`}>
-            Jugador #{player.number}
+            Jugador #{jerseyNumber}
           </h2>
           <p className="mt-1 text-[0.82rem] font-semibold text-[#5f6c80]">
             {player.position} · {answerLen} letras
@@ -225,7 +226,7 @@ export default function PlayerWordle({
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-[#871d54]/10 text-lg font-black text-[#871d54]">
                     {player.firstName[0]}
-                    {player.lastName[0]}
+                    {player.lastName[0] || player.displayName[0]}
                   </div>
                 )}
               </div>

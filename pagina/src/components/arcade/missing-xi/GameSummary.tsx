@@ -42,7 +42,7 @@ export default function GameSummary({
         </div>
         <div className="h-8 w-px bg-[#dde3ec]" />
         <div className="flex flex-col items-center">
-          <span className="text-3xl font-black text-[#162b4d]">11</span>
+          <span className="text-3xl font-black text-[#162b4d]">{players.length}</span>
           <span className="text-[0.7rem] font-semibold text-[#5f6c80]">Total</span>
         </div>
       </div>
@@ -76,7 +76,7 @@ export default function GameSummary({
               }`}
             >
               <span className="font-semibold text-[#162b4d]">
-                #{p.number} {p.position} — {p.firstName} {p.lastName}
+                #{p.number ?? "?"} {p.position} — {p.firstName} {p.lastName}
               </span>
               <span
                 className={`font-black ${p.guessed ? "text-green-600" : "text-red-500"}`}

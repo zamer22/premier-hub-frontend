@@ -6,16 +6,19 @@ export interface AttemptRow {
 }
 
 export interface MissingXIPlayer {
-  id: number;
+  id: string;
+  apiPlayerId?: number;
+  apiTeamId?: number;
   firstName: string;
   lastName: string;
+  displayName: string;
   answer: string;
-  number: number;
+  number: number | null;
   position: string;
   line: "goalkeeper" | "defense" | "midfield" | "attack";
   xPercent: number;
   yPercent: number;
-  photoUrl?: string;
+  photoUrl: string | null;
   guessed: boolean;
   failed: boolean;
   usedHint: boolean;

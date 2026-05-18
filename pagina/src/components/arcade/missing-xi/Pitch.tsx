@@ -3,7 +3,7 @@ import JerseyPlayer from "./JerseyPlayer";
 
 interface Props {
   players: MissingXIPlayer[];
-  onSelectPlayer: (id: number) => void;
+  onSelectPlayer: (id: string) => void;
 }
 
 export default function Pitch({ players, onSelectPlayer }: Props) {

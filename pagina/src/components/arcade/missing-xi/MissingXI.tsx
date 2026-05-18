@@ -1,31 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { MissingXIPlayer, MissingXIMatch, AttemptRow } from "../../../types/missingXI";
-import { getInitialMatch } from "../../../data/mockMissingXI";
+import { fetchDailyMissingXI, resetMissingXIProgress } from "../../../services/missingXIApi";
 import MatchHeader from "./MatchHeader";
 import Pitch from "./Pitch";
 import PlayerWordle from "./PlayerWordle";
 import GameSummary from "./GameSummary";
 
+const PUBLIC_LOAD_ERROR =
+  "No pudimos cargar el reto diario en este momento. Intenta de nuevo en unos minutos.";
+
 export default function MissingXI() {
   const navigate = useNavigate();
-  const [match, setMatch] = useState<MissingXIMatch>(() => getInitialMatch());
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [match, setMatch] = useState<MissingXIMatch | null>(null);
+  const [initialMatch, setInitialMatch] = useState<MissingXIMatch | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [totalPoints, setTotalPoints] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const { players } = match;
+  async function loadDailyChallenge(signal?: AbortSignal) {
+    try {
+      setLoading(true);
+      setErrorMsg("");
+
+      const dailyMatch = resetMissingXIProgress(await fetchDailyMissingXI(signal));
+
+      setInitialMatch(dailyMatch);
+      setMatch(dailyMatch);
+      setTotalPoints(0);
+      setSelectedId(null);
+    } catch (error) {
+      if (signal?.aborted) return;
+      console.error("[MissingXI] Error al cargar el reto diario", error);
+      setErrorMsg(PUBLIC_LOAD_ERROR);
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadDailyChallenge(controller.signal);
+
+    return () => controller.abort();
+  }, []);
+
+  const players = match?.players ?? [];
   const selectedPlayer =
     selectedId !== null ? (players.find((p) => p.id === selectedId) ?? null) : null;
 
   const guessedCount = players.filter((p) => p.guessed).length;
   const resolvedCount = players.filter((p) => p.guessed || p.failed).length;
-  const gameOver = resolvedCount === 11;
+  const totalPlayers = players.length || 11;
+  const gameOver = players.length > 0 && resolvedCount === players.length;
 
-  function updatePlayer(id: number, updates: Partial<MissingXIPlayer>) {
-    setMatch((prev) => ({
+  function updatePlayer(id: string, updates: Partial<MissingXIPlayer>) {
+    setMatch((prev) => prev ? ({
       ...prev,
       players: prev.players.map((p) => (p.id === id ? { ...p, ...updates } : p)),
-    }));
+    }) : prev);
   }
 
   function handleGuessed(attempts: AttemptRow[], usedHint: boolean, points: number) {
@@ -50,7 +84,9 @@ export default function MissingXI() {
   }
 
   function handleRestart() {
-    setMatch(getInitialMatch());
+    if (initialMatch) {
+      setMatch(resetMissingXIProgress(initialMatch));
+    }
     setTotalPoints(0);
     setSelectedId(null);
   }
@@ -64,6 +100,58 @@ export default function MissingXI() {
       ← Volver
     </button>
   );
+
+  if (loading) {
+    return (
+      <main className="ph-page">
+        <div className="mb-4 grid justify-items-start gap-2">
+          <BackButton />
+          <div>
+            <p className="ph-eyebrow">Arcade</p>
+            <h1 className="ph-title">Missing XI</h1>
+            <p className="ph-subtitle">Cargando reto diario desde Premier Hub</p>
+          </div>
+        </div>
+
+        <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-[#dde3ec] bg-white px-6 py-8 text-center shadow-sm">
+          <p className="text-sm font-bold uppercase tracking-widest text-[#cf275f]">
+            Preparando partido
+          </p>
+          <p className="mt-3 text-base font-semibold text-[#5f6c80]">
+            Estamos buscando la alineación guardada para hoy.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (errorMsg || !match) {
+    return (
+      <main className="ph-page">
+        <div className="mb-4 grid justify-items-start gap-2">
+          <BackButton />
+          <div>
+            <p className="ph-eyebrow">Arcade</p>
+            <h1 className="ph-title">Missing XI</h1>
+            <p className="ph-subtitle">No se pudo cargar el reto diario</p>
+          </div>
+        </div>
+
+        <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-[#dde3ec] bg-white px-6 py-8 text-center shadow-sm">
+          <p className="text-base font-bold text-[#162b4d]">
+            {errorMsg || "No hay datos disponibles para Missing XI."}
+          </p>
+          <button
+            type="button"
+            onClick={() => loadDailyChallenge()}
+            className="mt-5 rounded-xl bg-[#cf275f] px-6 py-3 text-sm font-black text-white shadow-md transition-colors hover:bg-[#b02050]"
+          >
+            Reintentar
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   // ─── Game over ───────────────────────────────────────────────
   if (gameOver && selectedId === null) {
@@ -143,7 +231,7 @@ export default function MissingXI() {
                   </p>
                   <p className="text-[1.65rem] font-black leading-none text-[#162b4d]">
                     {guessedCount}
-                    <span className="text-base font-semibold text-[#b0b8c6]">/11</span>
+                    <span className="text-base font-semibold text-[#b0b8c6]">/{totalPlayers}</span>
                   </p>
                 </div>
               </div>
@@ -153,13 +241,13 @@ export default function MissingXI() {
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-[0.72rem] font-semibold text-[#5f6c80]">Alineación</span>
                   <span className="text-[0.72rem] font-black text-[#162b4d]">
-                    {resolvedCount}/11 jugadores
+                    {resolvedCount}/{totalPlayers} jugadores
                   </span>
                 </div>
                 <div className="h-2.5 overflow-hidden rounded-full bg-[#edf0f5]">
                   <div
                     className="h-full rounded-full bg-[#cf275f] transition-all duration-500"
-                    style={{ width: `${(resolvedCount / 11) * 100}%` }}
+                    style={{ width: `${(resolvedCount / totalPlayers) * 100}%` }}
                   />
                 </div>
               </div>
@@ -178,7 +266,7 @@ export default function MissingXI() {
                 ))}
               </div>
 
-              {/* 5. Instruction — no emoji */}
+              {/* 5. Instruction  */}
               <div className="mt-auto rounded-xl border border-[#dde3ec] bg-[#f7f8fb] px-4 py-3.5">
                 <p className="text-[0.8rem] font-medium leading-relaxed text-[#5f6c80]">
                   Toca una camiseta en la cancha para adivinar al jugador
