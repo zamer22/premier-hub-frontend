@@ -1,0 +1,154 @@
+/* Page layout */
+.adm-page { min-height: 100vh; background: #f4f6f8; }
+
+/* Top header */
+.adm-header { background: linear-gradient(135deg, #263a55, #1a2a3f); color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+.adm-header__left {}
+.adm-header__brand { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em; }
+.adm-header__brand-accent { color: #E90052; }
+.adm-header__brand-name { color: #fff; }
+.adm-header__brand-section { color: rgba(255,255,255,0.7); font-weight: 500; margin-left: 0.6rem; font-size: 0.95rem; }
+.adm-header__sub { font-size: 0.78rem; color: rgba(255,255,255,0.7); }
+.adm-header__right { display: flex; align-items: center; gap: 0.85rem; }
+.adm-header__user { font-size: 0.82rem; color: rgba(255,255,255,0.85); }
+.adm-header__logout { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; color: #fff; padding: 0.4rem 0.95rem; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+/* Toast notification */
+.adm-toast { position: fixed; top: 80px; right: 2rem; padding: 0.75rem 1.25rem; color: #fff; border-radius: 10px; font-size: 0.85rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; }
+.adm-toast--ok  { background: #16a34a; }
+.adm-toast--err { background: #dc2626; }
+
+/* Filter bar */
+.adm-filters { padding: 1.25rem 2rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; border-bottom: 1px solid #e5e7eb; background: #fff; }
+.adm-filters__chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.adm-chip { padding: 0.4rem 0.85rem; border-radius: 20px; border: 1px solid #e0e0e0; background: #fff; color: #84878F; font-size: 0.78rem; font-weight: 500; cursor: pointer; text-transform: capitalize; font-family: inherit; }
+.adm-chip--active { border-color: #263a55; background: #263a55; color: #fff; font-weight: 700; }
+.adm-count { font-size: 0.78rem; color: #84878F; font-weight: 600; }
+
+/* Main input */
+.adm-input { padding: 0.55rem 0.7rem; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.85rem; outline: none; width: 100%; box-sizing: border-box; color: #263a55; background: #fff; font-family: inherit; }
+.adm-input:disabled { background: #f4f6f8; color: #84878F; }
+
+/* Two-column layout */
+.adm-layout { display: grid; grid-template-columns: minmax(320px, 380px) 1fr; gap: 1.25rem; padding: 1.25rem 2rem; align-items: start; }
+
+/* Left: order list */
+.adm-list { display: flex; flex-direction: column; gap: 0.6rem; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 0.4rem; }
+.adm-list__empty { color: #84878F; font-size: 0.85rem; text-align: center; padding: 2rem; background: #fff; border-radius: 10px; }
+.adm-list__loading { color: #84878F; font-size: 0.85rem; text-align: center; padding: 2rem; }
+
+/* Order card */
+.adm-order { background: #fff; border-radius: 10px; padding: 0.85rem 1rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; display: flex; flex-direction: column; gap: 0.3rem; }
+.adm-order--sel { border: 2px solid #E90052; box-shadow: 0 4px 12px rgba(233,0,82,0.15); }
+.adm-order__top { display: flex; justify-content: space-between; align-items: center; }
+.adm-order__id { background: #263a55; color: #fff; padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.72rem; font-weight: 800; }
+.adm-order__status { padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.adm-order__name { font-size: 0.85rem; font-weight: 700; color: #263a55; }
+.adm-order__user { font-size: 0.74rem; color: #84878F; }
+.adm-order__date { font-size: 0.7rem; color: #9ca3af; }
+
+/* Right: detail panel */
+.adm-detail { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 1.25rem; }
+.adm-detail--empty { background: #fff; border-radius: 12px; padding: 4rem 2rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.adm-detail__empty-text { color: #84878F; font-size: 0.9rem; }
+
+/* Detail header */
+.adm-detail__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 1rem; }
+.adm-detail__id { background: #263a55; color: #fff; padding: 0.25rem 0.7rem; border-radius: 6px; font-size: 0.85rem; font-weight: 800; }
+.adm-detail__name { font-size: 1.1rem; font-weight: 800; color: #263a55; margin-top: 0.5rem; }
+.adm-detail__client { font-size: 0.82rem; color: #84878F; }
+.adm-detail__meta { font-size: 0.78rem; color: #84878F; }
+.adm-detail__status { padding: 0.3rem 0.85rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+
+/* Locked / closed pedido banner */
+.adm-locked { border-radius: 10px; padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.6rem; }
+.adm-locked--delivered { background: #dcfce7; border: 1px solid #86efac; }
+.adm-locked--canceled  { background: #fee2e2; border: 1px solid #fecaca; }
+.adm-locked__icon { font-size: 1.1rem; }
+.adm-locked__title { font-size: 0.85rem; font-weight: 700; }
+.adm-locked--delivered .adm-locked__title { color: #166534; }
+.adm-locked--canceled  .adm-locked__title { color: #991b1b; }
+.adm-locked__text { font-size: 0.74rem; }
+.adm-locked--delivered .adm-locked__text { color: #166534; }
+.adm-locked--canceled  .adm-locked__text { color: #991b1b; }
+
+/* Section title inside detail */
+.adm-section-title { font-size: 0.74rem; color: #263a55; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+.adm-pending-tag { margin-left: 0.5rem; font-size: 0.7rem; font-weight: 600; color: #E90052; text-transform: none; letter-spacing: 0; }
+
+/* Estado buttons */
+.adm-estado-btns { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.adm-estado-btn { padding: 0.45rem 0.95rem; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #e5e7eb; background: #fff; color: #374151; text-transform: capitalize; font-family: inherit; }
+.adm-estado-btn--sel { border: 2px solid #263a55; font-weight: 800; }
+.adm-estado-btn--orig { border: 1px dashed #84878F; }
+.adm-estado-btn:disabled { cursor: default; }
+
+/* Direction display */
+.adm-dir-box { background: #f8f9fa; border-radius: 10px; padding: 0.85rem 1rem; }
+.adm-dir-title { font-size: 0.74rem; color: #263a55; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+.adm-dir-name { font-size: 0.85rem; color: #263a55; font-weight: 600; }
+.adm-dir-addr { font-size: 0.78rem; color: #374151; }
+
+/* Map section */
+.adm-map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem; }
+.adm-map-hint { font-size: 0.7rem; color: #84878F; font-style: italic; }
+.adm-geo-row { display: flex; gap: 0.4rem; position: relative; margin-bottom: 0.5rem; }
+.adm-geo-btn { padding: 0.5rem 0.95rem; border-radius: 8px; border: none; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; }
+.adm-geo-btn--active { background: #263a55; color: #fff; }
+.adm-geo-btn--off    { background: #e0e0e0; color: #999; cursor: not-allowed; }
+.adm-geo-dropdown { position: absolute; top: 100%; left: 0; right: 0; margin-top: 0.25rem; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); z-index: 1000; max-height: 200px; overflow-y: auto; }
+.adm-geo-item { display: block; width: 100%; text-align: left; padding: 0.55rem 0.75rem; border: none; background: transparent; font-size: 0.78rem; color: #263a55; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-family: inherit; }
+.adm-geo-item:hover { background: #f8f9fa; }
+.adm-geo-error { font-size: 0.72rem; color: #dc2626; margin-bottom: 0.5rem; }
+.adm-map-coords-row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem; }
+.adm-map-coords { font-size: 0.72rem; color: #84878F; }
+.adm-map-pending { font-size: 0.7rem; font-weight: 600; color: #E90052; }
+
+/* Info/shipping form section */
+.adm-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.adm-info-section { display: flex; flex-direction: column; gap: 0.6rem; }
+
+/* Map container — Leaflet reads height from CSS class */
+.t-map-lg { height: 320px; width: 100%; border-radius: 10px; border: 1px solid #e5e7eb; }
+
+/* Utility text colors */
+.adm-text-mid  { color: #374151; }
+.adm-text-soft { color: #84878F; }
+
+/* Search input in filter bar */
+.adm-search { flex: 1; min-width: 240px; max-width: 360px; }
+
+/* Textarea extends adm-input */
+.adm-textarea { resize: vertical; font-family: inherit; }
+
+/* Estado color — order list badge */
+.adm-order__status[data-estado="procesando"] { background: #fef3c7; color: #92400e; }
+.adm-order__status[data-estado="enviado"]    { background: #dbeafe; color: #1e40af; }
+.adm-order__status[data-estado="en_camino"]  { background: #e0e7ff; color: #4338ca; }
+.adm-order__status[data-estado="entregado"]  { background: #dcfce7; color: #16a34a; }
+.adm-order__status[data-estado="cancelado"]  { background: #fee2e2; color: #dc2626; }
+
+/* Estado color — detail panel header badge */
+.adm-detail__status[data-estado="procesando"] { background: #fef3c7; color: #92400e; }
+.adm-detail__status[data-estado="enviado"]    { background: #dbeafe; color: #1e40af; }
+.adm-detail__status[data-estado="en_camino"]  { background: #e0e7ff; color: #4338ca; }
+.adm-detail__status[data-estado="entregado"]  { background: #dcfce7; color: #16a34a; }
+.adm-detail__status[data-estado="cancelado"]  { background: #fee2e2; color: #dc2626; }
+
+/* Estado color — selected estado button */
+.adm-estado-btn--sel[data-estado="procesando"] { background: #fef3c7; color: #92400e; border-color: #92400e; }
+.adm-estado-btn--sel[data-estado="enviado"]    { background: #dbeafe; color: #1e40af; border-color: #1e40af; }
+.adm-estado-btn--sel[data-estado="en_camino"]  { background: #e0e7ff; color: #4338ca; border-color: #4338ca; }
+.adm-estado-btn--sel[data-estado="entregado"]  { background: #dcfce7; color: #16a34a; border-color: #16a34a; }
+.adm-estado-btn--sel[data-estado="cancelado"]  { background: #fee2e2; color: #dc2626; border-color: #dc2626; }
+
+/* Geo search input inside map section (fills remaining space) */
+.adm-geo-input { flex: 1; }
+
+/* Action row */
+.adm-actions { display: flex; justify-content: flex-end; align-items: center; gap: 0.6rem; border-top: 1px solid #f0f0f0; padding-top: 1rem; }
+.adm-btn { padding: 0.55rem 1.2rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; border: none; }
+.adm-btn--discard { border: 1px solid #e5e7eb !important; background: #fff; color: #374151; }
+.adm-btn--save    { background: #E90052; color: #fff; font-weight: 700; padding: 0.55rem 1.5rem; font-size: 0.85rem; }
+.adm-btn:disabled { background: #e0e0e0 !important; color: #bbb !important; cursor: not-allowed !important; border-color: transparent !important; }
+.adm-btn--discard:disabled { border-color: transparent !important; color: #bbb !important; }

@@ -13,6 +13,7 @@ import Tablero from "../pages/tablero/Tablero";
 import Tienda from "../pages/tienda/Tienda";
 import MissingXI from "../components/arcade/missing-xi/MissingXI";
 import Wordle from "../pages/wordle/Wordle";
+import OffseasonLab from "../pages/offseason/OffseasonLab";
 import {
   DEFAULT_ROUTE,
   PROXIMAMENTE,
@@ -105,6 +106,7 @@ export default function AppRoutes({
         <Route path="arcade" element={<Arcade />} />
         <Route path="arcade/wordle" element={<Wordle />} />
         <Route path="arcade/missing-xi" element={<MissingXI />} />
+        <Route path="offseason" element={<OffseasonLab user={user} />} />
         <Route path="Arcade" element={<Navigate to={ROUTES.arcade} replace />} />
         {PROXIMAMENTE.map((section) => (
           <Route
