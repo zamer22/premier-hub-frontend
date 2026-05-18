@@ -15,7 +15,7 @@ export default function JerseyPlayer({ player, onClick }: Props) {
       : "from-[#6f7b8d] to-[#374151]";
 
   const label = player.guessed
-    ? player.lastName.toUpperCase()
+    ? player.answer
     : player.failed
       ? player.answer
       : player.position;

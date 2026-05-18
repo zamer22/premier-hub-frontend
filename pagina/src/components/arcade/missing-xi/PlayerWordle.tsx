@@ -214,8 +214,8 @@ export default function PlayerWordle({
             </button>
           )}
           {hintShown && (
-            <div className="flex flex-col items-center gap-1.5">
-              <div className={`${compact ? "h-12 w-12" : "h-16 w-16"} overflow-hidden rounded-full border-2 border-[#871d54] shadow-lg`}>
+            <div className="flex flex-col items-center gap-2">
+              <div className={`${compact ? "h-24 w-24" : "h-32 w-32"} overflow-hidden rounded-2xl border-2 border-[#871d54] bg-[#f7f8fb] shadow-lg`}>
                 {player.photoUrl && !imgError ? (
                   <img
                     src={player.photoUrl}
@@ -224,7 +224,7 @@ export default function PlayerWordle({
                     onError={() => setImgError(true)}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-[#871d54]/10 text-lg font-black text-[#871d54]">
+                  <div className="flex h-full w-full items-center justify-center bg-[#871d54]/10 text-3xl font-black text-[#871d54]">
                     {player.firstName[0]}
                     {player.lastName[0] || player.displayName[0]}
                   </div>
