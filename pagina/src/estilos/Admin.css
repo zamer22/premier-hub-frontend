@@ -121,6 +121,27 @@
 /* Textarea extends adm-input */
 .adm-textarea { resize: vertical; font-family: inherit; }
 
+/* Estado color — order list badge */
+.adm-order__status[data-estado="procesando"] { background: #fef3c7; color: #92400e; }
+.adm-order__status[data-estado="enviado"]    { background: #dbeafe; color: #1e40af; }
+.adm-order__status[data-estado="en_camino"]  { background: #e0e7ff; color: #4338ca; }
+.adm-order__status[data-estado="entregado"]  { background: #dcfce7; color: #16a34a; }
+.adm-order__status[data-estado="cancelado"]  { background: #fee2e2; color: #dc2626; }
+
+/* Estado color — detail panel header badge */
+.adm-detail__status[data-estado="procesando"] { background: #fef3c7; color: #92400e; }
+.adm-detail__status[data-estado="enviado"]    { background: #dbeafe; color: #1e40af; }
+.adm-detail__status[data-estado="en_camino"]  { background: #e0e7ff; color: #4338ca; }
+.adm-detail__status[data-estado="entregado"]  { background: #dcfce7; color: #16a34a; }
+.adm-detail__status[data-estado="cancelado"]  { background: #fee2e2; color: #dc2626; }
+
+/* Estado color — selected estado button */
+.adm-estado-btn--sel[data-estado="procesando"] { background: #fef3c7; color: #92400e; border-color: #92400e; }
+.adm-estado-btn--sel[data-estado="enviado"]    { background: #dbeafe; color: #1e40af; border-color: #1e40af; }
+.adm-estado-btn--sel[data-estado="en_camino"]  { background: #e0e7ff; color: #4338ca; border-color: #4338ca; }
+.adm-estado-btn--sel[data-estado="entregado"]  { background: #dcfce7; color: #16a34a; border-color: #16a34a; }
+.adm-estado-btn--sel[data-estado="cancelado"]  { background: #fee2e2; color: #dc2626; border-color: #dc2626; }
+
 /* Geo search input inside map section (fills remaining space) */
 .adm-geo-input { flex: 1; }
 
