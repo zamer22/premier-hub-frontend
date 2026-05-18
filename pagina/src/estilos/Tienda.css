@@ -387,6 +387,53 @@
 /* Inline form container (editing address inside pedido modal) */
 .t-dir-edit-form { display: flex; flex-direction: column; gap: 0.55rem; }
 
+/* Pedido list card — thumbnail */
+.t-pedido-card-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background-color: #f0f2f5;
+  background-size: cover;
+  background-position: center;
+  background-image: linear-gradient(135deg, #e5e7eb, #d1d5db);
+}
+
+/* Pedido list card — order ID badge */
+.t-pedido-id-badge {
+  display: inline-block;
+  background: #263a55;
+  color: #fff;
+  padding: 0.1rem 0.45rem;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* Pedido status badge in list */
+.t-status-badge--pedido {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.t-status-badge--pedido[data-estado="procesando"] { background: #fef3c7; color: #92400e; }
+.t-status-badge--pedido[data-estado="enviado"]    { background: #dbeafe; color: #1e40af; }
+.t-status-badge--pedido[data-estado="en_camino"]  { background: #e0e7ff; color: #4338ca; }
+.t-status-badge--pedido[data-estado="entregado"]  { background: #dcfce7; color: #16a34a; }
+.t-status-badge--pedido[data-estado="cancelado"]  { background: #fee2e2; color: #dc2626; }
+
+/* Cancel button — white bg, red border/text */
+.t-card-btn--cancel {
+  background: #fff;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+}
+.t-card-btn--cancel:hover { background: #fee2e2; }
+
 /* Accent color for checkboxes and radios via CSS property */
 .t-dir-checkbox input[type="checkbox"] { accent-color: #E90052; }
 .t-dir-option input[type="radio"] { accent-color: #E90052; margin-top: 0.2rem; }

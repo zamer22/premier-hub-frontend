@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import "leaflet/dist/leaflet.css";
 
 import type { AdminPedido, AdminEnviosProps } from "../../components/admin/types";
-import { ESTADOS, ESTADO_LABEL, ESTADO_COLOR } from "../../components/admin/constants";
+import { ESTADOS, ESTADO_LABEL } from "../../components/admin/constants";
 import AdminTrackingMap from "../../components/admin/map/AdminTrackingMap";
 import "../../estilos/Admin.css";
 
@@ -242,7 +242,6 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
           )}
           {pedidos.map(p => {
             const isSel = selected?.id_pedido === p.id_pedido;
-            const color = ESTADO_COLOR[p.estado] || ESTADO_COLOR.procesando;
             return (
               <div
                 key={p.id_pedido}
@@ -251,7 +250,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
               >
                 <div className="adm-order__top">
                   <span className="adm-order__id">#{p.id_pedido}</span>
-                  <span className="adm-order__status" style={{ background: color.bg, color: color.fg }}>
+                  <span className="adm-order__status" data-estado={p.estado}>
                     {ESTADO_LABEL[p.estado]}
                   </span>
                 </div>
@@ -272,7 +271,6 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
           </div>
         ) : (() => {
           const dirSnap = selected.direccion_snapshot || {};
-          const color = ESTADO_COLOR[selected.estado] || ESTADO_COLOR.procesando;
           const isLocked = selected.estado === "entregado" || selected.estado === "cancelado";
           return (
             <div className="adm-detail">
@@ -289,7 +287,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                     {Number(selected.costo).toLocaleString()} pts · {new Date(selected.fecha_pedido).toLocaleString("es-MX")}
                   </p>
                 </div>
-                <span className="adm-detail__status" style={{ background: color.bg, color: color.fg }}>
+                <span className="adm-detail__status" data-estado={selected.estado}>
                   {ESTADO_LABEL[selected.estado]}
                 </span>
               </div>
@@ -314,14 +312,13 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                     {ESTADOS.map(est => {
                       const sel = estadoPendiente === est;
                       const original = selected.estado === est;
-                      const c = ESTADO_COLOR[est];
                       return (
                         <button
                           key={est}
                           disabled={sel}
                           onClick={() => setEstadoPendiente(est)}
                           className={`adm-estado-btn${sel ? " adm-estado-btn--sel" : original ? " adm-estado-btn--orig" : ""}`}
-                          style={sel ? { background: c.bg, color: c.fg } : undefined}
+                          data-estado={sel ? est : undefined}
                         >
                           {ESTADO_LABEL[est]}
                         </button>

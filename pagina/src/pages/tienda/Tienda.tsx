@@ -4,6 +4,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../../estilos/Tienda.css";
 
+import { PageHeader, Tabs, EmptyState } from "../../components/ui";
+
 import type {
   Producto, InventarioItem, Listado, Direccion, Pedido, Comentario,
   Variante, NewDireccionForm, ConfirmAction, SubTab, MarketView, TiendaUser,
@@ -77,7 +79,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const saldo = Number(user.dinero) || 0;
   const showToast = (msg: string, ok: boolean) => { setToast({ msg, ok }); setTimeout(() => setToast(null), 3000); };
 
-  useEffect(() => { setSelectedVariante(null); }, [productModal?.id_produto]);
+  useEffect(() => { setSelectedVariante(null); }, [productModal?.id_producto]);
 
   useEffect(() => { setEditingPedidoDireccion(false); }, [pedidoModal?.id_pedido]);
 
@@ -153,14 +155,14 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
   useEffect(() => {
     if (productModal?.categoria === "real") {
-      fetchComentarios(productModal.id_produto);
+      fetchComentarios(productModal.id_producto);
       setNewReview({ calificacion: 5, comentario: "" });
     } else {
       setProductComments([]);
     }
   }, [productModal, fetchComentarios]);
 
-  const ownedIds = new Set(misItems.map(i => i.id_produto));
+  const ownedIds = new Set(misItems.map(i => i.id_producto));
   const perfilProductos = productos.filter(p => p.tipo !== "avatar");
   const perfilTipos = ["todos", ...Array.from(new Set(perfilProductos.map(p => p.tipo)))];
   const perfilFiltrados = perfilProductos.filter(p =>
@@ -179,11 +181,11 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   });
 
   // POST /api/tienda/comprar — con id_direccion crea pedido (real); sin él agrega a inventario (perfil).
-  const comprar = async (id_produto: number, nombre: string, id_variante: number | null, id_direccion: number | null = null) => {
+  const comprar = async (id_producto: number, nombre: string, id_variante: number | null, id_direccion: number | null = null) => {
     try {
       const res = await fetch(`${API_URL}/api/tienda/comprar`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, id_produto, id_variante, id_direccion }),
+        body: JSON.stringify({ id_usuario: user.id_usuario, id_producto, id_variante, id_direccion }),
       });
       const data = await res.json();
       if (data.success) {
@@ -191,7 +193,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         onSaldoChange(nuevoSaldo);
         fetchMisItems();
         setProductos(prev => prev.map(p => {
-          if (p.id_produto !== id_produto) return p;
+          if (p.id_producto !== id_producto) return p;
           if (id_variante != null && p.variantes)
             return { ...p, variantes: p.variantes.map(v => v.id_variante === id_variante ? { ...v, stock: v.stock - 1 } : v) };
           return { ...p, stock: (p.stock ?? 0) - 1 };
@@ -259,7 +261,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     if (!checkoutAction || !selectedDireccionId) return;
     setPlacingOrder(true);
     try {
-      await comprar(checkoutAction.producto.id_produto, checkoutAction.producto.nombre, checkoutAction.variante?.id_variante ?? null, selectedDireccionId);
+      await comprar(checkoutAction.producto.id_producto, checkoutAction.producto.nombre, checkoutAction.variante?.id_variante ?? null, selectedDireccionId);
     } finally { setPlacingOrder(false); }
   };
 
@@ -347,7 +349,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     try {
       const r = await fetch(`${API_URL}/api/tienda/comentarios`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, id_produto: productModal.id_produto, calificacion: newReview.calificacion, comentario: newReview.comentario.trim() }),
+        body: JSON.stringify({ id_usuario: user.id_usuario, id_producto: productModal.id_producto, calificacion: newReview.calificacion, comentario: newReview.comentario.trim() }),
       });
       const d = await r.json();
       if (d.success) { setProductComments(prev => [d.data, ...prev]); setNewReview({ calificacion: 5, comentario: "" }); showToast("Reseña publicada", true); }
@@ -403,7 +405,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const modals = createPortal(
     <>
       {toast && (
-        <div style={{ position: "fixed", top: "80px", right: "2rem", padding: "0.75rem 1.25rem", background: toast.ok ? "#16a34a" : "#dc2626", color: "#fff", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", zIndex: 9999 }}>
+        <div className={`fixed top-20 right-8 px-5 py-3 rounded-xl text-sm font-semibold shadow-lg z-[9999] text-white ${toast.ok ? "bg-green-600" : "bg-red-600"}`}>
           {toast.ok ? "✓ " : "✗ "}{toast.msg}
         </div>
       )}
@@ -422,7 +424,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           saldo={saldo}
           onClose={() => setConfirmAction(null)}
           onConfirm={() => {
-            if (confirmAction.kind === "buy-product") comprar(confirmAction.producto.id_produto, confirmAction.producto.nombre, confirmAction.variante?.id_variante ?? null);
+            if (confirmAction.kind === "buy-product") comprar(confirmAction.producto.id_producto, confirmAction.producto.nombre, confirmAction.variante?.id_variante ?? null);
             else if (confirmAction.kind === "buy-listing") comprarMarketplace(confirmAction.listado.id_listado, confirmAction.listado.nombre);
             else publicar();
           }}
@@ -440,8 +442,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           producto={productModal}
           saldo={saldo}
           isOwned={productModal.categoria === "real"
-            ? pedidos.some(p => p.id_produto === productModal.id_produto && p.estado !== "cancelado")
-            : ownedIds.has(productModal.id_produto)}
+            ? pedidos.some(p => p.id_producto === productModal.id_producto && p.estado !== "cancelado")
+            : ownedIds.has(productModal.id_producto)}
           selectedVariante={selectedVariante}
           onSelectVariante={setSelectedVariante}
           productComments={productComments}
@@ -500,43 +502,37 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     <>
       {modals}
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <div>
-            <h2 style={{ color: "#263a55", fontSize: "1.25rem", marginBottom: "0.2rem" }}>Tienda</h2>
-            <p style={{ color: "#84878F", fontSize: "0.8rem" }}>Compra con tus puntos</p>
-          </div>
-          <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-            <button onClick={reclamarBonus} className="t-bonus-btn">
-              + 500 pts bonus
-            </button>
-            <div className="t-saldo">
-              {saldo.toLocaleString()} pts
+        <PageHeader
+          eyebrow="Fan economy"
+          title="Tienda"
+          subtitle="Compra con tus puntos"
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={reclamarBonus} className="t-bonus-btn">+ 500 pts bonus</button>
+              <div className="t-saldo">{saldo.toLocaleString()} pts</div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
-        <div style={{ display: "flex", borderBottom: "2px solid #e9ecef", marginBottom: "1.5rem" }}>
-          {([
-            { key: "perfil" as SubTab, label: "Objetos de Perfil" },
-            { key: "real" as SubTab, label: "Objetos Reales" },
-            { key: "marketplace" as SubTab, label: "Marketplace" },
-            { key: "pedidos" as SubTab, label: "Mis Pedidos" },
-          ]).map((t) => (
-            <button key={t.key} onClick={() => setSubTab(t.key)}
-              className={subTab === t.key ? "t-tab t-tab--active" : "t-tab"}>
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          value={subTab}
+          onChange={(k) => setSubTab(k as SubTab)}
+          items={[
+            { key: "perfil", label: "Objetos de Perfil" },
+            { key: "real", label: "Objetos Reales" },
+            { key: "marketplace", label: "Marketplace" },
+            { key: "pedidos", label: "Mis Pedidos" },
+          ]}
+        />
 
         {subTab !== "perfil" && subTab !== "pedidos" && (subTab !== "marketplace" || marketView === "explorar") && (
-          <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
-            <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
-              <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.75rem", fontWeight: 600 }}>&#x2315;</span>
-              <input type="text" placeholder="Buscar por nombre, equipo..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
-                style={{ width: "100%", padding: "0.6rem 0.75rem 0.6rem 2.2rem", borderRadius: "8px", border: "1px solid #e0e0e0", fontSize: "0.85rem", background: "#fff", boxSizing: "border-box", outline: "none" }} />
+          <div className="flex flex-wrap items-center gap-3 mb-5">
+            <div className="relative flex-1 min-w-[200px]">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs font-semibold pointer-events-none">&#x2315;</span>
+              <input type="text" placeholder="Buscar por nombre, equipo..." value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)} className="t-input pl-8" />
             </div>
-            <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+            <div className="flex flex-wrap gap-1">
               {TIPOS_REAL.map(tipo => (
                 <button key={tipo} onClick={() => setFiltroTipo(tipo)}
                   className={filtroTipo === tipo ? "t-chip t-chip--active" : "t-chip"}>
@@ -549,14 +545,14 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
         {subTab === "perfil" && (
           <div>
-            <div style={{ display: "flex", gap: "0.75rem", marginBottom: "2rem", flexWrap: "wrap", alignItems: "center" }}>
-              <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
-                <span style={{ position: "absolute", left: "0.85rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.85rem", pointerEvents: "none" }}>&#x2315;</span>
-                <input type="text" placeholder="Buscar en toda la tienda..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
-                  style={{ width: "100%", padding: "0.7rem 0.9rem 0.7rem 2.4rem", borderRadius: "10px", border: "1.5px solid #e0e0e0", fontSize: "0.88rem", background: "#fff", boxSizing: "border-box", outline: "none", color: "#263a55" }} />
+            <div className="flex flex-wrap items-center gap-3 mb-8">
+              <div className="relative flex-1 min-w-[200px]">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">&#x2315;</span>
+                <input type="text" placeholder="Buscar en toda la tienda..." value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)} className="t-input pl-9" />
               </div>
               {perfilTipos.length > 1 && (
-                <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                <div className="flex flex-wrap gap-1">
                   {perfilTipos.map(tipo => (
                     <button key={tipo} onClick={() => setFiltroPerfilTipo(tipo)}
                       className={filtroPerfilTipo === tipo ? "t-chip t-chip--active" : "t-chip"}>
@@ -566,30 +562,30 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                 </div>
               )}
             </div>
-            {loading && <p style={{ color: "#84878F" }}>Cargando...</p>}
+            {loading && <p className="text-muted text-sm">Cargando...</p>}
             <div className="t-grid--perfil">
               {perfilFiltrados.map(p => {
-                const owned = ownedIds.has(p.id_produto);
+                const owned = ownedIds.has(p.id_producto);
                 const canBuy = !owned && Number(p.costo) <= saldo;
                 return (
-                  <div key={p.id_produto} onClick={() => setProductModal(p)} className="t-card t-card--perfil">
-                    <div style={{ position: "relative" }}>
+                  <div key={p.id_producto} onClick={() => setProductModal(p)} className="t-card t-card--perfil">
+                    <div className="relative">
                       <ProductVisual p={p} height={160} />
                       {owned
                         ? <span className="t-badge t-badge--owned">EN TU PERFIL</span>
-                        : p.es_novo && <span className="t-badge t-badge--nuevo">NUEVO</span>
+                        : p.es_nuevo && <span className="t-badge t-badge--nuevo">NUEVO</span>
                       }
                     </div>
-                    <div style={{ padding: "0.9rem 1rem" }}>
-                      <p style={{ fontSize: "0.7rem", color: "#84878F", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.2rem" }}>{tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}</p>
-                      <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#263a55", marginBottom: "0.65rem", lineHeight: 1.3 }}>{p.nombre}</p>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div className="t-card-body">
+                      <p className="t-card-meta--sm">{tipoLabel(p.tipo)}{p.equipo ? ` · ${p.equipo}` : ""}</p>
+                      <p className="t-card-name">{p.nombre}</p>
+                      <div className="t-card-footer">
                         <div>
-                          <span style={{ fontSize: "1rem", fontWeight: 900, color: "#263a55" }}>{Number(p.costo).toLocaleString()}</span>
-                          <span style={{ fontSize: "0.72rem", color: "#84878F", marginLeft: "0.25rem" }}>pts</span>
+                          <span className="t-card-price">{Number(p.costo).toLocaleString()}</span>
+                          <span className="text-muted text-[0.72rem] ml-1">pts</span>
                         </div>
-                        <button onClick={e => { e.stopPropagation(); if (canBuy) setConfirmAction({ kind: "buy-product", producto: p, variante: null }); }} disabled={!canBuy}
-                          style={{ padding: "0.38rem 0.85rem", background: canBuy ? "#E90052" : "#e9ecef", color: canBuy ? "#fff" : "#aaa", border: "none", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 700, cursor: canBuy ? "pointer" : "not-allowed" }}>
+                        <button onClick={e => { e.stopPropagation(); if (canBuy) setConfirmAction({ kind: "buy-product", producto: p, variante: null }); }}
+                          disabled={!canBuy} className="t-card-btn t-card-btn--buy">
                           {owned ? "Ya tienes este" : "Comprar"}
                         </button>
                       </div>
@@ -599,19 +595,19 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
               })}
             </div>
             {!loading && perfilFiltrados.length === 0 && (
-              <p style={{ color: "#84878F", textAlign: "center", marginTop: "3rem", fontSize: "0.9rem" }}>No se encontraron productos</p>
+              <p className="text-muted text-center mt-12 text-sm">No se encontraron productos</p>
             )}
           </div>
         )}
 
         {subTab === "real" && (
           <div>
-            {loading ? <p style={{ color: "#84878F" }}>Cargando...</p> : productosFiltrados.length === 0
-              ? <p style={{ color: "#84878F", textAlign: "center", marginTop: "2rem" }}>No se encontraron productos</p>
+            {loading ? <p className="text-muted text-sm">Cargando...</p> : productosFiltrados.length === 0
+              ? <p className="text-muted text-center mt-8">No se encontraron productos</p>
               : (
                 <div className="t-grid">
                   {productosFiltrados.map(p => (
-                    <ProductCard key={p.id_produto} p={p} saldo={saldo} badge="OBJETO REAL"
+                    <ProductCard key={p.id_producto} p={p} saldo={saldo} badge="OBJETO REAL"
                       onOpenModal={setProductModal}
                       onConfirm={setConfirmAction}
                       onCheckout={abrirCheckout}
@@ -639,7 +635,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
             {marketView === "explorar" && (
               listadosFiltrados.length === 0
-                ? <p style={{ color: "#84878F", textAlign: "center", marginTop: "2rem" }}>No hay listados en el marketplace</p>
+                ? <p className="text-muted text-center mt-8">No hay listados en el marketplace</p>
                 : (
                   <div className="t-grid">
                     {listadosFiltrados.map(l => (
@@ -653,23 +649,22 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
             {marketView === "mis-items" && (
               <div>
-                <h3 style={{ color: "#263a55", fontSize: "1rem", marginBottom: "0.75rem" }}>Mi Inventario</h3>
+                <h3 className="t-text-dark font-bold text-base mb-3">Mi Inventario</h3>
                 {misItems.length === 0
-                  ? <p style={{ color: "#84878F", fontSize: "0.85rem", marginBottom: "1.5rem" }}>No tienes items. Compra algo en la tienda primero.</p>
+                  ? <p className="text-muted text-sm mb-6">No tienes items. Compra algo en la tienda primero.</p>
                   : (
-                    <div className="t-grid--inv" style={{ marginBottom: "2rem" }}>
+                    <div className="t-grid--inv mb-8">
                       {misItems.map(item => (
-                        <div key={item.id_inventario} style={{ background: "#fff", borderRadius: "10px", padding: "0.75rem", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                          <div style={{ borderRadius: "8px", overflow: "hidden" }}>
+                        <div key={item.id_inventario} className="bg-white rounded-xl p-3 shadow-sm flex flex-col gap-1.5">
+                          <div className="rounded-lg overflow-hidden">
                             <ProductVisual p={item} height={80} />
                           </div>
-                          <p style={{ fontWeight: 600, fontSize: "0.8rem", color: "#263a55" }}>{item.nombre}</p>
-                          <p style={{ fontSize: "0.7rem", color: "#84878F" }}>{item.tipo}{item.equipo ? ` · ${item.equipo}` : ""}</p>
+                          <p className="t-card-name">{item.nombre}</p>
+                          <p className="text-muted text-[0.7rem]">{item.tipo}{item.equipo ? ` · ${item.equipo}` : ""}</p>
                           {item.en_marketplace
-                            ? <span style={{ fontSize: "0.7rem", color: "#E90052", fontWeight: 600 }}>En marketplace</span>
+                            ? <span className="t-text-accent text-[0.7rem] font-semibold">En marketplace</span>
                             : item.categoria === "perfil"
-                              ? <button onClick={() => setPublishingItem({ item, precio: "" })}
-                                  style={{ padding: "0.3rem 0.6rem", background: "#E90052", color: "#fff", border: "none", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", alignSelf: "flex-start" }}>
+                              ? <button onClick={() => setPublishingItem({ item, precio: "" })} className="t-card-btn t-card-btn--buy self-start">
                                   Publicar
                                 </button>
                               : null
@@ -679,22 +674,21 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                     </div>
                   )}
 
-                <h3 style={{ color: "#263a55", fontSize: "1rem", marginBottom: "0.75rem" }}>Mis Publicaciones Activas</h3>
+                <h3 className="t-text-dark font-bold text-base mb-3">Mis Publicaciones Activas</h3>
                 {misListados.length === 0
-                  ? <p style={{ color: "#84878F", fontSize: "0.85rem" }}>No tienes publicaciones activas</p>
+                  ? <p className="text-muted text-sm">No tienes publicaciones activas</p>
                   : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <div className="flex flex-col gap-2">
                       {misListados.map(l => (
-                        <div key={l.id_listado} style={{ background: "#fff", borderRadius: "10px", padding: "0.75rem 1rem", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div key={l.id_listado} className="bg-white rounded-xl px-4 py-3 shadow-sm flex justify-between items-center">
                           <div>
-                            <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#263a55" }}>{l.nombre}</p>
-                            <p style={{ fontSize: "0.75rem", color: "#84878F" }}>
-                              Precio: <span style={{ color: "#263a55", fontWeight: 700 }}>{l.precio} pts</span>
+                            <p className="t-card-name">{l.nombre}</p>
+                            <p className="text-muted text-[0.75rem]">
+                              Precio: <span className="t-text-dark-bold">{l.precio} pts</span>
                               {" · "}Publicado: {new Date(l.fecha_creacion).toLocaleDateString("es-MX")}
                             </p>
                           </div>
-                          <button onClick={() => cancelarListado(l.id_listado)}
-                            style={{ padding: "0.35rem 0.75rem", background: "#fff", color: "#dc2626", border: "1px solid #dc2626", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}>
+                          <button onClick={() => cancelarListado(l.id_listado)} className="t-card-btn t-card-btn--cancel">
                             Cancelar
                           </button>
                         </div>
@@ -710,35 +704,35 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           <div>
             {pedidos.length === 0
               ? (
-                <div style={{ background: "#fff", borderRadius: "12px", padding: "3rem 1.5rem", textAlign: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-                  <p style={{ color: "#84878F", fontSize: "0.95rem", marginBottom: "0.4rem" }}>Aún no tienes pedidos</p>
-                  <p style={{ color: "#9ca3af", fontSize: "0.82rem" }}>Compra un objeto real desde la pestaña "Objetos Reales" y aparecerá aquí.</p>
-                </div>
+                <EmptyState
+                  title="Aún no tienes pedidos"
+                  description='Compra un objeto real desde la pestaña "Objetos Reales" y aparecerá aquí.'
+                />
               )
               : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <div className="flex flex-col gap-3">
                   {pedidos.map(p => {
-                    const color = { procesando: { bg: "#fef3c7", fg: "#92400e" }, enviado: { bg: "#dbeafe", fg: "#1e40af" }, en_camino: { bg: "#e0e7ff", fg: "#4338ca" }, entregado: { bg: "#dcfce7", fg: "#16a34a" }, cancelado: { bg: "#fee2e2", fg: "#dc2626" } }[p.estado] || { bg: "#fef3c7", fg: "#92400e" };
                     const estadoLabel: Record<string, string> = { procesando: "Procesando", enviado: "Enviado", en_camino: "En camino", entregado: "Entregado", cancelado: "Cancelado" };
                     return (
                       <div key={p.id_pedido} onClick={() => setPedidoModal(p)} className="t-card t-card--pedido">
-                        <div style={{ width: "64px", height: "64px", borderRadius: "8px", background: p.producto?.imagen ? `#f5f6f8 url(${p.producto.imagen}) center/contain no-repeat` : "linear-gradient(135deg, #263a55, #871d54)", flexShrink: 0 }} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <span style={{ display: "inline-block", background: "#263a55", color: "#fff", padding: "0.2rem 0.55rem", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, letterSpacing: "0.02em" }}>#{p.id_pedido}</span>
-                              <p style={{ fontSize: "0.92rem", color: "#263a55", fontWeight: 700, marginTop: "0.35rem" }}>{p.produto?.nombre || `Produto #${p.id_produto}`}</p>
-                              <p style={{ fontSize: "0.74rem", color: "#84878F" }}>
-                                {p.produto?.tipo ? tipoLabel(p.produto.tipo) : ""}{p.variante ? ` · talla ${p.variante.talla}` : ""}
+                        <div className="t-pedido-card-thumb"
+                          style={{ backgroundImage: p.producto?.imagen ? `url(${p.producto.imagen})` : undefined }} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="flex-1 min-w-0">
+                              <span className="t-pedido-id-badge">#{p.id_pedido}</span>
+                              <p className="t-text-dark font-bold text-sm mt-1.5">{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
+                              <p className="text-muted text-[0.74rem]">
+                                {p.producto?.tipo ? tipoLabel(p.producto.tipo) : ""}{p.variante ? ` · talla ${p.variante.talla}` : ""}
                               </p>
                             </div>
-                            <span style={{ background: color.bg, color: color.fg, padding: "0.25rem 0.65rem", borderRadius: "999px", fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+                            <span className="t-status-badge--pedido" data-estado={p.estado}>
                               {estadoLabel[p.estado] || p.estado}
                             </span>
                           </div>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.4rem" }}>
-                            <p style={{ fontSize: "0.72rem", color: "#84878F" }}>{new Date(p.fecha_pedido).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                            <p style={{ fontSize: "0.85rem", color: "#E90052", fontWeight: 800 }}>{Number(p.costo).toLocaleString()} pts</p>
+                          <div className="flex justify-between items-center mt-1.5">
+                            <p className="text-muted text-[0.72rem]">{new Date(p.fecha_pedido).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                            <p className="t-text-accent font-extrabold text-sm">{Number(p.costo).toLocaleString()} pts</p>
                           </div>
                         </div>
                       </div>
