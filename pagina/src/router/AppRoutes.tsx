@@ -105,7 +105,10 @@ export default function AppRoutes({
         <Route path="noticias/:newsId" element={<Noticia />} />
         <Route path="arcade" element={<Arcade />} />
         <Route path="arcade/wordle" element={<Wordle />} />
-        <Route path="arcade/missing-xi" element={<MissingXI />} />
+        <Route
+          path="arcade/missing-xi"
+          element={<MissingXI onSaldoChange={(dinero: number) => setUser({ ...user, dinero })} />}
+        />
         <Route path="offseason" element={<OffseasonLab user={user} />} />
         <Route path="Arcade" element={<Navigate to={ROUTES.arcade} replace />} />
         {PROXIMAMENTE.map((section) => (

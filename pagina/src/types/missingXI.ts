@@ -37,4 +37,11 @@ export interface MissingXIMatch {
   winner: string;
   formation: string;
   players: MissingXIPlayer[];
+  played?: boolean;
+  attempt?: {
+    score: number;
+    dinero_ganado: number;
+    submitted_players: Partial<MissingXIPlayer>[];
+    created_at: string;
+  } | null;
 }

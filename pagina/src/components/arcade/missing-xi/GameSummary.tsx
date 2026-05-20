@@ -4,6 +4,7 @@ interface Props {
   match: MissingXIMatch;
   players: MissingXIPlayer[];
   totalPoints: number;
+  saveMessage?: string;
   onRestart: () => void;
   onBackToArcade: () => void;
 }
@@ -12,6 +13,7 @@ export default function GameSummary({
   match,
   players,
   totalPoints,
+  saveMessage,
   onRestart,
   onBackToArcade,
 }: Props) {
@@ -27,6 +29,9 @@ export default function GameSummary({
         </p>
         <div className="text-6xl font-black text-[#162b4d]">{totalPoints}</div>
         <p className="mt-1 text-[0.82rem] text-[#5f6c80]">puntos</p>
+        {saveMessage ? (
+          <p className="mt-2 text-[0.76rem] font-bold text-[#cf275f]">{saveMessage}</p>
+        ) : null}
       </div>
 
       {/* Stats */}
