@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { MissingXIPlayer, MissingXIMatch, AttemptRow } from "../../../types/missingXI";
-import { fetchDailyMissingXI, resetMissingXIProgress } from "../../../services/missingXIApi";
+import { fetchDailyMissingXI, resetMissingXIProgress, submitMissingXI } from "../../../services/missingXIApi";
 import MatchHeader from "./MatchHeader";
 import Pitch from "./Pitch";
 import PlayerWordle from "./PlayerWordle";
@@ -10,7 +10,109 @@ import GameSummary from "./GameSummary";
 const PUBLIC_LOAD_ERROR =
   "No pudimos cargar el reto diario en este momento. Intenta de nuevo en unos minutos.";
 
-export default function MissingXI() {
+const CACHE_PREFIX = "premierhub_missing_xi_progress_v1";
+
+type CachedMissingXIProgress = {
+  challengeId: string;
+  players: Array<{
+    id: string;
+    guessed: boolean;
+    failed: boolean;
+    usedHint: boolean;
+    attempts: AttemptRow[];
+  }>;
+  totalPoints: number;
+  submitted: boolean;
+  savedAt: number;
+};
+
+type MissingXIProps = {
+  onSaldoChange?: (dinero: number) => void;
+};
+
+function getCacheKey(challengeId: string) {
+  return `${CACHE_PREFIX}:${challengeId}`;
+}
+
+function calculateTotalPoints(players: MissingXIPlayer[]) {
+  return players.reduce((total, player) => {
+    if (!player.guessed) return total;
+    return total + (player.usedHint ? 50 : 100);
+  }, 0);
+}
+
+function readCachedProgress(challengeId: string): CachedMissingXIProgress | null {
+  try {
+    const raw = window.localStorage.getItem(getCacheKey(challengeId));
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as CachedMissingXIProgress;
+    if (!parsed || parsed.challengeId !== challengeId || !Array.isArray(parsed.players)) {
+      return null;
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProgress(match: MissingXIMatch, totalPoints: number) {
+  try {
+    const payload: CachedMissingXIProgress = {
+      challengeId: match.id,
+      players: match.players.map((player) => ({
+        id: player.id,
+        guessed: player.guessed,
+        failed: player.failed,
+        usedHint: player.usedHint,
+        attempts: player.attempts,
+      })),
+      totalPoints,
+      submitted: match.played === true,
+      savedAt: Date.now(),
+    };
+
+    window.localStorage.setItem(getCacheKey(match.id), JSON.stringify(payload));
+  } catch {
+    // Cache local opcional: si el navegador lo bloquea, el juego sigue funcionando.
+  }
+}
+
+function restoreCachedProgress(match: MissingXIMatch) {
+  const cached = readCachedProgress(match.id);
+  if (!cached) return { match, totalPoints: 0 };
+
+  const cachedById = new Map(cached.players.map((player) => [player.id, player]));
+  const hasSamePlayers =
+    cached.players.length === match.players.length &&
+    match.players.every((player) => cachedById.has(player.id));
+
+  if (!hasSamePlayers) return { match, totalPoints: 0 };
+
+  const restoredMatch = {
+    ...match,
+    players: match.players.map((player) => {
+      const cachedPlayer = cachedById.get(player.id);
+      if (!cachedPlayer) return player;
+
+      return {
+        ...player,
+        guessed: cachedPlayer.guessed === true,
+        failed: cachedPlayer.failed === true,
+        usedHint: cachedPlayer.usedHint === true,
+        attempts: Array.isArray(cachedPlayer.attempts) ? cachedPlayer.attempts : [],
+      };
+    }),
+  };
+
+  return {
+    match: restoredMatch,
+    totalPoints: calculateTotalPoints(restoredMatch.players),
+  };
+}
+
+export default function MissingXI({ onSaldoChange }: MissingXIProps) {
   const navigate = useNavigate();
   const [match, setMatch] = useState<MissingXIMatch | null>(null);
   const [initialMatch, setInitialMatch] = useState<MissingXIMatch | null>(null);
@@ -18,17 +120,25 @@ export default function MissingXI() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const [saveMsg, setSaveMsg] = useState("");
+  const submittedChallengeRef = useRef<string | null>(null);
 
   async function loadDailyChallenge(signal?: AbortSignal) {
     try {
       setLoading(true);
       setErrorMsg("");
+      setSaveMsg("");
 
-      const dailyMatch = resetMissingXIProgress(await fetchDailyMissingXI(signal));
+      const dailyMatch = await fetchDailyMissingXI(signal);
+      const cleanMatch = resetMissingXIProgress(dailyMatch);
+      const restoredProgress = dailyMatch.played
+        ? { match: dailyMatch, totalPoints: Number(dailyMatch.attempt?.dinero_ganado ?? calculateTotalPoints(dailyMatch.players)) }
+        : restoreCachedProgress(cleanMatch);
 
-      setInitialMatch(dailyMatch);
-      setMatch(dailyMatch);
-      setTotalPoints(0);
+      submittedChallengeRef.current = dailyMatch.played ? dailyMatch.id : null;
+      setInitialMatch(cleanMatch);
+      setMatch(restoredProgress.match);
+      setTotalPoints(restoredProgress.totalPoints);
       setSelectedId(null);
     } catch (error) {
       if (signal?.aborted) return;
@@ -54,6 +164,52 @@ export default function MissingXI() {
   const resolvedCount = players.filter((p) => p.guessed || p.failed).length;
   const totalPlayers = players.length || 11;
   const gameOver = players.length > 0 && resolvedCount === players.length;
+
+  useEffect(() => {
+    if (!match) return;
+    writeCachedProgress(match, totalPoints);
+  }, [match, totalPoints]);
+
+  useEffect(() => {
+    if (!match || !gameOver || match.played) return;
+    if (submittedChallengeRef.current === match.id) return;
+
+    submittedChallengeRef.current = match.id;
+    setSaveMsg("Guardando puntos...");
+
+    submitMissingXI(match.id, players)
+      .then((result) => {
+        setSaveMsg(`Puntos guardados: +${result.dinero_ganado}`);
+        setTotalPoints(result.dinero_ganado);
+        if (typeof result.nuevo_saldo === "number") {
+          onSaldoChange?.(result.nuevo_saldo);
+        }
+        setMatch((prev) =>
+          prev
+            ? {
+                ...prev,
+                played: true,
+                attempt: {
+                  score: result.score,
+                  dinero_ganado: result.dinero_ganado,
+                  submitted_players: result.submitted_players,
+                  created_at: new Date().toISOString(),
+                },
+              }
+            : prev
+        );
+      })
+      .catch((error: Error & { status?: number }) => {
+        if (error.status === 409) {
+          setSaveMsg("Este Missing XI ya habia sido guardado.");
+          setMatch((prev) => (prev ? { ...prev, played: true } : prev));
+          return;
+        }
+
+        console.error("[MissingXI] Error al guardar puntos", error);
+        setSaveMsg("No se pudieron guardar los puntos. Tu avance quedo en cache.");
+      });
+  }, [gameOver, match, onSaldoChange, players]);
 
   function updatePlayer(id: string, updates: Partial<MissingXIPlayer>) {
     setMatch((prev) => prev ? ({
@@ -88,6 +244,7 @@ export default function MissingXI() {
       setMatch(resetMissingXIProgress(initialMatch));
     }
     setTotalPoints(0);
+    setSaveMsg("");
     setSelectedId(null);
   }
 
@@ -168,6 +325,7 @@ export default function MissingXI() {
           match={match}
           players={players}
           totalPoints={totalPoints}
+          saveMessage={saveMsg}
           onRestart={handleRestart}
           onBackToArcade={() => navigate("/arcade")}
         />

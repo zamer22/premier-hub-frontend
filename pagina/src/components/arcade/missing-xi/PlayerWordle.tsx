@@ -82,6 +82,13 @@ export default function PlayerWordle({
   const isFinished = player.guessed || player.failed;
   const attemptsLeft = MAX_ATTEMPTS - player.attempts.length;
 
+  useEffect(() => {
+    setCurrentLetters([]);
+    setHintShown(player.usedHint);
+    setImgError(false);
+    setError("");
+  }, [player.id, player.usedHint]);
+
   const handleKey = useCallback(
     (key: string) => {
       if (isFinished) return;
@@ -143,6 +150,13 @@ export default function PlayerWordle({
     onHintUsed();
   }
 
+  function handleGiveUp() {
+    if (isFinished) return;
+    setCurrentLetters([]);
+    setError("");
+    onFailed(player.attempts);
+  }
+
   type DisplayRow = { letters: string[]; results?: LetterResult[]; isCurrent: boolean };
   const rows: DisplayRow[] = player.attempts.map((a) => ({
     letters: a.letters,
@@ -171,21 +185,32 @@ export default function PlayerWordle({
           ← Volver
         </button>
 
-        <span
-          className={`rounded-full px-3.5 py-1 text-[0.75rem] font-bold ${
-            isFinished
+        <div className="flex items-center gap-2">
+          {!isFinished && (
+            <button
+              type="button"
+              onClick={handleGiveUp}
+              className="rounded-full border border-[#dde3ec] px-3 py-1 text-[0.68rem] font-bold text-[#7a8494] transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+            >
+              Rendirse
+            </button>
+          )}
+          <span
+            className={`rounded-full px-3.5 py-1 text-[0.75rem] font-bold ${
+              isFinished
+                ? player.guessed
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-600"
+                : "bg-[#f0f2f5] text-[#5f6c80]"
+            }`}
+          >
+            {isFinished
               ? player.guessed
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-600"
-              : "bg-[#f0f2f5] text-[#5f6c80]"
-          }`}
-        >
-          {isFinished
-            ? player.guessed
-              ? "¡Correcto!"
-              : "Fallado"
-            : `${attemptsLeft} intentos`}
-        </span>
+                ? "¡Correcto!"
+                : "Fallado"
+              : `${attemptsLeft} intentos`}
+          </span>
+        </div>
       </div>
 
       {/* ── Player info + hint ───────────────────── */}

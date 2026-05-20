@@ -1,4 +1,4 @@
-import type { MissingXIMatch, MissingXIPlayer } from "../types/missingXI";
+import type { AttemptRow, MissingXIMatch, MissingXIPlayer } from "../types/missingXI";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -32,7 +32,14 @@ type ApiPlayer = {
   guessed: boolean;
   failed: boolean;
   usedHint: boolean;
-  attempts: [];
+  attempts: AttemptRow[];
+};
+
+type ApiAttempt = {
+  score: number;
+  dinero_ganado: number;
+  submitted_players: Partial<MissingXIPlayer>[];
+  created_at: string;
 };
 
 type ApiChallenge = {
@@ -58,6 +65,15 @@ type ApiChallenge = {
     formation: string;
   };
   players: ApiPlayer[];
+  played?: boolean;
+  attempt?: ApiAttempt | null;
+};
+
+type SubmitMissingXIResponse = {
+  score: number;
+  dinero_ganado: number;
+  nuevo_saldo?: number;
+  submitted_players: Partial<MissingXIPlayer>[];
 };
 
 function splitDisplayName(displayName: string) {
@@ -93,10 +109,10 @@ function mapPlayer(player: ApiPlayer): MissingXIPlayer {
     xPercent: player.xPercent,
     yPercent: player.yPercent,
     photoUrl: player.photoUrl,
-    guessed: false,
-    failed: false,
-    usedHint: false,
-    attempts: [],
+    guessed: player.guessed === true,
+    failed: player.failed === true,
+    usedHint: player.usedHint === true,
+    attempts: Array.isArray(player.attempts) ? player.attempts : [],
   };
 }
 
@@ -113,6 +129,8 @@ function mapChallenge(challenge: ApiChallenge): MissingXIMatch {
     winner: challenge.fixture.winner.name,
     formation: challenge.fixture.formation,
     players: challenge.players.map(mapPlayer),
+    played: challenge.played === true,
+    attempt: challenge.attempt || null,
   };
 }
 
@@ -141,4 +159,37 @@ export async function fetchDailyMissingXI(signal?: AbortSignal): Promise<Missing
   }
 
   return mapChallenge(json.data);
+}
+
+export async function submitMissingXI(
+  challengeId: string,
+  players: MissingXIPlayer[]
+): Promise<SubmitMissingXIResponse> {
+  const response = await fetch(`${API_URL}/api/missing-xi/submit`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      challenge_id: challengeId,
+      players: players.map((player) => ({
+        id: player.id,
+        guessed: player.guessed,
+        failed: player.failed,
+        usedHint: player.usedHint,
+        attempts: player.attempts,
+      })),
+    }),
+  });
+  const json = (await response.json()) as ApiResponse<SubmitMissingXIResponse>;
+
+  if (!response.ok || !json.success || !json.data) {
+    const error = new Error(json.detail || json.error || "No se pudo guardar el intento");
+    (error as Error & { status?: number; data?: SubmitMissingXIResponse }).status = response.status;
+    (error as Error & { status?: number; data?: SubmitMissingXIResponse }).data = json.data;
+    throw error;
+  }
+
+  return json.data;
 }
