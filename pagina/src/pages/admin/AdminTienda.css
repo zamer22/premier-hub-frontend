@@ -1,0 +1,455 @@
+.adm-store {
+  --dark: #263a55;
+  --muted: #84878f;
+  --pink: #e90052;
+  --line: #e5e7eb;
+  --soft: #f8f9fa;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: system-ui, sans-serif;
+}
+
+.adm-store-hero,
+.adm-store-section-head,
+.adm-store-modal-head,
+.adm-store-modal-foot,
+.adm-store-card,
+.adm-store-card-actions,
+.adm-store-chips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-store-hero {
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.adm-store-kicker {
+  color: var(--pink);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.adm-store-hero h2,
+.adm-store-section-head h3,
+.adm-store-modal-head h3 {
+  margin: 0;
+  color: var(--dark);
+  font-weight: 900;
+}
+
+.adm-store-hero h2 {
+  font-size: 1.45rem;
+}
+
+.adm-store-hero p,
+.adm-store-section-head p,
+.adm-store-modal-head p,
+.adm-store-card p,
+.adm-store-card small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.adm-store-primary,
+.adm-store-secondary,
+.adm-store-danger,
+.adm-store-card-actions button {
+  border-radius: 8px;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.adm-store-primary,
+.adm-store-card-actions button {
+  border: 0;
+  background: var(--pink);
+  color: #fff;
+}
+
+.adm-store-primary:disabled {
+  background: #e5e7eb;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.adm-store-secondary {
+  background: #fff;
+  color: #374151;
+  border: 1px solid var(--line);
+}
+
+.adm-store-danger,
+.adm-store-card-actions button.is-danger {
+  background: #dc2626;
+  color: #fff;
+  border: 0;
+}
+
+.adm-store-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 1.3rem;
+}
+
+.adm-store-stats > div {
+  background: var(--soft);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  border-top: 3px solid var(--dark);
+}
+
+.adm-store-stats span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.adm-store-stats strong {
+  color: var(--dark);
+  font-size: 1.45rem;
+  font-weight: 950;
+}
+
+.adm-store-stats .is-active { border-top-color: #16a34a; }
+.adm-store-stats .is-active strong { color: #16a34a; }
+.adm-store-stats .is-sold { border-top-color: #1d4ed8; }
+.adm-store-stats .is-sold strong { color: #1d4ed8; }
+.adm-store-stats .is-cancelled { border-top-color: #dc2626; }
+.adm-store-stats .is-cancelled strong { color: #dc2626; }
+.adm-store-stats .is-catalog { border-top-color: #b45309; }
+.adm-store-stats .is-catalog strong { color: #b45309; }
+
+.adm-store-section {
+  margin-top: 1.6rem;
+}
+
+.adm-store-section-head {
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.adm-store-filterbox {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 0.85rem;
+  margin-bottom: 0.9rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.adm-store-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.58rem 0.75rem;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  outline: none;
+  color: var(--dark);
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.adm-store-input:focus {
+  border-color: var(--dark);
+}
+
+.adm-store-chips {
+  flex-wrap: wrap;
+}
+
+.adm-store-chip {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #64748b;
+  border-radius: 999px;
+  padding: 0.38rem 0.8rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.adm-store-chip.is-selected {
+  border-color: var(--dark);
+  background: var(--dark);
+  color: #fff;
+}
+
+/* LIST FORMAT FOR MARKETPLACE + CATALOG */
+.adm-store-card-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adm-store-card {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  min-height: 68px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.adm-store-card.is-clickable {
+  cursor: pointer;
+}
+
+.adm-store-card.is-clickable:hover,
+.adm-store-card:hover {
+  border-color: #f4a3c1;
+  box-shadow: 0 4px 14px rgba(233,0,82,0.08);
+}
+
+.adm-store-card.is-compact {
+  min-height: 62px;
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+.adm-store-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 9px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
+  overflow: hidden;
+}
+
+.adm-store-card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.adm-store-card-eyebrow {
+  display: block;
+  color: var(--pink);
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+.adm-store-card-main strong {
+  display: block;
+  color: var(--dark);
+  font-size: 0.9rem;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-store-card-main p,
+.adm-store-card-main small {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-store-card-side {
+  min-width: 220px;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.adm-store-card-side > strong {
+  color: var(--dark);
+  font-size: 0.82rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.adm-store-card-actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.adm-store-card-actions button {
+  padding: 0.36rem 0.65rem;
+  font-size: 0.72rem;
+}
+
+.adm-store-status {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.16rem 0.55rem;
+  font-size: 0.66rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.adm-store-status.is-active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.adm-store-status.is-sold {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.adm-store-status.is-cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.adm-store-empty {
+  padding: 2.2rem;
+  text-align: center;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  font-size: 0.88rem;
+}
+
+.adm-store-toast {
+  position: fixed;
+  top: 80px;
+  right: 2rem;
+  z-index: 9999;
+  padding: 0.75rem 1.25rem;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.16);
+}
+
+.adm-store-toast.is-ok { background: #16a34a; }
+.adm-store-toast.is-error { background: #dc2626; }
+
+.adm-store-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0,0,0,0.62);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.adm-store-modal {
+  width: 420px;
+  max-width: 100%;
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+.adm-store-modal.is-large {
+  width: 680px;
+}
+
+.adm-store-modal-head,
+.adm-store-modal-foot {
+  justify-content: space-between;
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.adm-store-modal-foot {
+  justify-content: flex-end;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 0;
+}
+
+.adm-store-modal-head button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: #f3f4f6;
+  cursor: pointer;
+  font-size: 1.05rem;
+}
+
+.adm-store-modal-body {
+  overflow-y: auto;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.adm-store-picker {
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adm-store-label {
+  color: var(--dark);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.adm-store-error {
+  color: #dc2626;
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.adm-store-confirm {
+  padding: 1.2rem 1.4rem;
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 860px) {
+  .adm-store {
+    padding: 1.25rem 1rem;
+  }
+
+  .adm-store-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .adm-store-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .adm-store-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .adm-store-card-side {
+    width: 100%;
+    min-width: 0;
+    justify-content: space-between;
+    text-align: left;
+  }
+}

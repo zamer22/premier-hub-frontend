@@ -58,9 +58,16 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
   };
 
   useEffect(() => {
-    if (geoJustSelected.current) { geoJustSelected.current = false; return; }
+    if (geoJustSelected.current) {
+      geoJustSelected.current = false;
+      return;
+    }
     const term = geoSearch.trim();
-    if (term.length < 3) { setGeoResults([]); setGeoError(null); return; }
+    if (term.length < 3) {
+      setGeoResults([]);
+      setGeoError(null);
+      return;
+    }
     const t = setTimeout(() => buscarLugar(term, false), 500);
     return () => clearTimeout(t);
   }, [geoSearch]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -80,7 +87,9 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
   const adminQS = useCallback((extra: Record<string, string | number | undefined> = {}) => {
     const params = new URLSearchParams({ id_usuario: String(user.id_usuario) });
-    Object.entries(extra).forEach(([k, v]) => { if (v !== undefined && v !== "") params.set(k, String(v)); });
+    Object.entries(extra).forEach(([k, v]) => {
+      if (v !== undefined && v !== "") params.set(k, String(v));
+    });
     return params.toString();
   }, [user.id_usuario]);
 
@@ -95,8 +104,11 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
       const d = await r.json();
       if (d.success) setPedidos(d.data);
       else showToast(d.error || "Error", false);
-    } catch { showToast("Error de conexión", false); }
-    finally { setLoading(false); }
+    } catch {
+      showToast("Error de conexión", false);
+    } finally {
+      setLoading(false);
+    }
   }, [filtroEstado, search, adminQS]);
 
   useEffect(() => {
@@ -125,10 +137,17 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
       body: JSON.stringify(body),
     });
     const d = await r.json();
-    if (!d.success) { showToast(d.error || "Error", false); return null; }
+    if (!d.success) {
+      showToast(d.error || "Error", false);
+      return null;
+    }
     setSelected(d.data);
     setPedidos(prev => prev.map(p => p.id_pedido === d.data.id_pedido ? d.data : p));
-    return { pedido: d.data as AdminPedido, refunded: d.refunded as number | undefined, warning: d.warning as string | undefined };
+    return {
+      pedido: d.data as AdminPedido,
+      refunded: d.refunded as number | undefined,
+      warning: d.warning as string | undefined,
+    };
   };
 
   const estadoCambio = useMemo(() => {
@@ -154,17 +173,23 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
   const guardarTodo = async () => {
     if (!selected || !hayCambios) return;
+
     const body: Record<string, any> = {};
     if (estadoCambio && estadoPendiente) body.estado = estadoPendiente;
-    if (ubicacionCambio) { body.lat_actual = latActual; body.lng_actual = lngActual; }
+    if (ubicacionCambio) {
+      body.lat_actual = latActual;
+      body.lng_actual = lngActual;
+    }
     if (infoCambio) {
       body.tracking_numero = tracking.trim() || null;
       body.fecha_estimada = fechaEstimada || null;
       body.notas_admin = notas.trim() || null;
     }
+
     setSaving(true);
     const result = await aplicarUpdate(body);
     setSaving(false);
+
     if (!result) return;
     if (result.warning) showToast(result.warning, false);
     else if (result.refunded != null) showToast(`Cancelado · ${Number(result.refunded).toLocaleString()} pts devueltos al usuario`, true);
@@ -183,8 +208,6 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
   return (
     <div className="adm-page">
-
-      {/* ── Header ── */}
       <div className="adm-header">
         <div className="adm-header__left">
           <h1 className="adm-header__brand">
@@ -199,7 +222,6 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
         </div>
       </div>
 
-      {/* ── Navbar de tabs ── */}
       <div style={{
         display: "flex",
         gap: "4px",
@@ -208,7 +230,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
         background: "#fff",
       }}>
         {([
-          ["envios",    "Envíos"],
+          ["envios", "Envíos"],
           ["productos", "Productos"],
         ] as const).map(([t, label]) => (
           <button
@@ -232,19 +254,16 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
         ))}
       </div>
 
-      {/* ── Toast ── */}
       {toast && (
         <div className={`adm-toast${toast.ok ? " adm-toast--ok" : " adm-toast--err"}`}>
           {toast.ok ? "✓ " : "✗ "}{toast.msg}
         </div>
       )}
 
-      {/* ── Contenido por tab ── */}
       {tab === "productos" ? (
-        <AdminProducts />
+        <AdminProducts user={user} />
       ) : (
         <>
-          {/* Filtros */}
           <div className="adm-filters">
             <div className="adm-filters__chips">
               {["todos", ...ESTADOS].map(e => (
@@ -266,13 +285,13 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
             <span className="adm-count">{pedidos.length} pedido{pedidos.length === 1 ? "" : "s"}</span>
           </div>
 
-          {/* Layout principal */}
           <div className="adm-layout">
             <div className="adm-list">
               {loading && pedidos.length === 0 && <p className="adm-list__loading">Cargando...</p>}
               {!loading && pedidos.length === 0 && (
                 <p className="adm-list__empty">Sin pedidos para los filtros aplicados</p>
               )}
+
               {pedidos.map(p => {
                 const isSel = selected?.id_pedido === p.id_pedido;
                 return (
@@ -305,6 +324,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
             ) : (() => {
               const dirSnap = selected.direccion_snapshot || {};
               const isLocked = selected.estado === "entregado" || selected.estado === "cancelado";
+
               return (
                 <div className="adm-detail">
                   <div className="adm-detail__header">
@@ -379,13 +399,19 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                         <h4 className="adm-section-title">Ubicación del paquete</h4>
                         {!isLocked && <p className="adm-map-hint">Busca un lugar o haz click en el mapa</p>}
                       </div>
+
                       {!isLocked && (
                         <div className="adm-geo-row">
                           <input
                             type="text"
                             value={geoSearch}
                             onChange={(e) => setGeoSearch(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); buscarLugar(geoSearch, true); } }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                buscarLugar(geoSearch, true);
+                              }
+                            }}
                             placeholder="Buscar lugar (ej. FedEx Polanco 222, CDMX)"
                             className="adm-input adm-geo-input"
                           />
@@ -397,6 +423,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                           >
                             {geoSearching ? "..." : "Buscar"}
                           </button>
+
                           {geoResults.length > 0 && (
                             <div className="adm-geo-dropdown">
                               {geoResults.map(r => (
@@ -413,14 +440,20 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                           )}
                         </div>
                       )}
+
                       {!isLocked && geoError && <p className="adm-geo-error">{geoError}</p>}
+
                       <AdminTrackingMap
                         destLat={Number(selected.lat_destino)}
                         destLng={Number(selected.lng_destino)}
                         actualLat={latActual}
                         actualLng={lngActual}
-                        onMovePackage={isLocked ? () => {} : (la, ln) => { setLatActual(la); setLngActual(ln); }}
+                        onMovePackage={isLocked ? () => {} : (la, ln) => {
+                          setLatActual(la);
+                          setLngActual(ln);
+                        }}
                       />
+
                       <div className="adm-map-coords-row">
                         <p className="adm-map-coords">
                           {latActual != null && lngActual != null
@@ -437,6 +470,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                       Información de envío
                       {infoCambio && <span className="adm-pending-tag">· pendiente de guardar</span>}
                     </h4>
+
                     <div className="adm-info-grid">
                       <input
                         placeholder="Número de tracking"
@@ -453,6 +487,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
                         className="adm-input"
                       />
                     </div>
+
                     <textarea
                       placeholder="Notas para el cliente (opcional)"
                       rows={3}
