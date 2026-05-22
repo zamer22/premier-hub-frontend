@@ -2,7 +2,7 @@ import type { Producto, Variante, Direccion, NewDireccionForm } from "../types";
 import { tipoLabel } from "../utils";
 import { EMPTY_DIRECCION } from "../constants";
 import DireccionForm from "../DireccionForm";
-import "../../../estilos/Tienda.css";
+import "../../../pages/tienda/Tienda.css";
 
 interface CheckoutModalProps {
   producto: Producto;

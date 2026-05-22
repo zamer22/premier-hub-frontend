@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import { DEFAULT_MAP_CENTER } from "../constants";
-import "../../../estilos/Tienda.css";
+import "../../../pages/tienda/Tienda.css";
 
 interface GeoResult { display_name: string; lat: string; lon: string; place_id: number }
 

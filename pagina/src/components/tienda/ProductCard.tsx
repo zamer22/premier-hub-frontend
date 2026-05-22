@@ -1,7 +1,7 @@
 import type { Producto, Variante, ConfirmAction } from "./types";
 import { tipoLabel } from "./utils";
 import ProductVisual from "./ProductVisual";
-import "../../estilos/Tienda.css";
+import "../../pages/tienda/Tienda.css";
 
 interface ProductCardProps {
   p: Producto;
