@@ -1362,3 +1362,32 @@
   .ol-module-grid   { grid-template-columns: 1fr; }
   .ol-module-visual { height: 170px; }
 }
+
+/* ── Club crest grid (ClubGrid component) ──────────────────────────────────── */
+.lab-club-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.lab-club-grid-empty { color: var(--ph-muted, #84878F); font-size: 0.82rem; }
+.lab-club-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.25rem;
+  border-radius: 8px;
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.lab-club-card:hover:not(:disabled) { border-color: #263a55; background: #f5f7fa; }
+.lab-club-card:disabled { opacity: 0.4; cursor: not-allowed; }
+.lab-club-card--active { border-color: #E90052; background: #fff0f4; }
+.lab-club-crest { width: 32px; height: 32px; object-fit: contain; }
+.lab-club-name { font-size: 0.62rem; color: #263a55; text-align: center; line-height: 1.2; font-weight: 500; }
