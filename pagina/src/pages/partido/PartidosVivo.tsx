@@ -168,13 +168,12 @@ const CHAT_EMOTES = [
   { token: ":hey:", label: "HeyGuys", src: "https://static-cdn.jtvnw.net/emoticons/v2/30259/default/dark/2.0", kind: "emote" },
   { token: ":good:", label: "SeemsGood", src: "https://static-cdn.jtvnw.net/emoticons/v2/64138/default/dark/2.0", kind: "emote" },
   { token: ":sleep:", label: "ResidentSleeper", src: "https://static-cdn.jtvnw.net/emoticons/v2/245/default/dark/2.0", kind: "emote" },
-  { token: ":cry:", label: "BibleThump", src: "https://static-cdn.jtvnw.net/emoticons/v2/86/default/dark/2.0", kind: "emote" },
   { token: ":rage:", label: "SwiftRage", src: "https://static-cdn.jtvnw.net/emoticons/v2/34/default/dark/2.0", kind: "sticker" },
   { token: ":cat:", label: "CoolCat", src: "https://static-cdn.jtvnw.net/emoticons/v2/58127/default/dark/2.0", kind: "emote" },
 ] as const;
 
 const CHAT_EMOTE_MAP: Map<string, (typeof CHAT_EMOTES)[number]> = new Map(CHAT_EMOTES.map((emote) => [emote.token, emote]));
-const CHAT_EMOTE_PATTERN = /(:pog:|:kappa:|:lul:|:hey:|:good:|:sleep:|:cry:|:rage:|:cat:)/g;
+const CHAT_EMOTE_PATTERN = /(:pog:|:kappa:|:lul:|:hey:|:good:|:sleep:|:rage:|:cat:)/g;
 
 const DEMO_EVENTS: LiveEvent[] = [
   { id: 1, fixture_id: 990000001, minute: 8, team: "home", type: "Chance", detail: "Tiro a puerta", player: "Bukayo Saka", assist: "Martin Odegaard" },
