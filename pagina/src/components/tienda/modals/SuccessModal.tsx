@@ -1,4 +1,4 @@
-import "../../../estilos/Tienda.css";
+import "../../../pages/tienda/Tienda.css";
 
 interface SuccessModalProps {
   message: string;

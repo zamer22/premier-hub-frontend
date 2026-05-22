@@ -1,5 +1,5 @@
 import type { InventarioItem } from "../types";
-import "../../../estilos/Tienda.css";
+import "../../../pages/tienda/Tienda.css";
 
 interface PublishModalProps {
   item: InventarioItem;

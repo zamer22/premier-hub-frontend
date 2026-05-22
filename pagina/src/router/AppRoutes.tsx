@@ -72,7 +72,7 @@ export default function AppRoutes({
           index
           element={<Navigate to={getInitialRoute(location.search)} replace />}
         />
-        <Route path="partido" element={<Partido />} />
+        <Route path="partido" element={<Partido user={user} />} />
         <Route path="historia" element={<Historia />} />
         <Route
           path="tienda"

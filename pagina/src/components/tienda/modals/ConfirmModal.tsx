@@ -1,5 +1,5 @@
 import type { ConfirmAction } from "../types";
-import "../../../estilos/Tienda.css";
+import "../../../pages/tienda/Tienda.css";
 
 interface ConfirmModalProps {
   action: ConfirmAction;

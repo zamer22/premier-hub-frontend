@@ -1,6 +1,6 @@
 import type { Listado } from "./types";
 import ProductVisual from "./ProductVisual";
-import "../../estilos/Tienda.css";
+import "../../pages/tienda/Tienda.css";
 
 interface ListingCardProps {
   l: Listado;

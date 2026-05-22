@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import type { AdminPedido, AdminEnviosProps } from "../../components/admin/types";
 import { ESTADOS, ESTADO_LABEL } from "../../components/admin/constants";
 import AdminTrackingMap from "../../components/admin/map/AdminTrackingMap";
-import "../../estilos/Admin.css";
+import "./AdminEnvios.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
