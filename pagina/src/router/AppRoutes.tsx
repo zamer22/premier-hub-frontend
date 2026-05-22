@@ -8,11 +8,11 @@ import Noticia from "../pages/noticias/Noticia";
 import Noticias from "../pages/noticias/NoticiasLanding";
 import Partido from "../pages/partido/Partido";
 import Perfil from "../pages/perfil/Perfil";
-import Simulador from "../pages/simulador/Simulador";
+import Laboratorio from "../pages/offseason/OffseasonLab";
 import Tablero from "../pages/tablero/Tablero";
 import Tienda from "../pages/tienda/Tienda";
+import MissingXI from "../components/arcade/missing-xi/MissingXI";
 import Wordle from "../pages/wordle/Wordle";
-import OffseasonLab from "../pages/offseason/OffseasonLab";
 import {
   DEFAULT_ROUTE,
   PROXIMAMENTE,
@@ -71,7 +71,7 @@ export default function AppRoutes({
           index
           element={<Navigate to={getInitialRoute(location.search)} replace />}
         />
-        <Route path="partido" element={<Partido />} />
+        <Route path="partido" element={<Partido user={user} />} />
         <Route path="historia" element={<Historia />} />
         <Route
           path="tienda"
@@ -99,12 +99,15 @@ export default function AppRoutes({
           }
         />
         <Route path="tablero" element={<Tablero />} />
-        <Route path="simulador" element={<Simulador />} />
+        <Route path="laboratorio" element={<Laboratorio user={user} />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />
         <Route path="arcade" element={<Arcade />} />
         <Route path="arcade/wordle" element={<Wordle />} />
-        <Route path="offseason" element={<OffseasonLab user={user} />} />
+        <Route
+          path="arcade/missing-xi"
+          element={<MissingXI onSaldoChange={(dinero: number) => setUser({ ...user, dinero })} />}
+        />
         <Route path="Arcade" element={<Navigate to={ROUTES.arcade} replace />} />
         {PROXIMAMENTE.map((section) => (
           <Route

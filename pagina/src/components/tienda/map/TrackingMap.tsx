@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
-import "../../../estilos/Tienda.css";
+import "../../../pages/tienda/Tienda.css";
 
 export const destinoIcon = L.divIcon({
   html: `<div style="background:#E90052;color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.35);border:2px solid #fff;">🏠</div>`,

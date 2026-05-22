@@ -1,7 +1,7 @@
 import type { Producto, Variante, Comentario, ConfirmAction } from "../types";
 import { tipoLabel } from "../utils";
 import ProductVisual from "../ProductVisual";
-import "../../../estilos/Tienda.css";
+import "../../../pages/tienda/Tienda.css";
 
 interface ProductDetailModalProps {
   producto: Producto;
