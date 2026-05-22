@@ -168,13 +168,12 @@ const CHAT_EMOTES = [
   { token: ":hey:", label: "HeyGuys", src: "https://static-cdn.jtvnw.net/emoticons/v2/30259/default/dark/2.0", kind: "emote" },
   { token: ":good:", label: "SeemsGood", src: "https://static-cdn.jtvnw.net/emoticons/v2/64138/default/dark/2.0", kind: "emote" },
   { token: ":sleep:", label: "ResidentSleeper", src: "https://static-cdn.jtvnw.net/emoticons/v2/245/default/dark/2.0", kind: "emote" },
-  { token: ":cry:", label: "BibleThump", src: "https://static-cdn.jtvnw.net/emoticons/v2/86/default/dark/2.0", kind: "emote" },
   { token: ":rage:", label: "SwiftRage", src: "https://static-cdn.jtvnw.net/emoticons/v2/34/default/dark/2.0", kind: "sticker" },
   { token: ":cat:", label: "CoolCat", src: "https://static-cdn.jtvnw.net/emoticons/v2/58127/default/dark/2.0", kind: "emote" },
 ] as const;
 
 const CHAT_EMOTE_MAP: Map<string, (typeof CHAT_EMOTES)[number]> = new Map(CHAT_EMOTES.map((emote) => [emote.token, emote]));
-const CHAT_EMOTE_PATTERN = /(:pog:|:kappa:|:lul:|:hey:|:good:|:sleep:|:cry:|:rage:|:cat:)/g;
+const CHAT_EMOTE_PATTERN = /(:pog:|:kappa:|:lul:|:hey:|:good:|:sleep:|:rage:|:cat:)/g;
 
 const DEMO_EVENTS: LiveEvent[] = [
   { id: 1, fixture_id: 990000001, minute: 8, team: "home", type: "Chance", detail: "Tiro a puerta", player: "Bukayo Saka", assist: "Martin Odegaard" },
@@ -544,15 +543,18 @@ function StateMessage({
 }
 
 function ChatEmote({ token, compact = false }: { token: string; compact?: boolean }) {
+  const [failed, setFailed] = useState(false);
   const emote = CHAT_EMOTE_MAP.get(token);
   if (!emote) return <>{token}</>;
+  const className = `pv-emote ${emote.kind === "sticker" && !compact ? "pv-emote--sticker" : ""}${failed ? " pv-emote--failed" : ""}`;
 
   return (
-    <span
-      className={`pv-emote ${emote.kind === "sticker" && !compact ? "pv-emote--sticker" : ""}`}
-      title={emote.label}
-    >
-      <img src={emote.src} alt={emote.label} loading="lazy" />
+    <span className={className} title={emote.label}>
+      {failed ? (
+        <span className="pv-emote__fallback">{token}</span>
+      ) : (
+        <img src={emote.src} alt={emote.label} loading="lazy" onError={() => setFailed(true)} />
+      )}
     </span>
   );
 }
