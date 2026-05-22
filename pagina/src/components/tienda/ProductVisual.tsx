@@ -1,6 +1,6 @@
 import type { Producto, Listado } from "./types";
 import { productBackground, tipoLabel } from "./utils";
-import "../../estilos/Tienda.css";
+import "../../pages/tienda/Tienda.css";
 
 interface ProductVisualProps {
   p: Producto | Listado;

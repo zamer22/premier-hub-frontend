@@ -35,6 +35,7 @@ interface LiveMatchApi {
   minute: string;
   stadium: string;
   status: string;
+  is_demo?: boolean;
   home_name: string;
   home_logo: string;
   home_score: number;
@@ -67,7 +68,7 @@ function PartidoPageHeader() {
 }
 
 // ── Componente ────────────────────────────────────────────────────────────────
-export default function Partido() {
+export default function Partido({ user }: { user: any }) {
   const [proximos, setProximos] = useState<ApiMatch[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [enVivo, setEnVivo] = useState<LiveMatch[]>([]);
@@ -79,52 +80,70 @@ export default function Partido() {
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const [p, s, l, pa] = await Promise.all([
-          fetch(`${API_URL}/api/partidos/proximos`).then((r) => r.json()),
-          fetch(`${API_URL}/api/partidos/standings`).then((r) => r.json()),
-          fetch(`${API_URL}/api/partidos/live`).then((r) => r.json()),
-          fetch(`${API_URL}/api/partidos/historial/pasados`).then((r) => r.json()),
-        ]);
-
-        if (p.success) setProximos(p.data.slice(0, 5));
-        if (s.success && Array.isArray(s.data)) setStandings(s.data);
-
-        // Live
-        if (l.success && Array.isArray(l.data)) {
-          const mappedLive: LiveMatch[] = l.data.map((m: LiveMatchApi) => ({
-            id: m.id,
-            league: m.league,
-            minute: m.minute,
-            stadium: m.stadium,
-            status: m.status,
-            homeTeam: { name: m.home_name, logo: m.home_logo, score: m.home_score ?? 0 },
-            awayTeam: { name: m.away_name, logo: m.away_logo, score: m.away_score ?? 0 },
-          }));
-          setEnVivo(mappedLive);
-        } else {
-          setEnVivo([]);
+      const fetchSection = async (path: string) => {
+        try {
+          const response = await fetch(`${API_URL}${path}`);
+          if (!response.ok) {
+            throw new Error(`Error HTTP ${response.status}`);
+          }
+          return await response.json();
+        } catch (err) {
+          console.error(`Error cargando ${path}:`, err);
+          return null;
         }
+      };
 
-        // Pasados
-        if (pa.success && Array.isArray(pa.data)) {
-          const mappedPast: PastMatch[] = pa.data.map((m: PastMatchApi) => ({
-            id: m.id,
-            date: m.archived_at,
-            league: m.league,
-            stadium: m.stadium,
-            round: m.league,
-            homeTeam: { name: m.home_name, logo: m.home_logo, score: m.home_score },
-            awayTeam: { name: m.away_name, logo: m.away_logo, score: m.away_score },
-          }));
-          setPasados(mappedPast);
-        }
-      } catch (err) {
-        console.error("Error cargando datos:", err);
-        setError(`Error cargando datos: ${err instanceof Error ? err.message : String(err)}`);
-      } finally {
-        setLoading(false);
+      const [p, s, l, pa] = await Promise.all([
+        fetchSection("/api/partidos/proximos"),
+        fetchSection("/api/partidos/standings"),
+        fetchSection("/api/partidos/live"),
+        fetchSection("/api/partidos/historial/pasados"),
+      ]);
+
+      if (p?.success && Array.isArray(p.data)) {
+        setProximos(p.data.slice(0, 5));
       }
+
+      if (s?.success && Array.isArray(s.data)) {
+        setStandings(s.data);
+      }
+
+      if (l?.success && Array.isArray(l.data)) {
+        const mappedLive: LiveMatch[] = l.data.map((m: LiveMatchApi) => ({
+          id: m.id,
+          league: m.league,
+          minute: m.minute,
+          stadium: m.stadium,
+          status: m.status,
+          isDemo: Boolean(m.is_demo),
+          homeTeam: { name: m.home_name, logo: m.home_logo, score: m.home_score ?? 0 },
+          awayTeam: { name: m.away_name, logo: m.away_logo, score: m.away_score ?? 0 },
+        }));
+        setEnVivo(mappedLive);
+      } else {
+        setEnVivo([]);
+      }
+
+      if (pa?.success && Array.isArray(pa.data)) {
+        const mappedPast: PastMatch[] = pa.data.map((m: PastMatchApi) => ({
+          id: m.id,
+          date: m.archived_at,
+          league: m.league,
+          stadium: m.stadium,
+          round: m.league,
+          homeTeam: { name: m.home_name, logo: m.home_logo, score: m.home_score },
+          awayTeam: { name: m.away_name, logo: m.away_logo, score: m.away_score },
+        }));
+        setPasados(mappedPast);
+      }
+
+      if (!p && !s && !l && !pa) {
+        setError("No se pudieron cargar los datos de partidos.");
+      } else {
+        setError(null);
+      }
+
+      setLoading(false);
     };
 
     load();
@@ -179,7 +198,7 @@ export default function Partido() {
 
   // Renders condicionales
   if (selectedLiveMatch) {
-    return <PartidosVivo match={selectedLiveMatch} onBack={() => setSelectedLiveMatch(null)} />;
+    return <PartidosVivo match={selectedLiveMatch} onBack={() => setSelectedLiveMatch(null)} user={user} />;
   }
 
   if (selectedPastMatch) {
@@ -261,9 +280,8 @@ export default function Partido() {
 
         {/* Partidos en Vivo */}
         <div className="partido_live-section">
-          <div className="partido_section-header partido_section-header--small">
-            <div className="partido_accent" />
-            <h3 className="partido_subtitle">Partidos en Vivo</h3>
+          <div className="partido_live-header">
+            <h3 className="partido_live-title">Partidos en vivo</h3>
           </div>
 
           {enVivo.length === 0 && <p className="partido_empty">No hay partidos en vivo</p>}
@@ -276,23 +294,24 @@ export default function Partido() {
                 className="partido_live-card"
                 onClick={() => setSelectedLiveMatch(m)}
               >
-                <div className="partido_live-card-top">
-                  <span className="partido_live-badge">EN VIVO</span>
-                  <span className="partido_live-minute">{m.minute}</span>
-                </div>
-                <p className="partido_live-league">{m.league}</p>
                 <div className="partido_live-card-match">
                   <div className="partido_live-team">
                     <img src={m.homeTeam.logo} alt={m.homeTeam.name} className="partido_live-team-logo" />
                     <span>{m.homeTeam.name}</span>
                   </div>
-                  <div className="partido_live-score">{m.homeTeam.score} - {m.awayTeam.score}</div>
+                  <div className="partido_live-score-block">
+                    <div className="partido_live-score">{m.homeTeam.score} - {m.awayTeam.score}</div>
+                    <span className="partido_live-minute">{m.minute}</span>
+                  </div>
                   <div className="partido_live-team">
                     <img src={m.awayTeam.logo} alt={m.awayTeam.name} className="partido_live-team-logo" />
                     <span>{m.awayTeam.name}</span>
                   </div>
                 </div>
-                <p className="partido_live-stadium">{m.stadium}</p>
+                <div className="partido_live-card-footer">
+                  <span className="partido_live-badge">EN VIVO</span>
+                  <span className="partido_live-stadium">{m.stadium || m.league}</span>
+                </div>
               </button>
             ))}
           </div>

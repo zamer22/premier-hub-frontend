@@ -1,6 +1,6 @@
 import type { NewDireccionForm } from "./types";
 import LocationPicker from "./map/LocationPicker";
-import "../../estilos/Tienda.css";
+import "../../pages/tienda/Tienda.css";
 
 interface DireccionFormProps {
   form: NewDireccionForm;

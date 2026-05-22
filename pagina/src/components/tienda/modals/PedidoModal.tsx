@@ -3,7 +3,7 @@ import { tipoLabel } from "../utils";
 import { ESTADO_PEDIDO_LABEL, ESTADO_PEDIDO_COLOR, ESTADO_FLOW } from "../constants";
 import TrackingMap from "../map/TrackingMap";
 import LocationPicker from "../map/LocationPicker";
-import "../../../estilos/Tienda.css";
+import "../../../pages/tienda/Tienda.css";
 
 interface PedidoModalProps {
   pedido: Pedido;
