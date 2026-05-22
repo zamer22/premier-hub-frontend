@@ -544,15 +544,18 @@ function StateMessage({
 }
 
 function ChatEmote({ token, compact = false }: { token: string; compact?: boolean }) {
+  const [failed, setFailed] = useState(false);
   const emote = CHAT_EMOTE_MAP.get(token);
   if (!emote) return <>{token}</>;
+  const className = `pv-emote ${emote.kind === "sticker" && !compact ? "pv-emote--sticker" : ""}${failed ? " pv-emote--failed" : ""}`;
 
   return (
-    <span
-      className={`pv-emote ${emote.kind === "sticker" && !compact ? "pv-emote--sticker" : ""}`}
-      title={emote.label}
-    >
-      <img src={emote.src} alt={emote.label} loading="lazy" />
+    <span className={className} title={emote.label}>
+      {failed ? (
+        <span className="pv-emote__fallback">{token}</span>
+      ) : (
+        <img src={emote.src} alt={emote.label} loading="lazy" onError={() => setFailed(true)} />
+      )}
     </span>
   );
 }
