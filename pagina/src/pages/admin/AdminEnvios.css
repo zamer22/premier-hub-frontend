@@ -1,9 +1,11 @@
-.admin-envios {
+/* Page layout */
+.adm-page {
   min-height: 100vh;
   background: #f4f6f8;
 }
 
-.admin-envios__header {
+/* Top header */
+.adm-header {
   background: linear-gradient(135deg, #263a55, #1a2a3f);
   color: #fff;
   padding: 1rem 2rem;
@@ -12,45 +14,39 @@
   align-items: center;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
-
-.admin-envios__title {
+.adm-header__left {
+}
+.adm-header__brand {
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: -0.01em;
 }
-
-.admin-envios__brand {
-  color: #E90052;
+.adm-header__brand-accent {
+  color: #e90052;
 }
-
-.admin-envios__brand-light {
+.adm-header__brand-name {
   color: #fff;
 }
-
-.admin-envios__subtitle {
+.adm-header__brand-section {
   color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
   margin-left: 0.6rem;
   font-size: 0.95rem;
 }
-
-.admin-envios__tagline {
+.adm-header__sub {
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.7);
 }
-
-.admin-envios__user {
+.adm-header__right {
   display: flex;
   align-items: center;
   gap: 0.85rem;
 }
-
-.admin-envios__user-name {
+.adm-header__user {
   font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.85);
 }
-
-.admin-envios__logout {
+.adm-header__logout {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 6px;
@@ -58,9 +54,12 @@
   padding: 0.4rem 0.95rem;
   font-size: 0.78rem;
   font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
 }
 
-.admin-envios__toast {
+/* Toast notification */
+.adm-toast {
   position: fixed;
   top: 80px;
   right: 2rem;
@@ -72,16 +71,15 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 9999;
 }
-
-.admin-envios__toast.is-ok {
+.adm-toast--ok {
   background: #16a34a;
 }
-
-.admin-envios__toast.is-error {
+.adm-toast--err {
   background: #dc2626;
 }
 
-.admin-envios__filters {
+/* Filter bar */
+.adm-filters {
   padding: 1.25rem 2rem;
   display: flex;
   gap: 0.75rem;
@@ -90,32 +88,37 @@
   border-bottom: 1px solid #e5e7eb;
   background: #fff;
 }
-
-.admin-envios__filter-list {
+.adm-filters__chips {
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
 }
-
-.admin-envios__filter-btn {
+.adm-chip {
   padding: 0.4rem 0.85rem;
   border-radius: 20px;
   border: 1px solid #e0e0e0;
   background: #fff;
-  color: #84878F;
+  color: #84878f;
   font-size: 0.78rem;
   font-weight: 500;
+  cursor: pointer;
   text-transform: capitalize;
+  font-family: inherit;
 }
-
-.admin-envios__filter-btn.is-active {
+.adm-chip--active {
   border-color: #263a55;
   background: #263a55;
   color: #fff;
   font-weight: 700;
 }
+.adm-count {
+  font-size: 0.78rem;
+  color: #84878f;
+  font-weight: 600;
+}
 
-.admin-envios__input {
+/* Main input */
+.adm-input {
   padding: 0.55rem 0.7rem;
   border: 1.5px solid #e0e0e0;
   border-radius: 8px;
@@ -125,30 +128,15 @@
   box-sizing: border-box;
   color: #263a55;
   background: #fff;
+  font-family: inherit;
 }
-
-.admin-envios__input:disabled {
+.adm-input:disabled {
   background: #f4f6f8;
-  color: #84878F;
+  color: #84878f;
 }
 
-.admin-envios__input:focus {
-  border-color: #263a55;
-}
-
-.admin-envios__search {
-  flex: 1;
-  min-width: 240px;
-  max-width: 360px;
-}
-
-.admin-envios__count {
-  font-size: 0.78rem;
-  color: #84878F;
-  font-weight: 600;
-}
-
-.admin-envios__layout {
+/* Two-column layout */
+.adm-layout {
   display: grid;
   grid-template-columns: minmax(320px, 380px) 1fr;
   gap: 1.25rem;
@@ -156,7 +144,8 @@
   align-items: start;
 }
 
-.admin-envios__list {
+/* Left: order list */
+.adm-list {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -164,20 +153,23 @@
   overflow-y: auto;
   padding-right: 0.4rem;
 }
-
-.admin-envios__empty {
-  color: #84878F;
+.adm-list__empty {
+  color: #84878f;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 10px;
+}
+.adm-list__loading {
+  color: #84878f;
   font-size: 0.85rem;
   text-align: center;
   padding: 2rem;
 }
 
-.admin-envios__empty--boxed {
-  background: #fff;
-  border-radius: 10px;
-}
-
-.admin-envios__card {
+/* Order card */
+.adm-order {
   background: #fff;
   border-radius: 10px;
   padding: 0.85rem 1rem;
@@ -188,19 +180,16 @@
   flex-direction: column;
   gap: 0.3rem;
 }
-
-.admin-envios__card.is-selected {
-  border: 2px solid #E90052;
+.adm-order--sel {
+  border: 2px solid #e90052;
   box-shadow: 0 4px 12px rgba(233, 0, 82, 0.15);
 }
-
-.admin-envios__card-header {
+.adm-order__top {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
-.admin-envios__order-id {
+.adm-order__id {
   background: #263a55;
   color: #fff;
   padding: 0.15rem 0.5rem;
@@ -208,77 +197,30 @@
   font-size: 0.72rem;
   font-weight: 800;
 }
-
-.admin-envios__order-id--large {
-  padding: 0.25rem 0.7rem;
-  font-size: 0.85rem;
-}
-
-.admin-envios__status {
+.adm-order__status {
   padding: 0.18rem 0.55rem;
   border-radius: 999px;
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  white-space: nowrap;
 }
-
-.admin-envios__status--procesando {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.admin-envios__status--enviado {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.admin-envios__status--en_camino {
-  background: #e0e7ff;
-  color: #4338ca;
-}
-
-.admin-envios__status--entregado {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.admin-envios__status--cancelado {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.admin-envios__card-title {
+.adm-order__name {
   font-size: 0.85rem;
   font-weight: 700;
   color: #263a55;
 }
-
-.admin-envios__card-meta {
+.adm-order__user {
   font-size: 0.74rem;
-  color: #84878F;
+  color: #84878f;
 }
-
-.admin-envios__card-date {
+.adm-order__date {
   font-size: 0.7rem;
   color: #9ca3af;
 }
 
-.admin-envios__empty-detail {
-  background: #fff;
-  border-radius: 12px;
-  padding: 4rem 2rem;
-  text-align: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
-
-.admin-envios__empty-detail-text {
-  color: #84878F;
-  font-size: 0.9rem;
-}
-
-.admin-envios__detail {
+/* Right: detail panel */
+.adm-detail {
   background: #fff;
   border-radius: 12px;
   padding: 1.5rem;
@@ -287,8 +229,20 @@
   flex-direction: column;
   gap: 1.25rem;
 }
+.adm-detail--empty {
+  background: #fff;
+  border-radius: 12px;
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+.adm-detail__empty-text {
+  color: #84878f;
+  font-size: 0.9rem;
+}
 
-.admin-envios__detail-header {
+/* Detail header */
+.adm-detail__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -296,67 +250,79 @@
   border-bottom: 1px solid #f0f0f0;
   padding-bottom: 1rem;
 }
-
-.admin-envios__detail-title {
+.adm-detail__id {
+  background: #263a55;
+  color: #fff;
+  padding: 0.25rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+.adm-detail__name {
   font-size: 1.1rem;
   font-weight: 800;
   color: #263a55;
   margin-top: 0.5rem;
 }
-
-.admin-envios__detail-meta {
+.adm-detail__client {
   font-size: 0.82rem;
-  color: #84878F;
+  color: #84878f;
 }
-
-.admin-envios__detail-strong {
-  color: #374151;
-}
-
-.admin-envios__detail-email {
-  color: #84878F;
-}
-
-.admin-envios__detail-sub {
+.adm-detail__meta {
   font-size: 0.78rem;
-  color: #84878F;
+  color: #84878f;
+}
+.adm-detail__status {
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
-.admin-envios__locked-banner {
+/* Locked / closed pedido banner */
+.adm-locked {
   border-radius: 10px;
   padding: 0.85rem 1rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  border: 1px solid transparent;
 }
-
-.admin-envios__locked-banner.is-delivered {
+.adm-locked--delivered {
   background: #dcfce7;
-  border-color: #86efac;
-  color: #166534;
+  border: 1px solid #86efac;
 }
-
-.admin-envios__locked-banner.is-cancelled {
+.adm-locked--canceled {
   background: #fee2e2;
-  border-color: #fecaca;
-  color: #991b1b;
+  border: 1px solid #fecaca;
 }
-
-.admin-envios__locked-icon {
+.adm-locked__icon {
   font-size: 1.1rem;
 }
-
-.admin-envios__locked-title {
+.adm-locked__title {
   font-size: 0.85rem;
   font-weight: 700;
 }
-
-.admin-envios__locked-sub {
+.adm-locked--delivered .adm-locked__title {
+  color: #166534;
+}
+.adm-locked--canceled .adm-locked__title {
+  color: #991b1b;
+}
+.adm-locked__text {
   font-size: 0.74rem;
 }
+.adm-locked--delivered .adm-locked__text {
+  color: #166534;
+}
+.adm-locked--canceled .adm-locked__text {
+  color: #991b1b;
+}
 
-.admin-envios__section-title {
+/* Section title inside detail */
+.adm-section-title {
   font-size: 0.74rem;
   color: #263a55;
   font-weight: 700;
@@ -364,94 +330,70 @@
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
 }
-
-.admin-envios__section-title--compact {
-  margin-bottom: 0.4rem;
-}
-
-.admin-envios__pending {
+.adm-pending-tag {
   margin-left: 0.5rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #E90052;
+  color: #e90052;
   text-transform: none;
   letter-spacing: 0;
 }
 
-.admin-envios__state-buttons {
+/* Estado buttons */
+.adm-estado-btns {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
 }
-
-.admin-envios__state-btn {
+.adm-estado-btn {
   padding: 0.45rem 0.95rem;
   border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
   border: 1px solid #e5e7eb;
   background: #fff;
   color: #374151;
-  font-size: 0.78rem;
-  font-weight: 600;
   text-transform: capitalize;
+  font-family: inherit;
 }
-
-.admin-envios__state-btn.is-selected {
+.adm-estado-btn--sel {
   border: 2px solid #263a55;
   font-weight: 800;
 }
-
-.admin-envios__state-btn.is-original {
-  border-style: dashed;
-  border-color: #84878F;
+.adm-estado-btn--orig {
+  border: 1px dashed #84878f;
 }
-
-.admin-envios__state-btn:disabled {
+.adm-estado-btn:disabled {
   cursor: default;
 }
 
-.admin-envios__state-btn--procesando.is-selected {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.admin-envios__state-btn--enviado.is-selected {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.admin-envios__state-btn--en_camino.is-selected {
-  background: #e0e7ff;
-  color: #4338ca;
-}
-
-.admin-envios__state-btn--entregado.is-selected {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.admin-envios__state-btn--cancelado.is-selected {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.admin-envios__address {
+/* Direction display */
+.adm-dir-box {
   background: #f8f9fa;
   border-radius: 10px;
   padding: 0.85rem 1rem;
 }
-
-.admin-envios__address-name {
+.adm-dir-title {
+  font-size: 0.74rem;
+  color: #263a55;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+.adm-dir-name {
   font-size: 0.85rem;
   color: #263a55;
   font-weight: 600;
 }
-
-.admin-envios__address-line {
+.adm-dir-addr {
   font-size: 0.78rem;
   color: #374151;
 }
 
-.admin-envios__map-header {
+/* Map section */
+.adm-map-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -459,42 +401,37 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-
-.admin-envios__map-hint {
+.adm-map-hint {
   font-size: 0.7rem;
-  color: #84878F;
+  color: #84878f;
   font-style: italic;
 }
-
-.admin-envios__geo-search {
+.adm-geo-row {
   display: flex;
   gap: 0.4rem;
   position: relative;
   margin-bottom: 0.5rem;
 }
-
-.admin-envios__geo-input {
-  flex: 1;
-}
-
-.admin-envios__geo-btn {
+.adm-geo-btn {
   padding: 0.5rem 0.95rem;
   border-radius: 8px;
   border: none;
-  background: #263a55;
-  color: #fff;
   font-size: 0.78rem;
   font-weight: 700;
+  cursor: pointer;
   white-space: nowrap;
+  font-family: inherit;
 }
-
-.admin-envios__geo-btn:disabled {
+.adm-geo-btn--active {
+  background: #263a55;
+  color: #fff;
+}
+.adm-geo-btn--off {
   background: #e0e0e0;
   color: #999;
   cursor: not-allowed;
 }
-
-.admin-envios__geo-results {
+.adm-geo-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -508,8 +445,7 @@
   max-height: 200px;
   overflow-y: auto;
 }
-
-.admin-envios__geo-item {
+.adm-geo-item {
   display: block;
   width: 100%;
   text-align: left;
@@ -518,31 +454,19 @@
   background: transparent;
   font-size: 0.78rem;
   color: #263a55;
+  cursor: pointer;
   border-bottom: 1px solid #f0f0f0;
+  font-family: inherit;
 }
-
-.admin-envios__geo-item:hover {
+.adm-geo-item:hover {
   background: #f8f9fa;
 }
-
-.admin-envios__geo-item:last-child {
-  border-bottom: none;
-}
-
-.admin-envios__geo-error {
+.adm-geo-error {
   font-size: 0.72rem;
   color: #dc2626;
   margin-bottom: 0.5rem;
 }
-
-.admin-envios__map {
-  height: 320px;
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-}
-
-.admin-envios__coords {
+.adm-map-coords-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -550,43 +474,135 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-
-.admin-envios__coords-text {
+.adm-map-coords {
   font-size: 0.72rem;
-  color: #84878F;
+  color: #84878f;
+}
+.adm-map-pending {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #e90052;
 }
 
-.admin-envios__info {
+/* Info/shipping form section */
+.adm-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+.adm-info-section {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
 }
 
-.admin-envios__info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-}
-
-.admin-envios__textarea {
-  padding: 0.55rem 0.7rem;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  outline: none;
+/* Map container — Leaflet reads height from CSS class */
+.t-map-lg {
+  height: 320px;
   width: 100%;
-  box-sizing: border-box;
-  color: #263a55;
-  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Utility text colors */
+.adm-text-mid {
+  color: #374151;
+}
+.adm-text-soft {
+  color: #84878f;
+}
+
+/* Search input in filter bar */
+.adm-search {
+  flex: 1;
+  min-width: 240px;
+  max-width: 360px;
+}
+
+/* Textarea extends adm-input */
+.adm-textarea {
   resize: vertical;
+  font-family: inherit;
 }
 
-.admin-envios__textarea:disabled {
-  background: #f4f6f8;
-  color: #84878F;
+/* Estado color — order list badge */
+.adm-order__status[data-estado="procesando"] {
+  background: #fef3c7;
+  color: #92400e;
+}
+.adm-order__status[data-estado="enviado"] {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.adm-order__status[data-estado="en_camino"] {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+.adm-order__status[data-estado="entregado"] {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.adm-order__status[data-estado="cancelado"] {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
-.admin-envios__actions {
+/* Estado color — detail panel header badge */
+.adm-detail__status[data-estado="procesando"] {
+  background: #fef3c7;
+  color: #92400e;
+}
+.adm-detail__status[data-estado="enviado"] {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.adm-detail__status[data-estado="en_camino"] {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+.adm-detail__status[data-estado="entregado"] {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.adm-detail__status[data-estado="cancelado"] {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Estado color — selected estado button */
+.adm-estado-btn--sel[data-estado="procesando"] {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #92400e;
+}
+.adm-estado-btn--sel[data-estado="enviado"] {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #1e40af;
+}
+.adm-estado-btn--sel[data-estado="en_camino"] {
+  background: #e0e7ff;
+  color: #4338ca;
+  border-color: #4338ca;
+}
+.adm-estado-btn--sel[data-estado="entregado"] {
+  background: #dcfce7;
+  color: #16a34a;
+  border-color: #16a34a;
+}
+.adm-estado-btn--sel[data-estado="cancelado"] {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Geo search input inside map section (fills remaining space) */
+.adm-geo-input {
+  flex: 1;
+}
+
+/* Action row */
+.adm-actions {
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -594,72 +610,34 @@
   border-top: 1px solid #f0f0f0;
   padding-top: 1rem;
 }
-
-.admin-envios__btn {
+.adm-btn {
   padding: 0.55rem 1.2rem;
   border-radius: 8px;
-  font-weight: 600;
   font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
 }
-
-.admin-envios__btn--secondary {
-  border: 1px solid #e5e7eb;
+.adm-btn--discard {
+  border: 1px solid #e5e7eb !important;
   background: #fff;
   color: #374151;
 }
-
-.admin-envios__btn--primary {
-  padding: 0.55rem 1.5rem;
-  border: none;
-  background: #E90052;
+.adm-btn--save {
+  background: #e90052;
   color: #fff;
   font-weight: 700;
+  padding: 0.55rem 1.5rem;
   font-size: 0.85rem;
 }
-
-.admin-envios__btn:disabled {
-  background: #e0e0e0;
-  color: #999;
-  cursor: not-allowed;
+.adm-btn:disabled {
+  background: #e0e0e0 !important;
+  color: #bbb !important;
+  cursor: not-allowed !important;
+  border-color: transparent !important;
 }
-
-.admin-envios__btn--secondary:disabled {
-  background: #fff;
-  color: #bbb;
-}
-
-.admin-envios__map-icon-wrapper {
-  background: transparent;
-  border: none;
-}
-
-.admin-envios__map-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  border: 2px solid #fff;
-  color: #fff;
-}
-
-.admin-envios__map-icon--home {
-  background: #E90052;
-}
-
-.admin-envios__map-icon--package {
-  background: #2563eb;
-}
-
-@media (max-width: 900px) {
-  .admin-envios__layout {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-envios__list {
-    max-height: none;
-  }
+.adm-btn--discard:disabled {
+  border-color: transparent !important;
+  color: #bbb !important;
 }

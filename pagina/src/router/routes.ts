@@ -5,14 +5,14 @@ export type Section =
   | "tienda"
   | "perfil"
   | "vr-arena"
-  | "simulador"
+  | "laboratorio"
   | "historia"
   | "arcade";
 
 export const ROUTES: Record<Section, string> = {
   partido: "/partido",
   tablero: "/tablero",
-  simulador: "/simulador",
+  laboratorio: "/laboratorio",
   "vr-arena": "/vr-arena",
   tienda: "/tienda",
   noticias: "/noticias",
@@ -26,7 +26,7 @@ export const DEFAULT_ROUTE = ROUTES.partido;
 export const TABS: { key: Section; label: string; path: string }[] = [
   { key: "partido", label: "Partido", path: ROUTES.partido },
   { key: "tablero", label: "Tablero", path: ROUTES.tablero },
-  { key: "simulador", label: "Simulador", path: ROUTES.simulador },
+  { key: "laboratorio", label: "Laboratorio", path: ROUTES.laboratorio },
   { key: "vr-arena", label: "VR Arena", path: ROUTES["vr-arena"] },
   { key: "tienda", label: "Tienda", path: ROUTES.tienda },
   { key: "noticias", label: "Noticias", path: ROUTES.noticias },

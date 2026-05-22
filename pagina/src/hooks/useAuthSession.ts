@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DEFAULT_ROUTE } from "../router/routes";
+import { DEFAULT_ROUTE, getInitialRoute } from "../router/routes";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -30,18 +30,19 @@ export function useAuthSession() {
 
       navigate({ pathname, search }, { replace: true });
 
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), 10_000);
+
       fetch(`${API_URL}/api/auth/google-sync`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ access_token: accessToken }),
+        signal: ctrl.signal,
       })
         .then((r) => r.json())
         .then((data) => {
-          if (!data.success) {
-            alert("Error con Google login: " + data.error);
-            return;
-          }
+          if (!data.success) return;
 
           if (data.isNew) {
             setOauthNuevo({
@@ -51,21 +52,23 @@ export function useAuthSession() {
             });
           } else {
             setUser(data.user);
+            navigate(getInitialRoute(window.location.search), { replace: true });
           }
         })
-        .catch(() => alert("No se pudo conectar con el servidor"))
-        .finally(() => setSessionLoading(false));
+        .catch(() => {})
+        .finally(() => { clearTimeout(tid); setSessionLoading(false); });
 
       return;
     }
 
-    fetch(`${API_URL}/api/auth/me`, { credentials: "include" })
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), 8_000);
+
+    fetch(`${API_URL}/api/auth/me`, { credentials: "include", signal: ctrl.signal })
       .then((r) => r.json())
-      .then((data) => {
-        if (data.success) setUser(data.user);
-      })
+      .then((data) => { if (data.success) setUser(data.user); })
       .catch(() => {})
-      .finally(() => setSessionLoading(false));
+      .finally(() => { clearTimeout(tid); setSessionLoading(false); });
   }, [navigate]);
 
   const handleLoginSuccess = async (fallbackUser: any) => {
