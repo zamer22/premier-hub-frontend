@@ -8,7 +8,7 @@ import Noticia from "../pages/noticias/Noticia";
 import Noticias from "../pages/noticias/NoticiasLanding";
 import Partido from "../pages/partido/Partido";
 import Perfil from "../pages/perfil/Perfil";
-import Laboratorio from "../pages/offseason/OffseasonLab";
+import Laboratorio from "../pages/laboratorio/Laboratorio";
 import Tablero from "../pages/tablero/Tablero";
 import Tienda from "../pages/tienda/Tienda";
 import MissingXI from "../components/arcade/missing-xi/MissingXI";
@@ -99,7 +99,7 @@ export default function AppRoutes({
           }
         />
         <Route path="tablero" element={<Tablero />} />
-        <Route path="laboratorio" element={<Laboratorio user={user} />} />
+        <Route path="laboratorio" element={<Laboratorio />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />
         <Route path="arcade" element={<Arcade />} />
