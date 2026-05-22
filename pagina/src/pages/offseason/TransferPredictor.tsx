@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { PLClub } from "../../components/offseason/types";
+import ClubGrid from "../laboratorio/ClubGrid";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const CIRC = 2 * Math.PI * 42; // circunferencia para r=42
@@ -7,6 +8,12 @@ const CIRC = 2 * Math.PI * 42; // circunferencia para r=42
 type Player = { id: number; name: string; age: number; position: string };
 type PredictResult = { probability: number; fit_score: "Low" | "Medium" | "High"; reasons: string[] };
 type HistoryEntry = { playerName: string; fromClub: string; targetClub: string; result: PredictResult };
+
+function fitLabel(s: string) {
+  if (s === "High")   return "Alto";
+  if (s === "Medium") return "Medio";
+  return "Bajo";
+}
 
 function fitClass(s: string) {
   if (s === "High")   return "ol-fit--high";
@@ -161,10 +168,7 @@ export default function TransferPredictor({
         <div className="ol-field-group">
           <label className="ol-label">
             Club del jugador
-            <select className="ol-select" value={sourceClubId} onChange={(e) => setSourceClubId(e.target.value ? Number(e.target.value) : "")}>
-              <option value="">Seleccionar club…</option>
-              {clubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubGrid clubs={clubs} selectedId={sourceClubId} onSelect={setSourceClubId} />
           </label>
 
           <label className="ol-label">
@@ -198,15 +202,7 @@ export default function TransferPredictor({
         <div className="ol-field-group">
           <label className="ol-label">
             Club destino
-            <select
-              className="ol-select"
-              value={targetClubId}
-              onChange={(e) => setTargetClubId(e.target.value ? Number(e.target.value) : "")}
-              disabled={!selectedPlayer}
-            >
-              <option value="">Seleccionar destino…</option>
-              {targetClubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubGrid clubs={targetClubs} selectedId={targetClubId} onSelect={setTargetClubId} disabled={!selectedPlayer} />
           </label>
         </div>
 
@@ -315,8 +311,8 @@ export default function TransferPredictor({
             </div>
 
             <div className="ol-fit-row">
-              <span className="ol-fit-label">Fit Score</span>
-              <span className={`ol-fit-badge ${fitClass(result.fit_score)}`}>{result.fit_score}</span>
+              <span className="ol-fit-label">Compatibilidad</span>
+              <span className={`ol-fit-badge ${fitClass(result.fit_score)}`}>{fitLabel(result.fit_score)}</span>
             </div>
 
             <div className="ol-reasons-block">
@@ -347,7 +343,7 @@ export default function TransferPredictor({
                     {h.result.probability.toFixed(1)}%
                   </span>
                   <span className={`ol-fit-badge ol-fit-badge--sm ${fitClass(h.result.fit_score)}`}>
-                    {h.result.fit_score}
+                    {fitLabel(h.result.fit_score)}
                   </span>
                 </div>
               </div>

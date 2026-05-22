@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { PLClub } from "../../components/offseason/types";
+import ClubGrid from "../laboratorio/ClubGrid";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -146,14 +147,7 @@ export default function SeasonSimulator({
         <div className="ol-field-group">
           <label className="ol-label">
             Club del jugador
-            <select
-              className="ol-select"
-              value={sourceClubId}
-              onChange={(e) => setSourceClubId(e.target.value ? Number(e.target.value) : "")}
-            >
-              <option value="">Seleccionar club…</option>
-              {clubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubGrid clubs={clubs} selectedId={sourceClubId} onSelect={setSourceClubId} />
           </label>
 
           <label className="ol-label">
@@ -177,15 +171,7 @@ export default function SeasonSimulator({
 
           <label className="ol-label">
             Club destino
-            <select
-              className="ol-select"
-              value={targetClubId}
-              onChange={(e) => setTargetClubId(e.target.value ? Number(e.target.value) : "")}
-              disabled={!selectedPlayer}
-            >
-              <option value="">Seleccionar destino…</option>
-              {targetClubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubGrid clubs={targetClubs} selectedId={targetClubId} onSelect={setTargetClubId} disabled={!selectedPlayer} />
           </label>
         </div>
 
