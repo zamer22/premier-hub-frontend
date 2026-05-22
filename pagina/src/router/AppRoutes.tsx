@@ -98,7 +98,6 @@ export default function AppRoutes({
             />
           }
         />
-        <Route path="tablero" element={<Tablero />} />
         <Route path="laboratorio" element={<Laboratorio user={user} />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />

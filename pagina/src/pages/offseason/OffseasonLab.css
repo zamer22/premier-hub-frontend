@@ -1363,6 +1363,10 @@
   .ol-module-visual { height: 170px; }
 }
 
+/* ── Club crest images ─────────────────────────────────────────────────────── */
+.ol-crest--md { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+.ol-crest--xs { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+
 /* ── Club crest grid (ClubGrid component) ──────────────────────────────────── */
 .lab-club-grid {
   display: grid;
