@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { crestUrl } from "../laboratorio/ClubGrid";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -51,17 +52,6 @@ const KIND_ABBR: Record<EventKind, string> = {
   var:            "VAR",
 };
 
-function clubInitials(name: string) {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("");
-}
-
-function clubHue(name: string) {
-  let h = 5381;
-  for (let i = 0; i < name.length; i++) h = ((h << 5) + h + name.charCodeAt(i)) & 0xfffffff;
-  return h % 360;
-}
 
 export default function MatchRewind({
   onLoadingChange,
@@ -189,12 +179,7 @@ export default function MatchRewind({
           <>
             <div className="ol-match-ticket">
               <div className="ol-ticket-team">
-                <div
-                  className="ol-club-badge ol-club-badge--md"
-                  style={{ background: `hsl(${clubHue(preview.home_team.name)},52%,32%)` }}
-                >
-                  {clubInitials(preview.home_team.name)}
-                </div>
+                <img src={crestUrl(preview.home_team.id)} alt={preview.home_team.name} className="ol-crest--md" loading="lazy" />
                 <span className="ol-ticket-team-name">{preview.home_team.name}</span>
               </div>
               <div className="ol-ticket-score">
@@ -204,12 +189,7 @@ export default function MatchRewind({
               </div>
               <div className="ol-ticket-team ol-ticket-team--right">
                 <span className="ol-ticket-team-name">{preview.away_team.name}</span>
-                <div
-                  className="ol-club-badge ol-club-badge--md"
-                  style={{ background: `hsl(${clubHue(preview.away_team.name)},52%,32%)` }}
-                >
-                  {clubInitials(preview.away_team.name)}
-                </div>
+                <img src={crestUrl(preview.away_team.id)} alt={preview.away_team.name} className="ol-crest--md" loading="lazy" />
               </div>
             </div>
 
@@ -226,12 +206,7 @@ export default function MatchRewind({
                 <div className="ol-events-columns">
                   <div className="ol-events-col">
                     <p className="ol-events-col-header">
-                      <span
-                        className="ol-club-badge ol-club-badge--xs"
-                        style={{ background: `hsl(${clubHue(preview.home_team.name)},52%,32%)` }}
-                      >
-                        {clubInitials(preview.home_team.name)}
-                      </span>
+                      <img src={crestUrl(preview.home_team.id)} alt={preview.home_team.name} className="ol-crest--xs" loading="lazy" />
                       {preview.home_team.name}
                     </p>
                     {homeEvents.length === 0 && <p className="ol-events-empty">Sin eventos</p>}
@@ -247,12 +222,7 @@ export default function MatchRewind({
 
                   <div className="ol-events-col">
                     <p className="ol-events-col-header">
-                      <span
-                        className="ol-club-badge ol-club-badge--xs"
-                        style={{ background: `hsl(${clubHue(preview.away_team.name)},52%,32%)` }}
-                      >
-                        {clubInitials(preview.away_team.name)}
-                      </span>
+                      <img src={crestUrl(preview.away_team.id)} alt={preview.away_team.name} className="ol-crest--xs" loading="lazy" />
                       {preview.away_team.name}
                     </p>
                     {awayEvents.length === 0 && <p className="ol-events-empty">Sin eventos</p>}
