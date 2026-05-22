@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { PLClub } from "../../components/offseason/types";
+import ClubGrid from "./ClubGrid";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -90,10 +91,7 @@ export default function SeasonSimulator({ clubs }: { clubs: PLClub[] }) {
         <div className="lab-field-group">
           <label className="lab-label">
             Club del jugador
-            <select className="lab-select" value={sourceClubId} onChange={(e) => setSourceClubId(e.target.value ? Number(e.target.value) : "")}>
-              <option value="">Seleccionar club…</option>
-              {clubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubGrid clubs={clubs} selectedId={sourceClubId} onSelect={(id) => setSourceClubId(id)} />
           </label>
 
           <label className="lab-label">
@@ -117,10 +115,7 @@ export default function SeasonSimulator({ clubs }: { clubs: PLClub[] }) {
 
           <label className="lab-label">
             Club destino
-            <select className="lab-select" value={targetClubId} onChange={(e) => setTargetClubId(e.target.value ? Number(e.target.value) : "")} disabled={!selectedPlayer}>
-              <option value="">Seleccionar destino…</option>
-              {targetClubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubGrid clubs={targetClubs} selectedId={targetClubId} onSelect={(id) => setTargetClubId(id)} disabled={!selectedPlayer} />
           </label>
         </div>
 
@@ -163,7 +158,7 @@ export default function SeasonSimulator({ clubs }: { clubs: PLClub[] }) {
         {loading && (
           <div className="lab-loading">
             <span className="lab-spinner" />
-            <p>Ejecutando 1000 simulaciones de Monte Carlo…</p>
+            <p>Simulando la temporada…</p>
           </div>
         )}
 
@@ -174,10 +169,10 @@ export default function SeasonSimulator({ clubs }: { clubs: PLClub[] }) {
                 <tr>
                   <th>#</th>
                   <th>Club</th>
-                  <th>Pts/RP</th>
+                  <th>Puntos</th>
                   <th>Título %</th>
                   <th>Top 4 %</th>
-                  <th>Rel %</th>
+                  <th>Desc. %</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { PLClub } from "../../components/offseason/types";
+import ClubGrid from "./ClubGrid";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -11,6 +12,12 @@ function fitClass(score: string) {
   if (score === "High") return "lab-fit--high";
   if (score === "Medium") return "lab-fit--medium";
   return "lab-fit--low";
+}
+
+function fitLabel(score: string) {
+  if (score === "High") return "Alto";
+  if (score === "Medium") return "Medio";
+  return "Bajo";
 }
 
 export default function TransferPredictor({ clubs }: { clubs: PLClub[] }) {
@@ -81,10 +88,7 @@ export default function TransferPredictor({ clubs }: { clubs: PLClub[] }) {
         <div className="lab-field-group">
           <label className="lab-label">
             Club del jugador
-            <select className="lab-select" value={sourceClubId} onChange={(e) => setSourceClubId(e.target.value ? Number(e.target.value) : "")}>
-              <option value="">Seleccionar club…</option>
-              {clubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubGrid clubs={clubs} selectedId={sourceClubId} onSelect={(id) => setSourceClubId(id)} />
           </label>
 
           <label className="lab-label">
@@ -113,10 +117,7 @@ export default function TransferPredictor({ clubs }: { clubs: PLClub[] }) {
         <div className="lab-field-group">
           <label className="lab-label">
             Club destino
-            <select className="lab-select" value={targetClubId} onChange={(e) => setTargetClubId(e.target.value ? Number(e.target.value) : "")} disabled={!selectedPlayer}>
-              <option value="">Seleccionar destino…</option>
-              {targetClubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubGrid clubs={targetClubs} selectedId={targetClubId} onSelect={(id) => setTargetClubId(id)} disabled={!selectedPlayer} />
           </label>
         </div>
 
@@ -153,7 +154,7 @@ export default function TransferPredictor({ clubs }: { clubs: PLClub[] }) {
         {loading && (
           <div className="lab-loading">
             <span className="lab-spinner" />
-            <p>El modelo ML está analizando la transferencia…</p>
+            <p>Analizando la transferencia…</p>
           </div>
         )}
 
@@ -168,8 +169,8 @@ export default function TransferPredictor({ clubs }: { clubs: PLClub[] }) {
             </div>
 
             <div className="lab-fit-row">
-              <span className="lab-fit-label">Fit Score</span>
-              <span className={`lab-fit-badge ${fitClass(result.fit_score)}`}>{result.fit_score}</span>
+              <span className="lab-fit-label">Compatibilidad</span>
+              <span className={`lab-fit-badge ${fitClass(result.fit_score)}`}>{fitLabel(result.fit_score)}</span>
             </div>
 
             <div className="lab-reasons-block">
@@ -202,7 +203,7 @@ export default function TransferPredictor({ clubs }: { clubs: PLClub[] }) {
                 </div>
                 <div className="lab-history-meta">
                   <span className="lab-history-prob">{h.result.probability.toFixed(1)}%</span>
-                  <span className={`lab-fit-badge lab-fit-badge--sm ${fitClass(h.result.fit_score)}`}>{h.result.fit_score}</span>
+                  <span className={`lab-fit-badge lab-fit-badge--sm ${fitClass(h.result.fit_score)}`}>{fitLabel(h.result.fit_score)}</span>
                 </div>
               </div>
             ))}

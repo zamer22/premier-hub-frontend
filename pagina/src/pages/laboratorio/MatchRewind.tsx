@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { crestUrl } from "./ClubGrid";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -134,6 +135,11 @@ export default function MatchRewind() {
                 className="lab-iconic-card"
                 onClick={() => handleSelectMatch(m)}
               >
+                <div className="lab-iconic-crests">
+                  <img src={crestUrl(m.home_team.id)} alt={m.home_team.name} className="lab-iconic-crest" loading="lazy" />
+                  <span className="lab-iconic-vs">vs</span>
+                  <img src={crestUrl(m.away_team.id)} alt={m.away_team.name} className="lab-iconic-crest" loading="lazy" />
+                </div>
                 <p className="lab-iconic-title">{m.title}</p>
                 <p className="lab-iconic-date">{m.date} · {m.season}/{String(m.season + 1).slice(2)}</p>
               </button>
@@ -159,9 +165,15 @@ export default function MatchRewind() {
             {preview && (
               <>
                 <div className="lab-match-header">
-                  <span className="lab-match-team">{preview.home_team.name}</span>
+                  <span className="lab-match-team">
+                    <img src={crestUrl(preview.home_team.id)} alt={preview.home_team.name} className="lab-match-crest" loading="lazy" />
+                    {preview.home_team.name}
+                  </span>
                   <span className="lab-match-score">{preview.score.home} – {preview.score.away}</span>
-                  <span className="lab-match-team lab-match-team--right">{preview.away_team.name}</span>
+                  <span className="lab-match-team lab-match-team--right">
+                    {preview.away_team.name}
+                    <img src={crestUrl(preview.away_team.id)} alt={preview.away_team.name} className="lab-match-crest" loading="lazy" />
+                  </span>
                 </div>
 
                 <p className="lab-lineup-hint">Selecciona un jugador para quitarlo del partido</p>
@@ -185,7 +197,7 @@ export default function MatchRewind() {
                 )}
 
                 <button type="button" className="lab-btn-primary" onClick={handleRewind} disabled={!selectedPlayer || loading}>
-                  {loading ? "Calculando resultado alternativo…" : "Rewind"}
+                  {loading ? "Calculando resultado alternativo…" : "Revivir partido"}
                 </button>
                 {error && <p className="lab-error">{error}</p>}
               </>
@@ -209,7 +221,7 @@ export default function MatchRewind() {
         {loading && (
           <div className="lab-loading">
             <span className="lab-spinner" />
-            <p>Calculando con xG proxy y simulación de Poisson…</p>
+            <p>Calculando el resultado alternativo…</p>
           </div>
         )}
 
