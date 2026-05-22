@@ -69,7 +69,6 @@ export default function MatchRewind({
   onLoadingChange: (v: boolean) => void;
 }) {
   const [iconicMatches, setIconicMatches]   = useState<IconicMatch[]>([]);
-  const [fixtureInput, setFixtureInput]     = useState("");
   const [preview, setPreview]               = useState<MatchPreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError]     = useState<string | null>(null);
@@ -87,8 +86,8 @@ export default function MatchRewind({
       .catch(() => {});
   }, []);
 
-  const handleLoadMatch = async (id?: number) => {
-    const fixtureId = id ?? parseInt(fixtureInput);
+  const handleLoadMatch = async (id: number) => {
+    const fixtureId = id;
     if (!fixtureId) return;
     setPreviewLoading(true);
     setPreviewError(null);
@@ -162,48 +161,27 @@ export default function MatchRewind({
           <h2>Seleccionar partido</h2>
         </div>
 
-        {iconicMatches.length > 0 && (
-          <div className="ol-field-group" style={{ marginBottom: "0.65rem" }}>
-            <label className="ol-label">
-              Partidos icónicos
-              <select
-                className="ol-select"
-                defaultValue=""
-                onChange={(e) => { if (e.target.value) handleLoadMatch(Number(e.target.value)); }}
-              >
-                <option value="">Seleccionar partido icónico…</option>
-                {iconicMatches.map((m) => (
-                  <option key={m.fixture_id} value={m.fixture_id}>{m.label}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-        )}
-
-        <p className="ol-section-minor">{iconicMatches.length > 0 ? "O ingresa un ID manual" : "Fixture ID"}</p>
-        <div className="ol-fixture-row">
-          <input
-            type="number"
-            className="ol-input ol-input--grow"
-            placeholder="Fixture ID de API-Football"
-            value={fixtureInput}
-            onChange={(e) => setFixtureInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") handleLoadMatch(); }}
-          />
-          <button
-            type="button"
-            className="ol-secondary"
-            onClick={() => handleLoadMatch()}
-            disabled={!fixtureInput || previewLoading}
-          >
-            {previewLoading ? "Cargando…" : "Cargar"}
-          </button>
+        <div className="ol-field-group" style={{ marginBottom: "0.65rem" }}>
+          <label className="ol-label">
+            Partidos icónicos
+            <select
+              className="ol-select"
+              defaultValue=""
+              onChange={(e) => { if (e.target.value) handleLoadMatch(Number(e.target.value)); }}
+              disabled={iconicMatches.length === 0 || previewLoading}
+            >
+              <option value="">{iconicMatches.length === 0 ? "Cargando partidos…" : "Seleccionar partido icónico…"}</option>
+              {iconicMatches.map((m) => (
+                <option key={m.fixture_id} value={m.fixture_id}>{m.label}</option>
+              ))}
+            </select>
+          </label>
         </div>
         {previewError && <p className="ol-error">{previewError}</p>}
 
         {!preview && !previewLoading && !previewError && (
           <div className="ol-empty" style={{ minHeight: 140 }}>
-            <p>Elige un partido icónico o ingresa un Fixture ID para ver su línea de tiempo.</p>
+            <p>Elige un partido icónico para ver su línea de tiempo.</p>
           </div>
         )}
 
