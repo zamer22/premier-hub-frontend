@@ -10,9 +10,9 @@ const API_URL = import.meta.env.VITE_API_URL;
 type Tab = "transfer" | "simulator" | "rewind";
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: "transfer", label: "Transfer Predictor" },
-  { key: "simulator", label: "Season Simulator" },
-  { key: "rewind", label: "Match Rewind" },
+  { key: "transfer", label: "Predictor de Fichajes" },
+  { key: "simulator", label: "Simulador de Temporada" },
+  { key: "rewind", label: "Revivir Partido" },
 ];
 
 export default function Laboratorio() {
@@ -36,7 +36,7 @@ export default function Laboratorio() {
         <div className="lab-header">
           <div className="lab-badge">
             <span className="lab-badge-dot" />
-            Powered by ML
+            Premier League
           </div>
           <h1 className="lab-title">Laboratorio Premier</h1>
           <p className="lab-subtitle">Explora escenarios hipotéticos de la Premier League</p>

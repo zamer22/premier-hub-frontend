@@ -1157,6 +1157,26 @@
   object-fit: contain;
 }
 
+.pv-emote--failed {
+  width: auto;
+  min-width: 28px;
+}
+
+.pv-emote__fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 0.35rem;
+  border: 1px solid #d8c8fb;
+  border-radius: 6px;
+  background: #fff;
+  color: #6b3fd1;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .pv-emote--sticker {
   width: 54px;
   height: 54px;
