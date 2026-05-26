@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import "./Partido.css";
 import { PageHeader } from "../../components/ui";
-import PartidosVivo, { type LiveMatch } from "./PartidosVivo";
+import PartidosVivo from "./PartidosVivo";
 import PartidoPasado, { type PastMatch } from "./partidoPasados";
+import { getLiveMatches } from "./liveApi";
+import type { LiveMatch } from "./liveTypes";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -27,21 +29,6 @@ interface Standing {
     goals: { for: number; against: number };
   };
   goalsDiff: number;
-}
-
-interface LiveMatchApi {
-  id: number;
-  league: string;
-  minute: string;
-  stadium: string;
-  status: string;
-  is_demo?: boolean;
-  home_name: string;
-  home_logo: string;
-  home_score: number;
-  away_name: string;
-  away_logo: string;
-  away_score: number;
 }
 
 interface PastMatchApi {
@@ -96,7 +83,10 @@ export default function Partido({ user }: { user: any }) {
       const [p, s, l, pa] = await Promise.all([
         fetchSection("/api/partidos/proximos"),
         fetchSection("/api/partidos/standings"),
-        fetchSection("/api/partidos/live"),
+        getLiveMatches().catch((err) => {
+          console.error("Error cargando /api/partidos/live:", err);
+          return null;
+        }),
         fetchSection("/api/partidos/historial/pasados"),
       ]);
 
@@ -108,18 +98,8 @@ export default function Partido({ user }: { user: any }) {
         setStandings(s.data);
       }
 
-      if (l?.success && Array.isArray(l.data)) {
-        const mappedLive: LiveMatch[] = l.data.map((m: LiveMatchApi) => ({
-          id: m.id,
-          league: m.league,
-          minute: m.minute,
-          stadium: m.stadium,
-          status: m.status,
-          isDemo: Boolean(m.is_demo),
-          homeTeam: { name: m.home_name, logo: m.home_logo, score: m.home_score ?? 0 },
-          awayTeam: { name: m.away_name, logo: m.away_logo, score: m.away_score ?? 0 },
-        }));
-        setEnVivo(mappedLive);
+      if (Array.isArray(l)) {
+        setEnVivo(l);
       } else {
         setEnVivo([]);
       }
