@@ -18,6 +18,11 @@
 .adm-toast--ok  { background: #16a34a; }
 .adm-toast--err { background: #dc2626; }
 
+/* Sub-tabs (Envios / Productos) */
+.adm-tabs { display: flex; gap: 4px; padding: 0 1.5rem; border-bottom: 2px solid #f0f0f0; background: #fff; }
+.adm-tab { padding: 0.75rem 1.25rem; border: none; border-bottom: 2px solid transparent; background: transparent; color: #84878F; font-size: 0.85rem; font-weight: 400; cursor: pointer; margin-bottom: -2px; transition: color 0.15s ease; font-family: inherit; }
+.adm-tab--active { border-bottom-color: #E90052; color: #E90052; font-weight: 700; }
+
 /* Filter bar */
 .adm-filters { padding: 1.25rem 2rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; border-bottom: 1px solid #e5e7eb; background: #fff; }
 .adm-filters__chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }

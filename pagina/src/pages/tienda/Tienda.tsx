@@ -10,7 +10,7 @@ import type {
   Producto, InventarioItem, Listado, Direccion, Pedido, Comentario,
   Variante, NewDireccionForm, ConfirmAction, SubTab, MarketView, TiendaUser,
 } from "../../components/tienda/types";
-import { API_URL, EMPTY_DIRECCION, TIPOS_REAL } from "../../components/tienda/constants";
+import { API_URL, EMPTY_DIRECCION, TIPOS_REAL, ESTADO_PEDIDO_LABEL } from "../../components/tienda/constants";
 import { tipoLabel } from "../../components/tienda/utils";
 
 import ProductVisual from "../../components/tienda/ProductVisual";
@@ -535,7 +535,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
               {TIPOS_REAL.map(tipo => (
                 <button key={tipo} onClick={() => setFiltroTipo(tipo)}
                   className={filtroTipo === tipo ? "t-chip t-chip--active" : "t-chip"}>
-                  {tipo === "todos" ? "Todos" : tipo === "balonazo" ? "Balón" : tipo === "jersey" ? "Jersey" : tipo === "ropa" ? "Ropa" : "Accesorio"}
+                  {tipo === "todos" ? "Todos" : tipoLabel(tipo)}
                 </button>
               ))}
             </div>
@@ -710,7 +710,6 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
               : (
                 <div className="flex flex-col gap-3">
                   {pedidos.map(p => {
-                    const estadoLabel: Record<string, string> = { procesando: "Procesando", enviado: "Enviado", en_camino: "En camino", entregado: "Entregado", cancelado: "Cancelado" };
                     return (
                       <div key={p.id_pedido} onClick={() => setPedidoModal(p)} className="t-card t-card--pedido">
                         <div className="t-pedido-card-thumb"
@@ -725,7 +724,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                               </p>
                             </div>
                             <span className="t-status-badge--pedido" data-estado={p.estado}>
-                              {estadoLabel[p.estado] || p.estado}
+                              {ESTADO_PEDIDO_LABEL[p.estado] || p.estado}
                             </span>
                           </div>
                           <div className="flex justify-between items-center mt-1.5">
