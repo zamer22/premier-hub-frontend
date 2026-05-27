@@ -51,8 +51,8 @@ export function useProfileCustomization(user: any) {
     if (userImage) setProfileImage(userImage);
 
     Promise.all([
-      fetch(`${API_URL}/api/tienda/mis-items/${user.id_usuario}`).then((r) =>
-        r.json(),
+      fetch(`${API_URL}/api/tienda/mis-items`, { credentials: "include" }).then(
+        (r) => r.json(),
       ),
       fetch(`${API_URL}/api/auth/profile/customization`, {
         credentials: "include",

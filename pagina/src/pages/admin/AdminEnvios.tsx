@@ -39,32 +39,34 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // El backend admin valida id_usuario en query string — adjuntar siempre.
-  const adminQS = useCallback((extra: Record<string, string | number | undefined> = {}) => {
-    const params = new URLSearchParams({ id_usuario: String(user.id_usuario) });
+  // El backend admin identifica al admin via cookie de sesion firmada (middleware requireAdmin).
+  // Aqui solo armamos query params para filtros (estado, q).
+  const filtrosQS = useCallback((extra: Record<string, string | number | undefined> = {}) => {
+    const params = new URLSearchParams();
     Object.entries(extra).forEach(([k, v]) => {
       if (v !== undefined && v !== "") params.set(k, String(v));
     });
     return params.toString();
-  }, [user.id_usuario]);
+  }, []);
 
   const fetchPedidos = useCallback(async () => {
     setLoading(true);
     try {
-      const qs = adminQS({
+      const qs = filtrosQS({
         estado: filtroEstado !== "todos" ? filtroEstado : undefined,
         q: search.trim() || undefined,
       });
-      const r = await fetch(`${API_URL}/api/admin/pedidos?${qs}`);
+      const url = qs ? `${API_URL}/api/admin/pedidos?${qs}` : `${API_URL}/api/admin/pedidos`;
+      const r = await fetch(url, { credentials: "include" });
       const d = await r.json();
       if (d.success) setPedidos(d.data);
       else showToast(d.error || "Error", false);
     } catch {
-      showToast("Error de conexión", false);
+      showToast("Error de conexion", false);
     } finally {
       setLoading(false);
     }
-  }, [filtroEstado, search, adminQS]);
+  }, [filtroEstado, search, filtrosQS]);
 
   // Debounce de la búsqueda; estados cambian sin debounce.
   useEffect(() => {
@@ -85,9 +87,10 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
   const aplicarUpdate = async (body: Record<string, any>) => {
     if (!selected) return null;
-    const r = await fetch(`${API_URL}/api/admin/pedido/${selected.id_pedido}?${adminQS()}`, {
+    const r = await fetch(`${API_URL}/api/admin/pedido/${selected.id_pedido}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(body),
     });
     const d = await r.json();

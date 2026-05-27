@@ -192,8 +192,8 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
       setLoading(true);
       try {
         const [itemsRes, listadosRes] = await Promise.all([
-          fetch(`${API_URL}/api/tienda/mis-items/${user.id_usuario}`),
-          fetch(`${API_URL}/api/marketplace/listados?mios=${user.id_usuario}`),
+          fetch(`${API_URL}/api/tienda/mis-items`, { credentials: "include" }),
+          fetch(`${API_URL}/api/marketplace/listados?mios=true`, { credentials: "include" }),
         ]);
         const [itemsData, listadosData] = await Promise.all([itemsRes.json(), listadosRes.json()]);
         if (!active) return;

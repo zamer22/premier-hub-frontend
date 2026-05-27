@@ -71,18 +71,15 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     setTimeout(() => setToast(null), 2800);
   };
 
-  // Wrapper de fetch que agrega id_usuario tanto en query string como en header — el backend valida ambos.
+  // Wrapper de fetch para /api/admin/*. El backend identifica al admin por la cookie
+  // de sesion firmada (middleware requireAdmin) — ya no se envia id_usuario por el cliente.
   const adminFetch = useCallback(
     async (path: string, init: RequestInit = {}) => {
-      const joiner = path.includes("?") ? "&" : "?";
-      const pathWithAdmin = `${path}${joiner}id_usuario=${encodeURIComponent(String(user.id_usuario))}`;
-
       const headers = new Headers(init.headers);
       if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-      headers.set("x-id-usuario", String(user.id_usuario));
 
       const baseUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
-      const url = `${baseUrl}/api/admin${pathWithAdmin}`;
+      const url = `${baseUrl}/api/admin${path}`;
 
       const res = await fetch(url, { ...init, credentials: "include", headers });
       const text = await res.text();
@@ -97,7 +94,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
       if (!res.ok || !json.success) throw new Error(json.error || "Error de servidor");
       return json;
     },
-    [user.id_usuario],
+    [],
   );
 
   const fetchListados = useCallback(async () => {
@@ -251,7 +248,6 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
       const json = await adminFetch("/marketplace/publicar", {
         method: "POST",
         body: JSON.stringify({
-          id_admin: user.id_usuario,
           id_producto: selectedProductId,
           precio: Number(publishPrice),
         }),
