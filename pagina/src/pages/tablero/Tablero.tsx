@@ -78,6 +78,51 @@ function isCurrentUser(row: LeaderboardItem, me: LeaderboardItem | null) {
   return Boolean(me && row.id_usuario === me.id_usuario);
 }
 
+function Avatar({
+  src,
+  name,
+  size = "md",
+  shape = "circle",
+  ring,
+}: {
+  src: string | null;
+  name: string;
+  size?: "sm" | "md" | "lg";
+  shape?: "circle" | "square";
+  ring?: string;
+}) {
+  const dimensions = {
+    sm: "h-9 w-9 text-[0.72rem]",
+    md: "h-10 w-10 text-[0.76rem]",
+    lg: "h-16 w-16 text-base",
+  }[size];
+
+  const radius = shape === "circle" ? "rounded-full" : "rounded-lg";
+
+  const baseClass = `relative flex ${dimensions} ${radius} shrink-0 items-center justify-center overflow-hidden font-black text-white bg-gradient-to-br from-[#263a55] to-[#162b4d] ${
+    ring ?? ""
+  }`;
+
+  return (
+    <span className={baseClass}>
+      <span className="absolute inset-0 flex items-center justify-center">
+        {getInitials(name)}
+      </span>
+      {src ? (
+        <img
+          src={src}
+          alt={name}
+          className="relative h-full w-full object-cover"
+          loading="lazy"
+          onError={(event) => {
+            event.currentTarget.style.display = "none";
+          }}
+        />
+      ) : null}
+    </span>
+  );
+}
+
 function StatTile({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div
@@ -182,6 +227,7 @@ function MyPositionBanner({ me }: { me: LeaderboardItem | null }) {
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#cf275f] text-[0.78rem] font-black text-white">
           #{me.rank}
         </span>
+        <Avatar src={me.foto_perfil} name={me.username} size="md" shape="circle" />
         <div className="min-w-0">
           <p className="m-0 text-[0.62rem] font-black uppercase tracking-widest text-[#cf275f]">
             Tu posición
@@ -218,7 +264,7 @@ function PodiumCard({ player }: { player: LeaderboardItem }) {
   return (
     <article
       className={`relative flex flex-col items-center overflow-hidden rounded-xl border bg-white px-5 pb-5 pt-6 text-center shadow-sm ${
-        isWinner ? "border-[#162b4d] md:-translate-y-4 md:shadow-md" : "border-[#dde3ec]"
+        isWinner ? "border-[#162b4d] md:shadow-md" : "border-[#dde3ec]"
       }`}
     >
       {medal ? (
@@ -229,13 +275,13 @@ function PodiumCard({ player }: { player: LeaderboardItem }) {
         </span>
       ) : null}
 
-      <div
-        className={`flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#263a55] to-[#162b4d] text-base font-black text-white ${
-          medal?.ring ?? ""
-        }`}
-      >
-        {getInitials(player.username)}
-      </div>
+      <Avatar
+        src={player.foto_perfil}
+        name={player.username}
+        size="lg"
+        shape="circle"
+        ring={medal?.ring}
+      />
 
       <h3 className="m-0 mt-3 max-w-[14rem] truncate text-[1rem] font-black text-[#162b4d]">
         {player.username}
@@ -296,9 +342,7 @@ function LeaderboardRow({ row, me }: { row: LeaderboardItem; me: LeaderboardItem
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#263a55] to-[#162b4d] text-[0.72rem] font-black text-white">
-            {getInitials(row.username)}
-          </span>
+          <Avatar src={row.foto_perfil} name={row.username} size="sm" shape="square" />
           <div className="min-w-0">
             <p className="m-0 truncate text-sm font-black text-[#162b4d]">{row.username}</p>
             {current ? (
@@ -340,9 +384,7 @@ function MobileRow({ row, me }: { row: LeaderboardItem; me: LeaderboardItem | nu
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <RankBadge rank={row.rank} />
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#263a55] to-[#162b4d] text-[0.76rem] font-black text-white">
-            {getInitials(row.username)}
-          </span>
+          <Avatar src={row.foto_perfil} name={row.username} size="md" shape="square" />
           <div className="min-w-0">
             <p className="m-0 truncate text-sm font-black text-[#162b4d]">{row.username}</p>
             <p className="m-0 mt-0.5 text-[0.7rem] font-semibold text-[#7a8494]">
@@ -476,7 +518,7 @@ export default function Tablero() {
 
       {!loading && !error && topPlayer ? (
         <section
-          className="grid gap-4 md:grid-cols-3 md:items-end"
+          className="grid gap-4 md:grid-cols-3 md:items-stretch"
           aria-label="Primeros lugares"
         >
           {second ? (

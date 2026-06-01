@@ -5,6 +5,7 @@ export type LeaderboardItem = {
   rank: number;
   id_usuario: number;
   username: string;
+  foto_perfil: string | null;
   total_points: number;
   games_played: number;
   total_score: number;
