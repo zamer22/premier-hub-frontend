@@ -294,14 +294,34 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
       setSaveMessage("El archivo debe ser una imagen");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setSaveMessage("La imagen debe pesar menos de 5 MB");
+    // Tope generoso solo como guarda; el re-encode reduce mucho el peso final.
+    if (file.size > 15 * 1024 * 1024) {
+      setSaveMessage("La imagen es demasiado grande (máx 15 MB)");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const image = String(reader.result || "");
+    // Re-codificamos en un canvas a JPEG: normaliza el formato (HEIC de iPhone,
+    // PNG, WebP...) a algo que el backend siempre acepta, y reduce el peso.
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = async () => {
+      URL.revokeObjectURL(objectUrl);
+
+      const MAX = 512; // una foto de perfil no necesita más
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        setSaveMessage("No se pudo procesar la imagen");
+        return;
+      }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const image = canvas.toDataURL("image/jpeg", 0.9);
+
       try {
         const res = await fetch(`${API_URL}/api/auth/profile/photo`, {
           method: "POST",
@@ -309,7 +329,9 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ imageData: image, fileName: file.name }),
         });
-        const data = await res.json();
+        const data = await res
+          .json()
+          .catch(() => ({ success: false, error: "Respuesta inválida del servidor" }));
 
         if (!data.success) {
           setSaveMessage(data.error || "No se pudo subir la foto");
@@ -323,7 +345,13 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
         setSaveMessage("No se pudo conectar con el servidor");
       }
     };
-    reader.readAsDataURL(file);
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      setSaveMessage("No se pudo leer la imagen (formato no soportado, prueba JPG o PNG)");
+    };
+
+    img.src = objectUrl;
   };
 
   const saveProfile = async () => {
