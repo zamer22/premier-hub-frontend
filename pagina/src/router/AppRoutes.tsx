@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AuthenticatedLayout from "../layouts/AuthenticatedLayout";
 import type { InventoryItem } from "../hooks/useProfileCustomization";
 import Arcade from "../pages/arcade/Arcade";
+import Foro from "../pages/foro/Foro";
 import Historia from "../pages/historia/Historia";
 import Noticia from "../pages/noticias/Noticia";
 import Noticias from "../pages/noticias/NoticiasLanding";
@@ -101,6 +102,8 @@ export default function AppRoutes({
         <Route path="laboratorio" element={<Laboratorio user={user} />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />
+        <Route path="foro" element={<Foro user={user} />} />
+        <Route path="foro/:postId" element={<Foro user={user} />} />
         <Route path="arcade" element={<Arcade />} />
         <Route path="arcade/wordle" element={<Wordle />} />
         <Route

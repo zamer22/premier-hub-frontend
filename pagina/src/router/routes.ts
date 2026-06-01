@@ -2,6 +2,7 @@ export type Section =
   | "tablero"
   | "partido"
   | "noticias"
+  | "foro"
   | "tienda"
   | "perfil"
   | "vr-arena"
@@ -16,6 +17,7 @@ export const ROUTES: Record<Section, string> = {
   "vr-arena": "/vr-arena",
   tienda: "/tienda",
   noticias: "/noticias",
+  foro: "/foro",
   historia: "/historia",
   arcade: "/arcade",
   perfil: "/perfil",
@@ -30,6 +32,7 @@ export const TABS: { key: Section; label: string; path: string }[] = [
   { key: "vr-arena", label: "VR Arena", path: ROUTES["vr-arena"] },
   { key: "tienda", label: "Tienda", path: ROUTES.tienda },
   { key: "noticias", label: "Noticias", path: ROUTES.noticias },
+  { key: "foro", label: "Foro", path: ROUTES.foro },
   { key: "historia", label: "Historia", path: ROUTES.historia },
   { key: "arcade", label: "Arcade", path: ROUTES.arcade },
 ];
