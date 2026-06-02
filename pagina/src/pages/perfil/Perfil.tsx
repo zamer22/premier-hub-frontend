@@ -182,9 +182,14 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteStep, setDeleteStep] = useState(1);
   const [deleteText, setDeleteText] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
   const [deleteAcknowledged, setDeleteAcknowledged] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+
+  // Detecta si el usuario inicia sesion con contrasena o con Google. Si usa contrasena
+  // (campo no vacio en BD), el flujo de eliminar cuenta exige reingresarla.
+  const usesPassword = Boolean(user.contrasena && String(user.contrasena).length > 0);
 
   useEffect(() => {
     let active = true;
@@ -234,7 +239,11 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
   const activeTitle = getItemByInventoryId(items, customization.titulo_inventario_id);
   const activeBanner = getItemByInventoryId(items, customization.banner_inventario_id);
   const deletePhrase = `ELIMINAR ${user.nickname || ""}`;
-  const canDelete = deleteText === deletePhrase && deleteAcknowledged && !deleteLoading;
+  const canDelete =
+    deleteText === deletePhrase &&
+    deleteAcknowledged &&
+    !deleteLoading &&
+    (!usesPassword || deletePassword.length > 0);
 
   const filterOptions: { key: FilterType; label: string }[] = [
     { key: "todos", label: "Todos" },
@@ -357,6 +366,7 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
     setDeleteModalOpen(false);
     setDeleteStep(1);
     setDeleteText("");
+    setDeletePassword("");
     setDeleteAcknowledged(false);
     setDeleteError("");
   };
@@ -366,11 +376,14 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
     setDeleteLoading(true);
     setDeleteError("");
     try {
+      const body: Record<string, string> = { confirmacion: deletePhrase };
+      if (usesPassword) body.contrasena = deletePassword;
+
       const res = await fetch(`${API_URL}/api/auth/account`, {
         method: "DELETE",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmacion: deletePhrase }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!data.success) {
@@ -393,6 +406,8 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
           step={deleteStep}
           phrase={deletePhrase}
           text={deleteText}
+          password={deletePassword}
+          requiresPassword={usesPassword}
           acknowledged={deleteAcknowledged}
           loading={deleteLoading}
           error={deleteError}
@@ -400,6 +415,7 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
           onClose={closeDeleteModal}
           onStep={setDeleteStep}
           onText={setDeleteText}
+          onPassword={setDeletePassword}
           onAcknowledged={setDeleteAcknowledged}
           onDelete={deleteAccount}
         />,
@@ -694,6 +710,8 @@ function DeleteAccountModal(props: {
   step: number;
   phrase: string;
   text: string;
+  password: string;
+  requiresPassword: boolean;
   acknowledged: boolean;
   loading: boolean;
   error: string;
@@ -701,6 +719,7 @@ function DeleteAccountModal(props: {
   onClose: () => void;
   onStep: (step: number) => void;
   onText: (text: string) => void;
+  onPassword: (password: string) => void;
   onAcknowledged: (value: boolean) => void;
   onDelete: () => void;
 }) {
@@ -726,6 +745,19 @@ function DeleteAccountModal(props: {
             <p style={deleteCopyStyle}>Para confirmar, escribe exactamente:</p>
             <code style={deletePhraseStyle}>{props.phrase}</code>
             <input value={props.text} onChange={(event) => props.onText(event.target.value)} placeholder={props.phrase} autoFocus style={inputStyle} />
+            {props.requiresPassword && (
+              <>
+                <p style={{ ...deleteCopyStyle, marginTop: "0.5rem" }}>Y reingresa tu contrasena:</p>
+                <input
+                  type="password"
+                  value={props.password}
+                  onChange={(event) => props.onPassword(event.target.value)}
+                  placeholder="Tu contrasena actual"
+                  autoComplete="current-password"
+                  style={inputStyle}
+                />
+              </>
+            )}
             <label style={checkboxRowStyle}>
               <input type="checkbox" checked={props.acknowledged} onChange={(event) => props.onAcknowledged(event.target.checked)} />
               <span>Se que esta accion borra mi cuenta y mis datos de forma definitiva.</span>
