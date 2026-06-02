@@ -89,11 +89,11 @@ export default function Simulador() {
     setError(null);
     setResult(null);
     try {
-      const res = await fetch(`${API_URL}/api/simulador/simular`, {
+      const res = await fetch(`${API_URL}/api/simulador/simulacion`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
-          id_usuario: 1,
           partido_data: original,
           cambios: {
             goles_local: golesLocal,
