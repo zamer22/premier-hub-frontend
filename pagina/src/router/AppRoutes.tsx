@@ -11,6 +11,7 @@ import Perfil from "../pages/perfil/Perfil";
 import Laboratorio from "../pages/offseason/OffseasonLab";
 import Tablero from "../pages/tablero/Tablero";
 import Tienda from "../pages/tienda/Tienda";
+import VrArena from "../pages/vr-arena/VrArena";
 import MissingXI from "../components/arcade/missing-xi/MissingXI";
 import Wordle from "../pages/wordle/Wordle";
 import {
@@ -101,6 +102,7 @@ export default function AppRoutes({
         <Route path="laboratorio" element={<Laboratorio user={user} />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />
+        <Route path="vr-arena" element={<VrArena />} />
         <Route path="arcade" element={<Arcade />} />
         <Route path="arcade/wordle" element={<Wordle />} />
         <Route
