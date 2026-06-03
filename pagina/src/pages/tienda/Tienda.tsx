@@ -526,11 +526,10 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         />
 
         {subTab !== "perfil" && subTab !== "pedidos" && (subTab !== "marketplace" || marketView === "explorar") && (
-          <div className="flex flex-wrap items-center gap-3 mb-5">
+          <div className="flex flex-wrap items-center gap-3 mt-4 mb-5">
             <div className="relative flex-1 min-w-[200px]">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs font-semibold pointer-events-none">&#x2315;</span>
               <input type="text" placeholder="Buscar por nombre, equipo..." value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)} className="t-input pl-8" />
+                onChange={(e) => setBusqueda(e.target.value)} className="t-input" />
             </div>
             <div className="flex flex-wrap gap-1">
               {TIPOS_REAL.map(tipo => (
@@ -545,11 +544,10 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
         {subTab === "perfil" && (
           <div>
-            <div className="flex flex-wrap items-center gap-3 mb-8">
+            <div className="flex flex-wrap items-center gap-3 mt-4 mb-8">
               <div className="relative flex-1 min-w-[200px]">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">&#x2315;</span>
                 <input type="text" placeholder="Buscar en toda la tienda..." value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)} className="t-input pl-9" />
+                  onChange={(e) => setBusqueda(e.target.value)} className="t-input" />
               </div>
               {perfilTipos.length > 1 && (
                 <div className="flex flex-wrap gap-1">

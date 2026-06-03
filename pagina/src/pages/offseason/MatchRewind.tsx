@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { crestUrl } from "../laboratorio/ClubGrid";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -51,17 +52,6 @@ const KIND_ABBR: Record<EventKind, string> = {
   var:            "VAR",
 };
 
-function clubInitials(name: string) {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("");
-}
-
-function clubHue(name: string) {
-  let h = 5381;
-  for (let i = 0; i < name.length; i++) h = ((h << 5) + h + name.charCodeAt(i)) & 0xfffffff;
-  return h % 360;
-}
 
 export default function MatchRewind({
   onLoadingChange,
@@ -69,7 +59,6 @@ export default function MatchRewind({
   onLoadingChange: (v: boolean) => void;
 }) {
   const [iconicMatches, setIconicMatches]   = useState<IconicMatch[]>([]);
-  const [fixtureInput, setFixtureInput]     = useState("");
   const [preview, setPreview]               = useState<MatchPreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError]     = useState<string | null>(null);
@@ -87,8 +76,8 @@ export default function MatchRewind({
       .catch(() => {});
   }, []);
 
-  const handleLoadMatch = async (id?: number) => {
-    const fixtureId = id ?? parseInt(fixtureInput);
+  const handleLoadMatch = async (id: number) => {
+    const fixtureId = id;
     if (!fixtureId) return;
     setPreviewLoading(true);
     setPreviewError(null);
@@ -162,48 +151,27 @@ export default function MatchRewind({
           <h2>Seleccionar partido</h2>
         </div>
 
-        {iconicMatches.length > 0 && (
-          <div className="ol-field-group" style={{ marginBottom: "0.65rem" }}>
-            <label className="ol-label">
-              Partidos icónicos
-              <select
-                className="ol-select"
-                defaultValue=""
-                onChange={(e) => { if (e.target.value) handleLoadMatch(Number(e.target.value)); }}
-              >
-                <option value="">Seleccionar partido icónico…</option>
-                {iconicMatches.map((m) => (
-                  <option key={m.fixture_id} value={m.fixture_id}>{m.label}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-        )}
-
-        <p className="ol-section-minor">{iconicMatches.length > 0 ? "O ingresa un ID manual" : "Fixture ID"}</p>
-        <div className="ol-fixture-row">
-          <input
-            type="number"
-            className="ol-input ol-input--grow"
-            placeholder="Fixture ID de API-Football"
-            value={fixtureInput}
-            onChange={(e) => setFixtureInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") handleLoadMatch(); }}
-          />
-          <button
-            type="button"
-            className="ol-secondary"
-            onClick={() => handleLoadMatch()}
-            disabled={!fixtureInput || previewLoading}
-          >
-            {previewLoading ? "Cargando…" : "Cargar"}
-          </button>
+        <div className="ol-field-group" style={{ marginBottom: "0.65rem" }}>
+          <label className="ol-label">
+            Partidos icónicos
+            <select
+              className="ol-select"
+              defaultValue=""
+              onChange={(e) => { if (e.target.value) handleLoadMatch(Number(e.target.value)); }}
+              disabled={iconicMatches.length === 0 || previewLoading}
+            >
+              <option value="">{iconicMatches.length === 0 ? "Cargando partidos…" : "Seleccionar partido icónico…"}</option>
+              {iconicMatches.map((m) => (
+                <option key={m.fixture_id} value={m.fixture_id}>{m.label}</option>
+              ))}
+            </select>
+          </label>
         </div>
         {previewError && <p className="ol-error">{previewError}</p>}
 
         {!preview && !previewLoading && !previewError && (
           <div className="ol-empty" style={{ minHeight: 140 }}>
-            <p>Elige un partido icónico o ingresa un Fixture ID para ver su línea de tiempo.</p>
+            <p>Elige un partido icónico para ver su línea de tiempo.</p>
           </div>
         )}
 
@@ -211,12 +179,7 @@ export default function MatchRewind({
           <>
             <div className="ol-match-ticket">
               <div className="ol-ticket-team">
-                <div
-                  className="ol-club-badge ol-club-badge--md"
-                  style={{ background: `hsl(${clubHue(preview.home_team.name)},52%,32%)` }}
-                >
-                  {clubInitials(preview.home_team.name)}
-                </div>
+                <img src={crestUrl(preview.home_team.id)} alt={preview.home_team.name} className="ol-crest--md" loading="lazy" />
                 <span className="ol-ticket-team-name">{preview.home_team.name}</span>
               </div>
               <div className="ol-ticket-score">
@@ -226,12 +189,7 @@ export default function MatchRewind({
               </div>
               <div className="ol-ticket-team ol-ticket-team--right">
                 <span className="ol-ticket-team-name">{preview.away_team.name}</span>
-                <div
-                  className="ol-club-badge ol-club-badge--md"
-                  style={{ background: `hsl(${clubHue(preview.away_team.name)},52%,32%)` }}
-                >
-                  {clubInitials(preview.away_team.name)}
-                </div>
+                <img src={crestUrl(preview.away_team.id)} alt={preview.away_team.name} className="ol-crest--md" loading="lazy" />
               </div>
             </div>
 
@@ -248,12 +206,7 @@ export default function MatchRewind({
                 <div className="ol-events-columns">
                   <div className="ol-events-col">
                     <p className="ol-events-col-header">
-                      <span
-                        className="ol-club-badge ol-club-badge--xs"
-                        style={{ background: `hsl(${clubHue(preview.home_team.name)},52%,32%)` }}
-                      >
-                        {clubInitials(preview.home_team.name)}
-                      </span>
+                      <img src={crestUrl(preview.home_team.id)} alt={preview.home_team.name} className="ol-crest--xs" loading="lazy" />
                       {preview.home_team.name}
                     </p>
                     {homeEvents.length === 0 && <p className="ol-events-empty">Sin eventos</p>}
@@ -269,12 +222,7 @@ export default function MatchRewind({
 
                   <div className="ol-events-col">
                     <p className="ol-events-col-header">
-                      <span
-                        className="ol-club-badge ol-club-badge--xs"
-                        style={{ background: `hsl(${clubHue(preview.away_team.name)},52%,32%)` }}
-                      >
-                        {clubInitials(preview.away_team.name)}
-                      </span>
+                      <img src={crestUrl(preview.away_team.id)} alt={preview.away_team.name} className="ol-crest--xs" loading="lazy" />
                       {preview.away_team.name}
                     </p>
                     {awayEvents.length === 0 && <p className="ol-events-empty">Sin eventos</p>}

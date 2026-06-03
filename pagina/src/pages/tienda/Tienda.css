@@ -326,17 +326,8 @@
   font-weight: 700;
 }
 .t-bonus-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #E90052;
-  background: transparent;
-  color: #E90052;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
+  display: none;
 }
-.t-bonus-btn:hover { background: #E90052; color: #fff; }
 
 /* Market inner toggle */
 .t-market-toggle { display: inline-flex; background: #f0f2f5; border-radius: 10px; padding: 4px; margin-bottom: 1.25rem; }

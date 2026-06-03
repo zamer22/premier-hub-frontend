@@ -1576,22 +1576,13 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
       <div>
 
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem" }}>
         <div>
           <h2 style={{ color: "#263a55", fontSize: "1.25rem", marginBottom: "0.2rem" }}>Tienda</h2>
           <p style={{ color: "#84878F", fontSize: "0.8rem" }}>Compra con tus puntos</p>
         </div>
         <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-          <button
-            onClick={reclamarBonus}
-            style={{
-              padding: "0.5rem 1rem", borderRadius: "8px", border: "1px solid #E90052",
-              background: "transparent", color: "#E90052", fontSize: "0.8rem", fontWeight: 700,
-              cursor: "pointer", transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#E90052"; (e.currentTarget as HTMLButtonElement).style.color = "#fff"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#E90052"; }}
-          >
+          <button className="t-bonus-btn" onClick={reclamarBonus}>
             + 500 pts bonus
           </button>
           <div style={{ background: "linear-gradient(135deg, #263a55, #1a2a3f)", color: "#fff", padding: "0.5rem 1.25rem", borderRadius: "8px", fontSize: "0.9rem", fontWeight: 700 }}>
@@ -1601,7 +1592,7 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
       </div>
 
       {/* Sub-tabs */}
-      <div style={{ display: "flex", borderBottom: "2px solid #e9ecef", marginBottom: "1.5rem", gap: "0" }}>
+      <div style={{ display: "flex", borderBottom: "2px solid #e9ecef", marginBottom: "2rem", gap: "0" }}>
         {([
           { key: "perfil" as SubTab,       label: "Objetos de Perfil" },
           { key: "real" as SubTab,         label: "Objetos Reales"    },
@@ -1625,14 +1616,13 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
       {subTab !== "perfil" && subTab !== "pedidos" && (subTab !== "marketplace" || marketView === "explorar") && (
         <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.25rem", flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
-            <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.75rem", fontWeight: 600 }}>&#x2315;</span>
             <input
               type="text"
               placeholder="Buscar por nombre, equipo..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               style={{
-                width: "100%", padding: "0.6rem 0.75rem 0.6rem 2.2rem",
+                width: "100%", padding: "0.6rem 0.75rem",
                 borderRadius: "8px", border: "1px solid #e0e0e0", fontSize: "0.85rem",
                 background: "#fff", boxSizing: "border-box", outline: "none",
               }}
@@ -1662,13 +1652,12 @@ const ProductCard = ({ p, badge }: { p: Producto; badge?: string }) => {
           {/* Search + filters */}
           <div style={{ display: "flex", gap: "0.75rem", marginBottom: "2rem", flexWrap: "wrap", alignItems: "center" }}>
             <div style={{ position: "relative", flex: "1", minWidth: "200px" }}>
-              <span style={{ position: "absolute", left: "0.85rem", top: "50%", transform: "translateY(-50%)", color: "#84878F", fontSize: "0.85rem", pointerEvents: "none" }}>&#x2315;</span>
               <input
                 type="text"
                 placeholder="Buscar en toda la tienda..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                style={{ width: "100%", padding: "0.7rem 0.9rem 0.7rem 2.4rem", borderRadius: "10px", border: "1.5px solid #e0e0e0", fontSize: "0.88rem", background: "#fff", boxSizing: "border-box", outline: "none", color: "#263a55" }}
+                style={{ width: "100%", padding: "0.7rem 0.9rem", borderRadius: "10px", border: "1.5px solid #e0e0e0", fontSize: "0.88rem", background: "#fff", boxSizing: "border-box", outline: "none", color: "#263a55" }}
               />
             </div>
             {perfilTipos.length > 1 && (

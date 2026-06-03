@@ -39,7 +39,7 @@ function ComingSoon({ section }: { section: Section }) {
       <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">
         {TABS.find((tab) => tab.key === section)?.label.toUpperCase()}
       </span>
-      <span className="text-muted text-sm">Proximamente</span>
+      <span className="text-muted text-sm">Próximamente</span>
     </div>
   );
 }
@@ -98,8 +98,8 @@ export default function AppRoutes({
             />
           }
         />
-        <Route path="tablero" element={<Tablero />} />
         <Route path="laboratorio" element={<Laboratorio user={user} />} />
+        <Route path="tablero" element={<Tablero />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />
         <Route path="arcade" element={<Arcade />} />
