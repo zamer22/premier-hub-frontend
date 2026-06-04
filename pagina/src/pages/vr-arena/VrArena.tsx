@@ -71,10 +71,10 @@ export default function VrArena() {
 
       <section id="detalles" className="vr-access">
         <div className="vr-access__copy">
-          <h2>Disponible desde Meta.</h2>
+          <h2>Domina cada ronda.</h2>
           <p>
-            El modo portero esta completo y listo para jugarse desde el acceso
-            publicado en Meta.
+            Ataja balones, conserva tu racha y suma puntos para avanzar dentro
+            de la experiencia Premier Hub.
           </p>
         </div>
 
