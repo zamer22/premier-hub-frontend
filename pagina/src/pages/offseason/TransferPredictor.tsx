@@ -16,9 +16,11 @@ type HistoryEntry = { playerName: string; fromClub: string; targetClub: string; 
 export default function TransferPredictor({
   clubs,
   onLoadingChange,
+  onActionSuccess,
 }: {
   clubs: PLClub[];
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [sourceClubId, setSourceClubId] = useState<number | "">("");
   const [players, setPlayers]           = useState<Player[]>([]);
@@ -78,6 +80,7 @@ export default function TransferPredictor({
       setHistory((prev) =>
         [{ playerName: selectedPlayer.name, fromClub: fromName, targetClub: targetName, result: data.data }, ...prev].slice(0, 5)
       );
+      onActionSuccess?.("transfer_predict", { probability: data.data.probability });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {

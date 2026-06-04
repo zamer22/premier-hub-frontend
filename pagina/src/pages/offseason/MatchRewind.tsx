@@ -7,8 +7,10 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function MatchRewind({
   onLoadingChange,
+  onActionSuccess,
 }: {
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [iconicMatches, setIconicMatches]   = useState<IconicMatch[]>([]);
   const [preview, setPreview]               = useState<MatchPreview | null>(null);
@@ -82,6 +84,7 @@ export default function MatchRewind({
       const data = await res.json();
       if (!data.success) { setError(data.message); return; }
       setResult(data.data);
+      onActionSuccess?.("match_rewind", { no_change: data.data.no_change });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {

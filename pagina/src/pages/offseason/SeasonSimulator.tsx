@@ -16,9 +16,11 @@ type ClubResult = { position: number; club: string; club_id: number; avg_pts: nu
 export default function SeasonSimulator({
   clubs,
   onLoadingChange,
+  onActionSuccess,
 }: {
   clubs: PLClub[];
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [sourceClubId, setSourceClubId]     = useState<number | "">("");
   const [players, setPlayers]               = useState<Player[]>([]);
@@ -84,6 +86,7 @@ export default function SeasonSimulator({
       const data = await res.json();
       if (!data.success) { setError(data.message); return; }
       setResult(data.data.table);
+      onActionSuccess?.("season_simulate", { table: data.data.table, num_fichajes: transfers.length });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {
