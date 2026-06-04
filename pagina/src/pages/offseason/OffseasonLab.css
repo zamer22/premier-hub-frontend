@@ -1395,3 +1395,311 @@
 .lab-club-card--active { border-color: #E90052; background: #fff0f4; }
 .lab-club-crest { width: 32px; height: 32px; object-fit: contain; }
 .lab-club-name { font-size: 0.62rem; color: #263a55; text-align: center; line-height: 1.2; font-weight: 500; }
+
+/* ── LabDesafios ─────────────────────────────────────────────────────────────── */
+
+.lab-desafios {
+  margin-top: 0.5rem;
+}
+
+.lab-desafios-hint {
+  margin-left: auto;
+  color: var(--ph-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lab-desafios-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.lab-desafios-group-header {
+  margin-bottom: 0.6rem;
+}
+
+.lab-desafio-tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.65rem;
+  border-radius: var(--ph-radius-pill);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.lab-desafio-tipo-badge--diario {
+  background: rgba(233, 0, 82, 0.08);
+  color: var(--ph-red-600);
+  border: 1px solid rgba(233, 0, 82, 0.2);
+}
+
+.lab-desafio-tipo-badge--semanal {
+  background: rgba(37, 99, 235, 0.07);
+  color: var(--ph-blue-600);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.lab-desafios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.lab-desafio-card {
+  background: var(--ph-surface);
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-md);
+  padding: 0.7rem 0.85rem 0.6rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.lab-desafio-card--completado {
+  opacity: 0.6;
+  border-left: 3px solid var(--ph-green-600);
+}
+
+.lab-desafio-card--listo {
+  border-color: var(--ph-red-600);
+  box-shadow: 0 0 0 3px rgba(233, 0, 82, 0.1);
+  animation: lab-card-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes lab-card-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(233, 0, 82, 0.10); }
+  50%       { box-shadow: 0 0 0 5px rgba(233, 0, 82, 0.22); }
+}
+
+.lab-desafio-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 0.55rem;
+}
+
+.lab-desafio-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.lab-desafio-check {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ph-green-600);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 16px;
+  text-align: center;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.lab-desafio-titulo {
+  margin: 0 0 0.18rem;
+  font-size: 0.83rem;
+  font-weight: 850;
+  color: var(--ph-text-strong);
+  line-height: 1.2;
+}
+
+.lab-desafio-desc {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--ph-muted);
+  line-height: 1.4;
+}
+
+.lab-desafio-pts {
+  flex-shrink: 0;
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--ph-radius-pill);
+  background: rgba(233, 0, 82, 0.08);
+  color: var(--ph-red-600);
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.lab-desafio-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lab-desafio-track {
+  flex: 1;
+  height: 5px;
+  background: var(--ph-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.lab-desafio-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--ph-red-600);
+  transition: width 0.4s ease;
+}
+
+.lab-desafio-fill--listo     { background: var(--ph-red-600); }
+.lab-desafio-fill--completado { background: var(--ph-green-600); }
+.lab-desafio-fill--progreso  { background: var(--ph-red-600); }
+
+.lab-desafio-counter {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ph-muted);
+  white-space: nowrap;
+}
+
+.lab-desafio-pts--done {
+  background: rgba(22, 163, 74, 0.08);
+  color: var(--ph-green-600);
+}
+
+.lab-desafio-reclamar {
+  display: block;
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: var(--ph-radius-md);
+  background: var(--ph-red-600);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.lab-desafio-reclamar:hover:not(:disabled) {
+  background: var(--ph-red-700);
+}
+
+.lab-desafio-reclamar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Skeleton */
+.lab-desafios-skeleton {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.lab-desafio-skeleton-item {
+  height: 76px;
+  border-radius: var(--ph-radius-md);
+  background: linear-gradient(90deg, var(--ph-surface) 25%, var(--ph-border-subtle) 50%, var(--ph-surface) 75%);
+  background-size: 200% 100%;
+  animation: lab-shimmer 1.4s infinite;
+}
+
+@keyframes lab-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 760px) {
+  .lab-desafios-content { grid-template-columns: 1fr; }
+  .lab-desafios-skeleton { grid-template-columns: 1fr; }
+  .lab-desafios-hint { display: none; }
+}
+
+/* ── LabDesafios mini-card (entrada, arriba a la derecha del header) ──────────── */
+
+.lab-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 200px;
+  padding: 0.62rem 0.9rem;
+  text-align: left;
+  background: #ffffff;
+  border: 1.5px solid rgba(26, 26, 46, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.lab-mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.09);
+  border-color: rgba(26, 26, 46, 0.2);
+}
+
+.lab-mini:focus-visible {
+  outline: 2px solid var(--color-crimson, #e90052);
+  outline-offset: 3px;
+}
+
+.lab-mini-accent {
+  width: 3px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--color-crimson, #e90052);
+  flex-shrink: 0;
+}
+
+.lab-mini-title {
+  color: var(--color-navy, #17243a);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Empuja el estado + la flecha a la derecha, dejando el título a la izquierda. */
+.lab-mini-badge {
+  margin-left: auto;
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-crimson, #e90052);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.4;
+  white-space: nowrap;
+  animation: lab-mini-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes lab-mini-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(233, 0, 82, 0.0); }
+  50%      { box-shadow: 0 0 0 4px rgba(233, 0, 82, 0.16); }
+}
+
+.lab-mini-sub {
+  margin-left: auto;
+  color: var(--color-muted, #6b7280);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lab-mini-arrow {
+  flex-shrink: 0;
+  color: var(--color-muted, #6b7280);
+  font-size: 1.05rem;
+  font-weight: 700;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.lab-mini:hover .lab-mini-arrow {
+  transform: translateX(3px);
+  color: var(--color-navy, #17243a);
+}
+
+@media (max-width: 600px) {
+  .lab-mini { width: 100%; }
+}
