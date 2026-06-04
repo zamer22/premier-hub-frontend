@@ -30,21 +30,155 @@ interface AdminTiendaProps {
   user: { id_usuario: number };
 }
 
+type EstadoFilter = "todos" | "activo" | "vendido" | "cancelado";
+type ToastTone = "success" | "error" | "warning";
+
+const EMPTY_NEW_PRODUCT = {
+  nombre: "",
+  descripcion: "",
+  costo: "",
+  stock: "0",
+  imagen: "",
+  es_nuevo: true,
+  es_de_liga: false,
+  categoria: "perfil" as "perfil" | "real",
+  tipo: "",
+  equipo: "",
+  rareza: "",
+  id_temporada: "",
+  publicarMarketplace: false,
+  precioMarketplace: "",
+};
+
+const NEW_PRODUCT_TIPOS = [
+  "marco",
+  "titulo",
+  "banner",
+  "trofeo",
+  "achievement",
+  "foto_perfil",
+  "jersey",
+  "balonazo",
+  "ropa",
+  "accesorio",
+];
+
+const ESTADO_LABEL: Record<string, string> = {
+  activo: "Activo",
+  vendido: "Vendido",
+  cancelado: "Cancelado",
+};
+
+function tipoLabel(tipo?: string | null) {
+  if (!tipo) return "Sin tipo";
+
+  const labels: Record<string, string> = {
+    balonazo: "Balón",
+    foto_perfil: "Foto perfil",
+    achievement: "Achievement",
+    jersey: "Jersey",
+    ropa: "Ropa",
+    accesorio: "Accesorio",
+    marco: "Marco",
+    titulo: "Título",
+    banner: "Banner",
+    trofeo: "Trofeo",
+  };
+
+  return labels[tipo] || tipo;
+}
+
+function categoriaLabel(categoria?: string | null) {
+  if (categoria === "real") return "Objeto real";
+  if (categoria === "perfil") return "Perfil";
+  return "Sin categoría";
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return "Sin fecha";
+
+  return new Date(value).toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof TypeError) return "No se pudo conectar con el backend";
+  if (error instanceof Error) return error.message;
+  return "Error de conexión";
+}
+
+function ProductThumb({
+  item,
+}: {
+  item: { imagen?: string | null; css?: string | null; tipo?: string | null };
+}) {
+  const fallback =
+    item.tipo === "banner"
+      ? "linear-gradient(135deg, #263a55, #E90052)"
+      : item.tipo === "marco"
+        ? "linear-gradient(135deg, #E90052, #f59e0b)"
+        : "linear-gradient(135deg, #263a55, #871d54)";
+
+  return (
+    <div
+      className="adm-store-thumb"
+      style={{
+        background: item.imagen
+          ? `#f0f2f5 url(${item.imagen}) center/cover no-repeat`
+          : item.css || fallback,
+      }}
+    >
+      {!item.imagen && !item.css && (
+        <span>{tipoLabel(item.tipo).slice(0, 2).toUpperCase()}</span>
+      )}
+    </div>
+  );
+}
+
+function ChipGroup({
+  items,
+  value,
+  onChange,
+}: {
+  items: { key: string; label: string; count?: number }[];
+  value: string;
+  onChange: (key: string) => void;
+}) {
+  return (
+    <div className="adm-store-chips">
+      {items.map((item) => (
+        <button
+          key={item.key}
+          type="button"
+          onClick={() => onChange(item.key)}
+          className={value === item.key ? "adm-store-chip is-active" : "adm-store-chip"}
+        >
+          <span>{item.label}</span>
+          {item.count !== undefined && <b>{item.count}</b>}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminTienda({ user }: AdminTiendaProps) {
-  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [toast, setToast] = useState<{
+    msg: string;
+    ok: boolean;
+    title?: string;
+    tone: ToastTone;
+  } | null>(null);
 
   const [listados, setListados] = useState<AdminListado[]>([]);
   const [productos, setProductos] = useState<AdminProduct[]>([]);
   const [loadingMarket, setLoadingMarket] = useState(true);
-  const [loadingCatalog, setLoadingCatalog] = useState(true);
 
   const [marketSearch, setMarketSearch] = useState("");
   const [marketEstado, setMarketEstado] = useState<ListadoEstadoFilter>("todos");
   const [marketTipo, setMarketTipo] = useState("todos");
-
-  const [catalogSearch, setCatalogSearch] = useState("");
-  const [catalogCategoria, setCatalogCategoria] = useState<ProductCategoriaFilter>("todos");
-  const [catalogTipo, setCatalogTipo] = useState("todos");
 
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishSearch, setPublishSearch] = useState("");
@@ -55,6 +189,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newProduct, setNewProduct] = useState(EMPTY_NEW_PRODUCT);
+  const [newProductImageFile, setNewProductImageFile] = useState<File | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
@@ -66,8 +201,8 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   const [confirmCancel, setConfirmCancel] = useState<AdminListado | null>(null);
   const [canceling, setCanceling] = useState(false);
 
-  const showToast = (msg: string, ok = true) => {
-    setToast({ msg, ok });
+  const showToast = (msg: string, ok = true, title?: string, tone?: ToastTone) => {
+    setToast({ msg, ok, title, tone: tone || (ok ? "success" : "error") });
     setTimeout(() => setToast(null), 2800);
   };
 
@@ -76,7 +211,18 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   const adminFetch = useCallback(
     async (path: string, init: RequestInit = {}) => {
       const headers = new Headers(init.headers);
-      if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+
+      if (
+        init.body &&
+        !(init.body instanceof FormData) &&
+        !(init.body instanceof File) &&
+        !(init.body instanceof Blob) &&
+        !headers.has("Content-Type")
+      ) {
+        headers.set("Content-Type", "application/json");
+      }
+
+      headers.set("x-id-usuario", String(user.id_usuario));
 
       const baseUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
       const url = `${baseUrl}/api/admin${path}`;
@@ -110,14 +256,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   }, [adminFetch]);
 
   const fetchCatalogo = useCallback(async () => {
-    setLoadingCatalog(true);
     try {
       const json = await adminFetch("/productos");
       setProductos(json.data || []);
     } catch (error) {
       showToast(getErrorMessage(error), false);
-    } finally {
-      setLoadingCatalog(false);
     }
   }, [adminFetch]);
 
@@ -125,11 +268,6 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     fetchListados();
     fetchCatalogo();
   }, [fetchListados, fetchCatalogo]);
-
-  const productTypes = useMemo(() => {
-    const tipos = productos.map((p) => p.tipo).filter(Boolean) as string[];
-    return ["todos", ...Array.from(new Set(tipos))];
-  }, [productos]);
 
   const marketTypes = useMemo(() => {
     const tipos = listados.map((l) => l.tipo).filter(Boolean) as string[];
@@ -151,21 +289,6 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     });
   }, [listados, marketSearch, marketEstado, marketTipo]);
 
-  const filteredProductos = useMemo(() => {
-    const term = catalogSearch.trim().toLowerCase();
-    return productos.filter((p) => {
-      const matchesText =
-        !term ||
-        p.nombre.toLowerCase().includes(term) ||
-        (p.descripcion || "").toLowerCase().includes(term) ||
-        (p.equipo || "").toLowerCase().includes(term) ||
-        (p.tipo || "").toLowerCase().includes(term);
-      const matchesCategoria = catalogCategoria === "todos" || p.categoria === catalogCategoria;
-      const matchesTipo = catalogTipo === "todos" || p.tipo === catalogTipo;
-      return matchesText && matchesCategoria && matchesTipo;
-    });
-  }, [productos, catalogSearch, catalogCategoria, catalogTipo]);
-
   const productosParaPublicar = useMemo(() => {
     const term = publishSearch.trim().toLowerCase();
     return productos.filter((p) => {
@@ -179,15 +302,18 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   }, [productos, publishSearch]);
 
   const stats = {
-    catalogo: productos.length,
-    perfil: productos.filter((p) => p.categoria === "perfil").length,
-    real: productos.filter((p) => p.categoria === "real").length,
+    publicaciones: listados.length,
     activos: listados.filter((l) => l.estado === "activo").length,
     vendidos: listados.filter((l) => l.estado === "vendido").length,
+    cancelados: listados.filter((l) => l.estado === "cancelado").length,
+    ventasPts: listados
+      .filter((l) => l.estado === "vendido")
+      .reduce((total, l) => total + Number(l.precio || 0), 0),
   };
 
   const openCreate = () => {
     setNewProduct(EMPTY_NEW_PRODUCT);
+    setNewProductImageFile(null);
     setCreateError("");
     setCreateOpen(true);
   };
@@ -201,34 +327,95 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   };
 
   const handleCreateProduct = async () => {
+    const precioMarketplace = Number(newProduct.precioMarketplace);
+
     if (!newProduct.nombre.trim() || newProduct.costo === "" || Number(newProduct.costo) < 0) {
       setCreateError("Nombre y costo válido son requeridos.");
       return;
     }
+
+    if (
+      newProduct.publicarMarketplace &&
+      (!newProduct.precioMarketplace ||
+        !Number.isFinite(precioMarketplace) ||
+        precioMarketplace <= 0)
+    ) {
+      setCreateError("Agrega un precio válido para publicar en marketplace.");
+      return;
+    }
+
     setCreateError("");
     setCreating(true);
 
-    const payload = {
-      nombre: newProduct.nombre.trim(),
-      descripcion: newProduct.descripcion.trim() || null,
-      costo: Number(newProduct.costo),
-      stock: Number(newProduct.stock || 0),
-      imagen: newProduct.imagen.trim() || null,
-      es_nuevo: newProduct.es_nuevo,
-      categoria: newProduct.categoria,
-      tipo: newProduct.tipo || null,
-      equipo: newProduct.equipo.trim() || null,
-      rareza: newProduct.rareza.trim() || null,
-      id_temporada: newProduct.id_temporada ? Number(newProduct.id_temporada) : null,
-      css: null,
-      es_de_liga: newProduct.es_de_liga,
-    };
-
     try {
-      const json = await adminFetch("/productos", { method: "POST", body: JSON.stringify(payload) });
-      setProductos((prev) => [json.data, ...prev]);
+      let imagenUrl = newProduct.imagen.trim() || null;
+
+      if (newProductImageFile) {
+        const formData = new FormData();
+        formData.append("imagen", newProductImageFile);
+
+        const uploadJson = await adminFetch("/productos/imagen", {
+          method: "POST",
+          body: formData,
+        });
+
+        imagenUrl = uploadJson.data.publicUrl;
+      }
+
+      const payload = {
+        nombre: newProduct.nombre.trim(),
+        descripcion: newProduct.descripcion.trim() || null,
+        costo: Number(newProduct.costo),
+        stock: Number(newProduct.stock || 0),
+        imagen: imagenUrl,
+        es_nuevo: newProduct.es_nuevo,
+        categoria: newProduct.categoria,
+        tipo: newProduct.tipo || null,
+        equipo: newProduct.equipo.trim() || null,
+        rareza: newProduct.rareza.trim() || null,
+        id_temporada: newProduct.id_temporada ? Number(newProduct.id_temporada) : null,
+        css: null,
+        es_de_liga: newProduct.es_de_liga,
+      };
+
+      const json = await adminFetch("/productos", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const createdProduct = json.data as Product;
+      setProductos((prev) => [createdProduct, ...prev]);
+
+      if (newProduct.publicarMarketplace) {
+        try {
+          const publishJson = await adminFetch("/marketplace/publicar", {
+            method: "POST",
+            body: JSON.stringify({
+              id_admin: user.id_usuario,
+              id_producto: createdProduct.id_producto,
+              precio: precioMarketplace,
+            }),
+          });
+
+          setListados((prev) => [publishJson.data, ...prev]);
+          showToast(
+            "Ya aparece como publicación activa en marketplace.",
+            true,
+            "Objeto creado y publicado",
+          );
+        } catch (error) {
+          showToast(
+            `No se pudo publicar: ${getErrorMessage(error)}`,
+            false,
+            "Objeto creado",
+            "warning",
+          );
+        }
+      } else {
+        showToast("Se agregó al catálogo base de la tienda.", true, "Objeto creado");
+      }
+
       setCreateOpen(false);
-      showToast("Objeto creado");
     } catch (error) {
       setCreateError(getErrorMessage(error));
     } finally {
@@ -254,7 +441,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
       });
       setListados((prev) => [json.data, ...prev]);
       setPublishOpen(false);
-      showToast("Producto publicado en marketplace");
+      showToast("El producto ya aparece activo en marketplace.", true, "Publicado");
     } catch (error) {
       setPublishError(getErrorMessage(error));
     } finally {
@@ -303,11 +490,29 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     }
   };
 
+  const createButtonText = creating
+    ? newProduct.publicarMarketplace
+      ? "Creando y publicando..."
+      : "Creando..."
+    : newProduct.publicarMarketplace
+      ? "Crear y publicar"
+      : "Crear objeto";
+
   return (
     <div className="adm-store">
       {toast && (
-        <div className={toast.ok ? "adm-store-toast is-ok" : "adm-store-toast is-error"}>
-          {toast.ok ? "✓ " : "✗ "}{toast.msg}
+        <div
+          className={`adm-store-toast is-${toast.tone}`}
+          role={toast.ok ? "status" : "alert"}
+          aria-live="polite"
+        >
+          <span className="adm-store-toast-icon">
+            {toast.tone === "warning" ? "!" : toast.ok ? "✓" : "✕"}
+          </span>
+          <span className="adm-store-toast-copy">
+            <b>{toast.title || (toast.ok ? "Listo" : "No se pudo completar")}</b>
+            <small>{toast.msg}</small>
+          </span>
         </div>
       )}
 
@@ -315,7 +520,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
         <div>
           <p className="adm-store-eyebrow">PremierHub Admin</p>
           <h2>Tienda y Marketplace</h2>
-          <p>Gestiona el catálogo base y las publicaciones activas desde un solo lugar.</p>
+          <p>Gestiona publicaciones, precios y estado de los objetos en marketplace.</p>
         </div>
 
         <div className="adm-store-hero-actions">
@@ -329,11 +534,26 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
       </section>
 
       <section className="adm-store-stats">
-        <div><span>Catálogo</span><b>{stats.catalogo}</b></div>
-        <div><span>Perfil</span><b>{stats.perfil}</b></div>
-        <div><span>Reales</span><b>{stats.real}</b></div>
-        <div><span>Activos</span><b>{stats.activos}</b></div>
-        <div><span>Vendidos</span><b>{stats.vendidos}</b></div>
+        <div>
+          <span>Publicaciones</span>
+          <b>{stats.publicaciones}</b>
+        </div>
+        <div>
+          <span>Activas</span>
+          <b>{stats.activos}</b>
+        </div>
+        <div>
+          <span>Vendidas</span>
+          <b>{stats.vendidos}</b>
+        </div>
+        <div>
+          <span>Canceladas</span>
+          <b>{stats.cancelados}</b>
+        </div>
+        <div>
+          <span>Ventas pts</span>
+          <b>{stats.ventasPts.toLocaleString()}</b>
+        </div>
       </section>
 
       <section className="adm-store-section">
@@ -429,89 +649,211 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
         )}
       </section>
 
-      <section className="adm-store-section">
-        <div className="adm-store-section-head">
-          <div>
-            <h3>Catálogo de tienda</h3>
-            <p>{filteredProductos.length} objetos encontrados</p>
-          </div>
-        </div>
-
-        <div className="adm-store-toolbar">
-          <input
-            value={catalogSearch}
-            onChange={(e) => setCatalogSearch(e.target.value)}
-            placeholder="Buscar objeto, equipo, tipo..."
-            className="adm-store-input"
-          />
-
-          <ChipGroup
-            value={catalogCategoria}
-            onChange={(v) => setCatalogCategoria(v as ProductCategoriaFilter)}
-            items={[
-              { key: "todos", label: "Todo", count: productos.length },
-              { key: "perfil", label: "Perfil", count: productos.filter((p) => p.categoria === "perfil").length },
-              { key: "real", label: "Reales", count: productos.filter((p) => p.categoria === "real").length },
-            ]}
-          />
-
-          <ChipGroup
-            value={catalogTipo}
-            onChange={setCatalogTipo}
-            items={productTypes.map((tipo) => ({
-              key: tipo,
-              label: tipo === "todos" ? "Todos los tipos" : tipoLabel(tipo),
-            }))}
-          />
-        </div>
-
-        {loadingCatalog ? (
-          <p className="adm-store-empty">Cargando catálogo...</p>
-        ) : filteredProductos.length === 0 ? (
-          <p className="adm-store-empty">No hay objetos con esos filtros.</p>
-        ) : (
-          <div className="adm-store-list">
-            {filteredProductos.map((p) => (
-              <article key={p.id_producto} className="adm-store-row">
-                <ProductThumb item={p} />
-
-                <div className="adm-store-row-main">
-                  <div className="adm-store-row-top">
-                    <h4>{p.nombre}</h4>
-                    <div className="adm-store-mini-tags">
-                      {p.es_nuevo && <span>Nuevo</span>}
-                      <span>{categoriaLabel(p.categoria)}</span>
-                    </div>
-                  </div>
-
-                  <p className="adm-store-row-meta">
-                    #{p.id_producto} · {tipoLabel(p.tipo)}
-                    {p.equipo ? ` · ${p.equipo}` : ""}
-                    {p.rareza ? ` · ${p.rareza}` : ""}
-                  </p>
-
-                  <p className="adm-store-row-soft">{p.descripcion || "Sin descripción"}</p>
-                </div>
-
-                <div className="adm-store-row-side">
-                  <strong>{Number(p.costo).toLocaleString()} pts</strong>
-                  <span>Stock: {Number(p.stock || 0)}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
       {createOpen && (
-        <CreateProductModal
-          form={newProduct}
-          onChange={setNewProduct}
-          error={createError}
-          saving={creating}
-          onClose={() => setCreateOpen(false)}
-          onSubmit={handleCreateProduct}
-        />
+        <div className="adm-store-modal-backdrop">
+          <div className="adm-store-modal">
+            <div className="adm-store-modal-head">
+              <div>
+                <h3>Crear objeto</h3>
+                <p>Agrega un item nuevo al catálogo base de la tienda.</p>
+              </div>
+              <button type="button" onClick={() => setCreateOpen(false)}>
+                ×
+              </button>
+            </div>
+
+            <div className="adm-store-form-grid">
+              <label className="adm-store-field">
+                <span>Nombre</span>
+                <input
+                  value={newProduct.nombre}
+                  onChange={(e) => setNewProduct((p) => ({ ...p, nombre: e.target.value }))}
+                  placeholder="Ej. Marco Campeón"
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Costo</span>
+                <input
+                  type="number"
+                  value={newProduct.costo}
+                  onChange={(e) => setNewProduct((p) => ({ ...p, costo: e.target.value }))}
+                  placeholder="1500"
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Categoría</span>
+                <select
+                  value={newProduct.categoria}
+                  onChange={(e) =>
+                    setNewProduct((p) => ({
+                      ...p,
+                      categoria: e.target.value as "perfil" | "real",
+                    }))
+                  }
+                >
+                  <option value="perfil">Perfil</option>
+                  <option value="real">Objeto real</option>
+                </select>
+              </label>
+
+              <label className="adm-store-field">
+                <span>Tipo</span>
+                <select
+                  value={newProduct.tipo}
+                  onChange={(e) => setNewProduct((p) => ({ ...p, tipo: e.target.value }))}
+                >
+                  <option value="">Seleccionar</option>
+                  {NEW_PRODUCT_TIPOS.map((tipo) => (
+                    <option key={tipo} value={tipo}>
+                      {tipoLabel(tipo)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="adm-store-field">
+                <span>Stock</span>
+                <input
+                  type="number"
+                  value={newProduct.stock}
+                  onChange={(e) => setNewProduct((p) => ({ ...p, stock: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Equipo</span>
+                <input
+                  value={newProduct.equipo}
+                  onChange={(e) => setNewProduct((p) => ({ ...p, equipo: e.target.value }))}
+                  placeholder="Opcional"
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Rareza</span>
+                <input
+                  value={newProduct.rareza}
+                  onChange={(e) => setNewProduct((p) => ({ ...p, rareza: e.target.value }))}
+                  placeholder="Common, Rare, Elite..."
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Temporada ID</span>
+                <input
+                  type="number"
+                  value={newProduct.id_temporada}
+                  onChange={(e) =>
+                    setNewProduct((p) => ({ ...p, id_temporada: e.target.value }))
+                  }
+                  placeholder="Opcional"
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Descripción</span>
+                <textarea
+                  value={newProduct.descripcion}
+                  onChange={(e) =>
+                    setNewProduct((p) => ({ ...p, descripcion: e.target.value }))
+                  }
+                  placeholder="Descripción visible en tienda"
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Imagen URL</span>
+                <input
+                  value={newProduct.imagen}
+                  onChange={(e) => setNewProduct((p) => ({ ...p, imagen: e.target.value }))}
+                  placeholder="https://..."
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Imagen desde computadora</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => setNewProductImageFile(e.target.files?.[0] || null)}
+                />
+              </label>
+
+              <div className="adm-store-checks is-wide">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newProduct.es_nuevo}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({ ...p, es_nuevo: e.target.checked }))
+                    }
+                  />
+                  Nuevo
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newProduct.es_de_liga}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({ ...p, es_de_liga: e.target.checked }))
+                    }
+                  />
+                  De liga
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newProduct.publicarMarketplace}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({
+                        ...p,
+                        publicarMarketplace: e.target.checked,
+                      }))
+                    }
+                  />
+                  Publicar en marketplace
+                </label>
+              </div>
+
+              {newProduct.publicarMarketplace && (
+                <label className="adm-store-field is-wide">
+                  <span>Precio en marketplace</span>
+                  <input
+                    type="number"
+                    value={newProduct.precioMarketplace}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({
+                        ...p,
+                        precioMarketplace: e.target.value,
+                      }))
+                    }
+                    placeholder="Ej. 2500"
+                  />
+                </label>
+              )}
+            </div>
+
+            {createError && <p className="adm-store-error">{createError}</p>}
+
+            <div className="adm-store-modal-actions">
+              <button type="button" className="adm-store-btn is-ghost" onClick={() => setCreateOpen(false)}>
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="adm-store-btn is-primary"
+                onClick={handleCreateProduct}
+                disabled={creating}
+              >
+                {createButtonText}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {publishOpen && (
