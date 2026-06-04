@@ -6,7 +6,7 @@
 
 .vr-hero {
   position: relative;
-  min-height: clamp(440px, 56vh, 600px);
+  min-height: clamp(360px, 46vh, 480px);
   overflow: hidden;
   border-radius: 8px;
   background: #101827;
@@ -123,8 +123,7 @@
   gap: 1rem;
 }
 
-.vr-feature,
-.vr-access {
+.vr-feature {
   border: 1px solid var(--ph-border);
   border-radius: 8px;
   background: #ffffff;
@@ -149,8 +148,7 @@
   text-transform: uppercase;
 }
 
-.vr-feature h2,
-.vr-access h2 {
+.vr-feature h2 {
   margin: 0;
   color: var(--ph-text-strong);
   line-height: 1.12;
@@ -162,8 +160,7 @@
   font-size: 1.16rem;
 }
 
-.vr-feature p,
-.vr-access p {
+.vr-feature p {
   margin: 0;
   color: var(--ph-muted);
   line-height: 1.65;
@@ -174,77 +171,9 @@
   font-size: 0.88rem;
 }
 
-.vr-access {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
-  gap: 1.25rem;
-  align-items: center;
-  padding: clamp(1.25rem, 3vw, 2rem);
-}
-
-.vr-access__copy {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.vr-access h2 {
-  max-width: 660px;
-  font-size: clamp(1.5rem, 2.8vw, 2.35rem);
-}
-
-.vr-access p {
-  max-width: 720px;
-  font-size: 0.98rem;
-}
-
-.vr-checklist {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
-}
-
-.vr-check {
-  min-height: 56px;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  background: var(--ph-surface);
-  color: var(--ph-text-strong);
-  font-size: 0.82rem;
-  font-weight: 850;
-  line-height: 1.3;
-}
-
-.vr-check__icon {
-  width: 1.35rem;
-  height: 1.35rem;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  color: #fff;
-  background: var(--ph-green-600);
-}
-
-.vr-check__icon::after {
-  content: "";
-  width: 0.56rem;
-  height: 0.3rem;
-  border-left: 2px solid #fff;
-  border-bottom: 2px solid #fff;
-  transform: rotate(-45deg) translate(1px, -1px);
-}
-
 @media (max-width: 960px) {
-  .vr-feature-grid,
-  .vr-access {
+  .vr-feature-grid {
     grid-template-columns: 1fr;
-  }
-
-  .vr-access {
-    align-items: start;
   }
 }
 
@@ -254,7 +183,7 @@
   }
 
   .vr-hero {
-    min-height: 520px;
+    min-height: 420px;
   }
 
   .vr-hero__shade {
@@ -272,12 +201,7 @@
     width: 100%;
   }
 
-  .vr-feature,
-  .vr-access {
+  .vr-feature {
     padding: 1rem;
-  }
-
-  .vr-checklist {
-    grid-template-columns: 1fr;
   }
 }

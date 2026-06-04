@@ -8,7 +8,7 @@ const featureCards = [
   {
     label: "Modo portero",
     title: "Ataja bajo presion",
-    text: "Enfrenta rondas de 10 balones y demuestra tus reflejos desde la porteria.",
+    text: "Enfrenta rondas de 5 balones y demuestra tus reflejos desde la porteria.",
   },
   {
     label: "Racha de atajadas",
@@ -20,13 +20,6 @@ const featureCards = [
     title: "Gana puntos para comprar objetos",
     text: "Suma puntos en cada partida y usalos en la tienda de la pagina para comprar objetos.",
   },
-] as const;
-
-const checkpoints = [
-  "Rondas de 10 balones",
-  "Contador de racha",
-  "Puntos por atajada",
-  "Objetos en la tienda web",
 ] as const;
 
 export default function VrArena() {
@@ -45,7 +38,7 @@ export default function VrArena() {
             Modo Portero VR
           </h1>
           <p className="vr-hero__lead">
-            Ataja rondas de 10 balones, cuida tu racha y gana puntos para
+            Ataja rondas de 5 balones, cuida tu racha y gana puntos para
             progresar en la tienda del juego.
           </p>
 
@@ -66,25 +59,6 @@ export default function VrArena() {
               <span aria-hidden="true">-&gt;</span>
             </a>
           </div>
-        </div>
-      </section>
-
-      <section id="detalles" className="vr-access">
-        <div className="vr-access__copy">
-          <h2>Domina cada ronda.</h2>
-          <p>
-            Ataja balones, conserva tu racha y suma puntos para avanzar dentro
-            de la experiencia Premier Hub.
-          </p>
-        </div>
-
-        <div className="vr-checklist" aria-label="Caracteristicas del modo portero">
-          {checkpoints.map((checkpoint) => (
-            <span className="vr-check" key={checkpoint}>
-              <span className="vr-check__icon" aria-hidden="true" />
-              {checkpoint}
-            </span>
-          ))}
         </div>
       </section>
 
