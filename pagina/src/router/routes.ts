@@ -37,7 +37,9 @@ export const TABS: { key: Section; label: string; path: string }[] = [
   { key: "arcade", label: "Arcade", path: ROUTES.arcade },
 ];
 
-export const PROXIMAMENTE: Section[] = ["vr-arena"];
+// tablero y vr-arena ya tienen ruta/pagina propia en AppRoutes, asi que
+// ninguna seccion queda como "Proximamente".
+export const PROXIMAMENTE: Section[] = [];
 
 const VALID_SECTIONS: Section[] = [...TABS.map((tab) => tab.key), "perfil"];
 
