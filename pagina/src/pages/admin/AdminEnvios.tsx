@@ -5,12 +5,14 @@ import type { AdminPedido, AdminEnviosProps } from "../../components/admin/types
 import { ESTADOS, ESTADO_LABEL } from "../../components/admin/constants";
 import AdminTrackingMap from "../../components/admin/map/AdminTrackingMap";
 import AdminProducts from "../admin/AdminTienda";
+import AdminForum from "./AdminForum";
+import AdminUsers from "./AdminUsers";
 import "../../estilos/Admin.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
-  const [tab, setTab] = useState<"envios" | "productos">("envios");
+  const [tab, setTab] = useState<"envios" | "productos" | "foro" | "usuarios">("envios");
 
   const [pedidos, setPedidos] = useState<AdminPedido[]>([]);
   const [loading, setLoading] = useState(false);
@@ -232,6 +234,8 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
         {([
           ["envios", "Envíos"],
           ["productos", "Productos"],
+          ["foro", "Foro"],
+          ["usuarios", "Usuarios"],
         ] as const).map(([t, label]) => (
           <button
             key={t}
@@ -262,6 +266,10 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
       {tab === "productos" ? (
         <AdminProducts user={user} />
+      ) : tab === "foro" ? (
+        <AdminForum user={user} />
+      ) : tab === "usuarios" ? (
+        <AdminUsers user={user} />
       ) : (
         <>
           <div className="adm-filters">
