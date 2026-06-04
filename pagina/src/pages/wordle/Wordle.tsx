@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GameInstructions, { type InstructionStep } from "../../components/arcade/GameInstructions";
 import "./Wordle.css";
+
+// Instrucciones del juego "Reto Diario".
+const RETO_DIARIO_TITLE = "Cómo jugar Reto Diario";
+const RETO_DIARIO_STEPS: InstructionStep[] = [
+  { icon: "📅", text: "Observa la pregunta o categoría diaria." },
+  { icon: "✋", text: "Arrastra las 10 tarjetas para ordenar a los jugadores de mayor a menor." },
+  { icon: "🥇", text: "La posición número 1 corresponde al jugador con el valor más alto." },
+  { icon: "✅", text: "Presiona “Confirmar” cuando estés seguro del orden." },
+  { icon: "🟩", text: "Después de confirmar, las posiciones correctas aparecerán en verde y las incorrectas en rojo." },
+  { icon: "🎯", text: "Tu puntuación depende de cuántos jugadores estén exactamente en la posición correcta." },
+  { icon: "🗓️", text: "Solo hay un reto disponible cada día." },
+];
 
 // Tipos de datos que usa el juego.
 interface Player {
@@ -72,6 +85,11 @@ function WordleHeader() {
       >
         ← Volver
       </button>
+      <GameInstructions
+        title={RETO_DIARIO_TITLE}
+        steps={RETO_DIARIO_STEPS}
+        buttonClassName="ml-auto"
+      />
     </div>
   );
 }

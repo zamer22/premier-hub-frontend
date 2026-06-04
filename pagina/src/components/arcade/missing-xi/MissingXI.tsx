@@ -6,6 +6,22 @@ import MatchHeader from "./MatchHeader";
 import Pitch from "./Pitch";
 import PlayerWordle from "./PlayerWordle";
 import GameSummary from "./GameSummary";
+import GameInstructions, { type InstructionStep } from "../GameInstructions";
+
+// Instrucciones del juego "Missing XI".
+const MISSING_XI_TITLE = "Cómo jugar Missing XI";
+const MISSING_XI_STEPS: InstructionStep[] = [
+  { icon: "⚽", text: "Debes descubrir a los 11 titulares del equipo ganador de un partido histórico." },
+  { icon: "🎽", text: "Selecciona una camiseta de la cancha para comenzar a adivinar al jugador." },
+  { icon: "6️⃣", text: "Tienes hasta 6 intentos para descubrir cada jugador." },
+  { icon: "🟩", text: "Las letras verdes están en la posición correcta." },
+  { icon: "🟨", text: "Las letras amarillas pertenecen al nombre, pero están en otra posición." },
+  { icon: "⬛", text: "Las letras oscuras no aparecen en el nombre." },
+  { icon: "💯", text: "Adivinar sin pista otorga 100 puntos." },
+  { icon: "💡", text: "Usar la pista muestra una imagen del jugador y reduce la recompensa a 50 puntos." },
+  { icon: "🏳️", text: "Rendirse o agotar los intentos otorga 0 puntos para ese jugador." },
+  { icon: "🏁", text: "El reto termina cuando todos los jugadores estén acertados o fallados." },
+];
 
 const PUBLIC_LOAD_ERROR =
   "No pudimos cargar el reto diario en este momento. Intenta de nuevo en unos minutos.";
@@ -261,7 +277,12 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
   if (loading) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
-        <div className="mb-4 grid justify-items-start gap-2">
+        <div className="relative mb-4 grid justify-items-start gap-2">
+          <GameInstructions
+            title={MISSING_XI_TITLE}
+            steps={MISSING_XI_STEPS}
+            buttonClassName="absolute right-0 top-0"
+          />
           <BackButton />
           <div>
             <p className="ph-eyebrow">Arcade</p>
@@ -285,7 +306,12 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
   if (errorMsg || !match) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
-        <div className="mb-4 grid justify-items-start gap-2">
+        <div className="relative mb-4 grid justify-items-start gap-2">
+          <GameInstructions
+            title={MISSING_XI_TITLE}
+            steps={MISSING_XI_STEPS}
+            buttonClassName="absolute right-0 top-0"
+          />
           <BackButton />
           <div>
             <p className="ph-eyebrow">Arcade</p>
@@ -314,7 +340,12 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
   if (gameOver && selectedId === null) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
-        <div className="mb-5 grid justify-items-start gap-3">
+        <div className="relative mb-5 grid justify-items-start gap-3">
+          <GameInstructions
+            title={MISSING_XI_TITLE}
+            steps={MISSING_XI_STEPS}
+            buttonClassName="absolute right-0 top-0"
+          />
           <BackButton />
           <div>
             <p className="ph-eyebrow">Arcade</p>
@@ -338,7 +369,12 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
     <main className="ph-page min-w-0 overflow-x-clip max-[520px]:gap-[0.85rem]">
 
       {/* Back button + title */}
-      <div className="mb-[clamp(0.5rem,1.4vh,1rem)] grid justify-items-start gap-2 [@media_(min-width:841px)_and_(max-height:700px)]:mb-[0.35rem]">
+      <div className="relative mb-[clamp(0.5rem,1.4vh,1rem)] grid justify-items-start gap-2 [@media_(min-width:841px)_and_(max-height:700px)]:mb-[0.35rem]">
+        <GameInstructions
+          title={MISSING_XI_TITLE}
+          steps={MISSING_XI_STEPS}
+          buttonClassName="absolute right-0 top-0 z-10"
+        />
         <BackButton />
         <div>
           <p className="ph-eyebrow">Arcade</p>
