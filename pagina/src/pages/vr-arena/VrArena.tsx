@@ -41,13 +41,6 @@ export default function VrArena() {
         <div className="vr-hero__shade" />
 
         <div className="vr-hero__content">
-          <span
-            className="vr-kicker vr-kicker--tooltip"
-            data-tooltip="Juego terminado y disponible desde Meta con acceso directo."
-            tabIndex={0}
-          >
-            Publicado en Meta
-          </span>
           <h1 id="vr-title" className="vr-hero__title">
             Modo Portero VR
           </h1>
@@ -69,31 +62,15 @@ export default function VrArena() {
                 if (!hasMetaAccess) event.preventDefault();
               }}
             >
-              {hasMetaAccess ? "Empezar ronda" : "Acceso no disponible"}
+              {hasMetaAccess ? "Descargar" : "Acceso no disponible"}
               <span aria-hidden="true">-&gt;</span>
             </a>
           </div>
         </div>
-
-        <div className="vr-hero__status" aria-label="Estado del juego">
-          <span className="vr-status-dot" />
-          Publicado en Meta
-        </div>
-      </section>
-
-      <section className="vr-feature-grid" aria-label="Resumen del modo portero VR">
-        {featureCards.map((feature) => (
-          <article className="vr-feature" key={feature.title}>
-            <span className="vr-feature__label">{feature.label}</span>
-            <h2>{feature.title}</h2>
-            <p>{feature.text}</p>
-          </article>
-        ))}
       </section>
 
       <section id="detalles" className="vr-access">
         <div className="vr-access__copy">
-          <span className="vr-kicker">Juego terminado</span>
           <h2>Disponible desde Meta.</h2>
           <p>
             El modo portero esta completo y listo para jugarse desde el acceso
@@ -109,6 +86,16 @@ export default function VrArena() {
             </span>
           ))}
         </div>
+      </section>
+
+      <section className="vr-feature-grid" aria-label="Resumen del modo portero VR">
+        {featureCards.map((feature) => (
+          <article className="vr-feature" key={feature.title}>
+            <span className="vr-feature__label">{feature.label}</span>
+            <h2>{feature.title}</h2>
+            <p>{feature.text}</p>
+          </article>
+        ))}
       </section>
     </main>
   );
