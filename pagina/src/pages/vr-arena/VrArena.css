@@ -6,7 +6,7 @@
 
 .vr-hero {
   position: relative;
-  min-height: clamp(520px, 68vh, 720px);
+  min-height: clamp(440px, 56vh, 600px);
   overflow: hidden;
   border-radius: 8px;
   background: #101827;
@@ -40,7 +40,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(2rem, 5vw, 5rem);
+  padding: clamp(1.5rem, 4vw, 4rem);
 }
 
 .vr-kicker {
@@ -60,21 +60,62 @@
   text-transform: uppercase;
 }
 
+.vr-kicker--tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.vr-kicker--tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  left: 0;
+  z-index: 10;
+  width: min(320px, calc(100vw - 2rem));
+  padding: 0.72rem 0.78rem;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.86);
+  background: rgba(15, 23, 42, 0.94);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.vr-kicker--tooltip:hover::after,
+.vr-kicker--tooltip:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vr-kicker--tooltip:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+}
+
 .vr-hero__title {
-  margin: 1.1rem 0 0;
+  margin: 0.95rem 0 0;
   color: #ffffff;
-  font-size: clamp(3rem, 7vw, 6.4rem);
-  line-height: 0.94;
+  font-size: clamp(2.8rem, 5.2vw, 4.9rem);
+  line-height: 0.96;
   font-weight: 950;
   letter-spacing: 0;
 }
 
 .vr-hero__lead {
-  margin: 1.15rem 0 0;
+  margin: 1rem 0 0;
   max-width: 580px;
   color: rgba(255, 255, 255, 0.82);
-  font-size: clamp(1rem, 1.7vw, 1.18rem);
-  line-height: 1.7;
+  font-size: clamp(0.98rem, 1.35vw, 1.08rem);
+  line-height: 1.6;
   font-weight: 620;
 }
 
@@ -83,7 +124,7 @@
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-top: 1.75rem;
+  margin-top: 1.45rem;
 }
 
 .vr-button {
@@ -303,7 +344,7 @@
   }
 
   .vr-hero {
-    min-height: 600px;
+    min-height: 520px;
   }
 
   .vr-hero__shade {
@@ -313,7 +354,7 @@
 
   .vr-hero__content {
     justify-content: flex-start;
-    padding: 2rem 1.15rem 5rem;
+    padding: 1.5rem 1.15rem 4.25rem;
   }
 
   .vr-hero__actions,

@@ -1,32 +1,32 @@
-import heroImage from "../../assets/vr-alpha-hero.png";
+import heroImage from "../../assets/vr-hero.png";
 import "./VrArena.css";
 
-const ALPHA_ACCESS_URL = "https://www.meta.com/s/cBrqPyVuj";
-const hasAlphaAccess = ALPHA_ACCESS_URL.trim().length > 0;
+const META_ACCESS_URL = "https://www.meta.com/s/cBrqPyVuj";
+const hasMetaAccess = META_ACCESS_URL.trim().length > 0;
 
 const featureCards = [
   {
-    label: "Modo alpha",
-    title: "Acceso cerrado",
-    text: "La entrada al build se controla desde un link directo para mantener pruebas ordenadas.",
+    label: "Modo portero",
+    title: "Ataja bajo presion",
+    text: "Enfrenta rondas de 10 balones y demuestra tus reflejos desde la porteria.",
   },
   {
-    label: "VR Arena",
-    title: "Estadio inmersivo",
-    text: "Una experiencia pensada para entrar al campo, mirar jugadas y sentir la escala del estadio.",
+    label: "Racha de atajadas",
+    title: "Encadena paradas perfectas",
+    text: "Cada balon detenido aumenta tu racha y te reta a superar tu mejor marca.",
   },
   {
-    label: "Premier Hub",
-    title: "Fans primero",
-    text: "La pagina conecta el juego con la comunidad sin depender de cambios en backend o Docker.",
+    label: "Puntos y tienda web",
+    title: "Gana puntos para comprar objetos",
+    text: "Suma puntos en cada partida y usalos en la tienda de la pagina para comprar objetos.",
   },
 ] as const;
 
 const checkpoints = [
-  "Build alpha privado",
-  "Acceso por invitacion",
-  "Experiencia VR de futbol",
-  "Pruebas con usuarios reales",
+  "Rondas de 10 balones",
+  "Contador de racha",
+  "Puntos por atajada",
+  "Objetos en la tienda web",
 ] as const;
 
 export default function VrArena() {
@@ -41,44 +41,47 @@ export default function VrArena() {
         <div className="vr-hero__shade" />
 
         <div className="vr-hero__content">
-          <span className="vr-kicker">Premier Hub VR</span>
+          <span
+            className="vr-kicker vr-kicker--tooltip"
+            data-tooltip="Juego terminado y disponible desde Meta con acceso directo."
+            tabIndex={0}
+          >
+            Publicado en Meta
+          </span>
           <h1 id="vr-title" className="vr-hero__title">
-            VR Arena Alpha
+            Modo Portero VR
           </h1>
           <p className="vr-hero__lead">
-            Entra a la primera version jugable de la experiencia VR de Premier
-            Hub desde un acceso directo y privado.
+            Ataja rondas de 10 balones, cuida tu racha y gana puntos para
+            progresar en la tienda del juego.
           </p>
 
           <div className="vr-hero__actions">
             <a
               className={`vr-button vr-button--primary${
-                hasAlphaAccess ? "" : " is-disabled"
+                hasMetaAccess ? "" : " is-disabled"
               }`}
-              href={hasAlphaAccess ? ALPHA_ACCESS_URL : undefined}
+              href={hasMetaAccess ? META_ACCESS_URL : undefined}
               target="_blank"
               rel="noreferrer"
-              aria-disabled={!hasAlphaAccess}
+              aria-disabled={!hasMetaAccess}
               onClick={(event) => {
-                if (!hasAlphaAccess) event.preventDefault();
+                if (!hasMetaAccess) event.preventDefault();
               }}
             >
-              {hasAlphaAccess ? "Abrir alpha" : "Link alpha pendiente"}
+              {hasMetaAccess ? "Empezar ronda" : "Acceso no disponible"}
               <span aria-hidden="true">-&gt;</span>
-            </a>
-            <a className="vr-button vr-button--secondary" href="#detalles">
-              Ver detalles
             </a>
           </div>
         </div>
 
-        <div className="vr-hero__status" aria-label="Estado del alpha">
+        <div className="vr-hero__status" aria-label="Estado del juego">
           <span className="vr-status-dot" />
-          Alpha privada
+          Publicado en Meta
         </div>
       </section>
 
-      <section className="vr-feature-grid" aria-label="Resumen de VR Arena">
+      <section className="vr-feature-grid" aria-label="Resumen del modo portero VR">
         {featureCards.map((feature) => (
           <article className="vr-feature" key={feature.title}>
             <span className="vr-feature__label">{feature.label}</span>
@@ -90,16 +93,15 @@ export default function VrArena() {
 
       <section id="detalles" className="vr-access">
         <div className="vr-access__copy">
-          <span className="vr-kicker">Acceso alpha</span>
-          <h2>Un punto de entrada simple para probar el juego.</h2>
+          <span className="vr-kicker">Juego terminado</span>
+          <h2>Disponible desde Meta.</h2>
           <p>
-            Esta pantalla vive completamente en el frontend. Cuando el link del
-            build este listo, el boton principal mandara directo a la version
-            alpha sin depender de cambios de infraestructura.
+            El modo portero esta completo y listo para jugarse desde el acceso
+            publicado en Meta.
           </p>
         </div>
 
-        <div className="vr-checklist" aria-label="Caracteristicas del alpha">
+        <div className="vr-checklist" aria-label="Caracteristicas del modo portero">
           {checkpoints.map((checkpoint) => (
             <span className="vr-check" key={checkpoint}>
               <span className="vr-check__icon" aria-hidden="true" />
