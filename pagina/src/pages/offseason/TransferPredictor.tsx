@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import type { PLClub } from "../../components/offseason/types";
-import ClubGrid from "../laboratorio/ClubGrid";
+import ClubGrid from "../../components/offseason/ClubGrid";
+import {
+  clubInitials, clubHue, posAbbr,
+  fitLabel, fitClass, gaugeColor,
+} from "../../components/offseason/utils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const CIRC = 2 * Math.PI * 42; // circunferencia para r=42
@@ -9,42 +13,14 @@ type Player = { id: number; name: string; age: number; position: string };
 type PredictResult = { probability: number; fit_score: "Low" | "Medium" | "High"; reasons: string[] };
 type HistoryEntry = { playerName: string; fromClub: string; targetClub: string; result: PredictResult };
 
-function fitLabel(s: string) {
-  if (s === "High")   return "Alto";
-  if (s === "Medium") return "Medio";
-  return "Bajo";
-}
-
-function fitClass(s: string) {
-  if (s === "High")   return "ol-fit--high";
-  if (s === "Medium") return "ol-fit--medium";
-  return "ol-fit--low";
-}
-
-function gaugeColor(p: number) {
-  if (p >= 65) return "var(--ph-green-600)";
-  if (p >= 40) return "var(--ph-amber-500)";
-  return "var(--ph-danger-600)";
-}
-
-function clubInitials(name: string) {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("");
-}
-
-function clubHue(name: string) {
-  let h = 5381;
-  for (let i = 0; i < name.length; i++) h = ((h << 5) + h + name.charCodeAt(i)) & 0xfffffff;
-  return h % 360;
-}
-
 export default function TransferPredictor({
   clubs,
   onLoadingChange,
+  onActionSuccess,
 }: {
   clubs: PLClub[];
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [sourceClubId, setSourceClubId] = useState<number | "">("");
   const [players, setPlayers]           = useState<Player[]>([]);
@@ -104,6 +80,7 @@ export default function TransferPredictor({
       setHistory((prev) =>
         [{ playerName: selectedPlayer.name, fromClub: fromName, targetClub: targetName, result: data.data }, ...prev].slice(0, 5)
       );
+      onActionSuccess?.("transfer_predict", { probability: data.data.probability });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {
@@ -353,12 +330,4 @@ export default function TransferPredictor({
       </section>
     </div>
   );
-}
-
-function posAbbr(pos: string) {
-  const p = pos.toLowerCase();
-  if (p.includes("goal")) return "POR";
-  if (p.includes("defend")) return "DEF";
-  if (p.includes("midfield")) return "MED";
-  return "DEL";
 }

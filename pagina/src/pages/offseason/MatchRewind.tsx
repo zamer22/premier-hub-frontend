@@ -1,62 +1,16 @@
 import { useEffect, useState } from "react";
-import { crestUrl } from "../laboratorio/ClubGrid";
+import { crestUrl } from "../../components/offseason/ClubGrid";
+import type { IconicMatch, MatchPreview, RewindResult } from "../../components/offseason/types";
+import EventRow, { KIND_ABBR } from "../../components/offseason/EventRow";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type IconicMatch = { fixture_id: number; label: string };
-
-type EventKind =
-  | "goal" | "penalty" | "own_goal" | "red_card"
-  | "missed_penalty" | "yellow_card" | "substitution" | "var";
-
-type MatchEvent = {
-  id: string;
-  minute: number;
-  team: "home" | "away";
-  team_name: string;
-  player_name: string;
-  kind: EventKind;
-  removable: boolean;
-  label: string;
-  detail: string;
-};
-
-type TeamInfo = { id: number; name: string };
-
-type MatchPreview = {
-  fixture_id: number;
-  home_team: TeamInfo;
-  away_team: TeamInfo;
-  score: { home: number; away: number };
-  match_minutes: number;
-  events: MatchEvent[];
-};
-
-type KeyChange = { description: string; xg_delta: number };
-type RewindResult = {
-  original_score: { home: number; away: number };
-  predicted_score: { home: number; away: number };
-  key_changes: KeyChange[];
-  no_change: boolean;
-};
-
-// Abreviatura por tipo de evento (sin emojis)
-const KIND_ABBR: Record<EventKind, string> = {
-  goal:           "GOL",
-  penalty:        "PEN",
-  own_goal:       "PPG",
-  red_card:       "ROJA",
-  missed_penalty: "FALLO",
-  yellow_card:    "AMA",
-  substitution:   "CAM",
-  var:            "VAR",
-};
-
-
 export default function MatchRewind({
   onLoadingChange,
+  onActionSuccess,
 }: {
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [iconicMatches, setIconicMatches]   = useState<IconicMatch[]>([]);
   const [preview, setPreview]               = useState<MatchPreview | null>(null);
@@ -130,6 +84,7 @@ export default function MatchRewind({
       const data = await res.json();
       if (!data.success) { setError(data.message); return; }
       setResult(data.data);
+      onActionSuccess?.("match_rewind", { no_change: data.data.no_change });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {
@@ -349,45 +304,5 @@ export default function MatchRewind({
         )}
       </section>
     </div>
-  );
-}
-
-function EventRow({
-  event,
-  selected,
-  onToggle,
-}: {
-  event: MatchEvent;
-  selected: boolean;
-  onToggle: (id: string) => void;
-}) {
-  const inner = (
-    <>
-      <span className="ol-event-minute">{event.minute}'</span>
-      <span className="ol-event-icon">{KIND_ABBR[event.kind]}</span>
-      <div className="ol-event-info">
-        <span className="ol-event-player">{event.player_name}</span>
-        <span className="ol-event-type">
-          {event.label}{event.detail ? ` · ${event.detail}` : ""}
-        </span>
-      </div>
-      {event.removable && (
-        <span className="ol-event-check">{selected ? "✕" : "+"}</span>
-      )}
-    </>
-  );
-
-  if (!event.removable) {
-    return <div className="ol-event-card ol-event-card--context">{inner}</div>;
-  }
-
-  return (
-    <button
-      type="button"
-      className={`ol-event-card${selected ? " ol-event-card--selected" : ""}`}
-      onClick={() => onToggle(event.id)}
-    >
-      {inner}
-    </button>
   );
 }

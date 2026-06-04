@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { PLClub } from "../../components/offseason/types";
-import ClubGrid from "../laboratorio/ClubGrid";
+import ClubGrid from "../../components/offseason/ClubGrid";
+import { clubInitials, clubHue, posAbbr, posBg, posColor } from "../../components/offseason/utils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -12,48 +13,14 @@ type Transfer = {
 };
 type ClubResult = { position: number; club: string; club_id: number; avg_pts: number; avg_pts_base: number; title_odds_delta: number };
 
-function clubInitials(name: string) {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("");
-}
-
-function clubHue(name: string) {
-  let h = 5381;
-  for (let i = 0; i < name.length; i++) h = ((h << 5) + h + name.charCodeAt(i)) & 0xfffffff;
-  return h % 360;
-}
-
-function posBg(pos: string) {
-  const p = pos.toLowerCase();
-  if (p.includes("goal"))    return "#e0f2fe";
-  if (p.includes("defend"))  return "#dcfce7";
-  if (p.includes("midfield")) return "#fef9c3";
-  return "#fce7f3";
-}
-
-function posColor(pos: string) {
-  const p = pos.toLowerCase();
-  if (p.includes("goal"))    return "#0369a1";
-  if (p.includes("defend"))  return "#15803d";
-  if (p.includes("midfield")) return "#854d0e";
-  return "#9d174d";
-}
-
-function posAbbr(pos: string) {
-  const p = pos.toLowerCase();
-  if (p.includes("goal"))    return "POR";
-  if (p.includes("defend"))  return "DEF";
-  if (p.includes("midfield")) return "MED";
-  return "DEL";
-}
-
 export default function SeasonSimulator({
   clubs,
   onLoadingChange,
+  onActionSuccess,
 }: {
   clubs: PLClub[];
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [sourceClubId, setSourceClubId]     = useState<number | "">("");
   const [players, setPlayers]               = useState<Player[]>([]);
@@ -119,6 +86,7 @@ export default function SeasonSimulator({
       const data = await res.json();
       if (!data.success) { setError(data.message); return; }
       setResult(data.data.table);
+      onActionSuccess?.("season_simulate", { table: data.data.table, num_fichajes: transfers.length });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {
