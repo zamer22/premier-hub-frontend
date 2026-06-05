@@ -4,6 +4,7 @@ import TransferVisual from "./visuals/TransferVisual";
 import SimulatorVisual from "./visuals/SimulatorVisual";
 import RewindVisual from "./visuals/RewindVisual";
 import type { OffseasonTab } from "./types";
+import LabDesafiosBanner from "./LabDesafiosBanner";
 
 type ModuleCard = {
   key: OffseasonTab;
@@ -38,16 +39,18 @@ const MODULE_CARDS: ModuleCard[] = [
 ];
 
 type Props = {
-  onSelect: (tab: OffseasonTab) => void;
+  onSelect: (tab: OffseasonTab | "desafios") => void;
+  refreshKey?: number;
 };
 
-export default function LabHome({ onSelect }: Props) {
+export default function LabHome({ onSelect, refreshKey = 0 }: Props) {
   return (
     <main className="ph-page">
       <PageHeader
         eyebrow="Laboratorio"
         title="Laboratorio Premier"
         subtitle="Explora escenarios hipotéticos de la Premier League con modelos de ML. Predice fichajes, simula temporadas completas y revive partidos históricos."
+        actions={<LabDesafiosBanner onOpen={() => onSelect("desafios")} refreshKey={refreshKey} />}
       />
 
       <div className="ol-module-grid">

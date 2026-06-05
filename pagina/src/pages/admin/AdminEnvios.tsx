@@ -10,10 +10,12 @@ import EnviosFilters from "../../components/admin/EnviosFilters";
 import OrderList from "../../components/admin/OrderList";
 import OrderDetailPane from "../../components/admin/OrderDetailPane";
 import AdminProducts from "./AdminTienda";
+import AdminForum from "./AdminForum";
+import AdminUsers from "./AdminUsers";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type AdminTab = "envios" | "productos";
+type AdminTab = "envios" | "productos" | "foro" | "usuarios";
 
 export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
   const [tab, setTab] = useState<AdminTab>("envios");
@@ -173,6 +175,8 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
         items={[
           { key: "envios",     label: "Envíos" },
           { key: "productos",  label: "Productos" },
+          { key: "foro",       label: "Foro" },
+          { key: "usuarios",   label: "Usuarios" },
         ]}
       />
 
@@ -180,6 +184,10 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
       {tab === "productos" ? (
         <AdminProducts user={user} />
+      ) : tab === "foro" ? (
+        <AdminForum user={user} />
+      ) : tab === "usuarios" ? (
+        <AdminUsers user={user} />
       ) : (
         <>
           <EnviosFilters

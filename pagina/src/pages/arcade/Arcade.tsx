@@ -18,7 +18,7 @@ export default function Arcade() {
       <PageHeader
         eyebrow="Arcade"
         title="Elige un reto de Premier Hub"
-        subtitle="Juegos rápidos basados en datos, rankings y preguntas diarias de la Premier League."
+        subtitle="Juegos rápidos basados en datos, clasificaciones y preguntas diarias de la Premier League."
       />
 
       <section
@@ -155,6 +155,7 @@ export default function Arcade() {
             </span>
           </div>
         </Link>
+
       </section>
     </main>
   );

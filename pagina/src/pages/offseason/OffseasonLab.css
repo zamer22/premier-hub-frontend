@@ -1395,3 +1395,686 @@
 .lab-club-card--active { border-color: #E90052; background: #fff0f4; }
 .lab-club-crest { width: 32px; height: 32px; object-fit: contain; }
 .lab-club-name { font-size: 0.62rem; color: #263a55; text-align: center; line-height: 1.2; font-weight: 500; }
+
+/* ── LabDesafios ─────────────────────────────────────────────────────────────── */
+
+.lab-desafios {
+  margin-top: 0.5rem;
+}
+
+.lab-desafios-hint {
+  margin-left: auto;
+  color: var(--ph-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lab-desafios-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.lab-desafios-group-header {
+  margin-bottom: 0.6rem;
+}
+
+.lab-desafio-tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.65rem;
+  border-radius: var(--ph-radius-pill);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.lab-desafio-tipo-badge--diario {
+  background: rgba(233, 0, 82, 0.08);
+  color: var(--ph-red-600);
+  border: 1px solid rgba(233, 0, 82, 0.2);
+}
+
+.lab-desafio-tipo-badge--semanal {
+  background: rgba(37, 99, 235, 0.07);
+  color: var(--ph-blue-600);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.lab-desafios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.lab-desafio-card {
+  background: var(--ph-surface);
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-md);
+  padding: 0.7rem 0.85rem 0.6rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.lab-desafio-card--completado {
+  opacity: 0.6;
+  border-left: 3px solid var(--ph-green-600);
+}
+
+.lab-desafio-card--listo {
+  border-color: var(--ph-red-600);
+  box-shadow: 0 0 0 3px rgba(233, 0, 82, 0.1);
+  animation: lab-card-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes lab-card-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(233, 0, 82, 0.10); }
+  50%       { box-shadow: 0 0 0 5px rgba(233, 0, 82, 0.22); }
+}
+
+.lab-desafio-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 0.55rem;
+}
+
+.lab-desafio-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.lab-desafio-check {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ph-green-600);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 16px;
+  text-align: center;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.lab-desafio-titulo {
+  margin: 0 0 0.18rem;
+  font-size: 0.83rem;
+  font-weight: 850;
+  color: var(--ph-text-strong);
+  line-height: 1.2;
+}
+
+.lab-desafio-desc {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--ph-muted);
+  line-height: 1.4;
+}
+
+.lab-desafio-pts {
+  flex-shrink: 0;
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--ph-radius-pill);
+  background: rgba(233, 0, 82, 0.08);
+  color: var(--ph-red-600);
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.lab-desafio-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lab-desafio-track {
+  flex: 1;
+  height: 5px;
+  background: var(--ph-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.lab-desafio-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--ph-red-600);
+  transition: width 0.4s ease;
+}
+
+.lab-desafio-fill--listo     { background: var(--ph-red-600); }
+.lab-desafio-fill--completado { background: var(--ph-green-600); }
+.lab-desafio-fill--progreso  { background: var(--ph-red-600); }
+
+.lab-desafio-counter {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ph-muted);
+  white-space: nowrap;
+}
+
+.lab-desafio-pts--done {
+  background: rgba(22, 163, 74, 0.08);
+  color: var(--ph-green-600);
+}
+
+.lab-desafio-reclamar {
+  display: block;
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: var(--ph-radius-md);
+  background: var(--ph-red-600);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.lab-desafio-reclamar:hover:not(:disabled) {
+  background: var(--ph-red-700);
+}
+
+.lab-desafio-reclamar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Skeleton */
+.lab-desafios-skeleton {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.lab-desafio-skeleton-item {
+  height: 76px;
+  border-radius: var(--ph-radius-md);
+  background: linear-gradient(90deg, var(--ph-surface) 25%, var(--ph-border-subtle) 50%, var(--ph-surface) 75%);
+  background-size: 200% 100%;
+  animation: lab-shimmer 1.4s infinite;
+}
+
+@keyframes lab-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 760px) {
+  .lab-desafios-content { grid-template-columns: 1fr; }
+  .lab-desafios-skeleton { grid-template-columns: 1fr; }
+  .lab-desafios-hint { display: none; }
+}
+
+/* ── LabDesafios mini-card (entrada, arriba a la derecha del header) ──────────── */
+
+.lab-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 200px;
+  padding: 0.62rem 0.9rem;
+  text-align: left;
+  background: #ffffff;
+  border: 1.5px solid rgba(26, 26, 46, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.lab-mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.09);
+  border-color: rgba(26, 26, 46, 0.2);
+}
+
+.lab-mini:focus-visible {
+  outline: 2px solid var(--color-crimson, #e90052);
+  outline-offset: 3px;
+}
+
+.lab-mini-accent {
+  width: 3px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--color-crimson, #e90052);
+  flex-shrink: 0;
+}
+
+.lab-mini-title {
+  color: var(--color-navy, #17243a);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Empuja el estado + la flecha a la derecha, dejando el título a la izquierda. */
+.lab-mini-badge {
+  margin-left: auto;
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-crimson, #e90052);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.4;
+  white-space: nowrap;
+  animation: lab-mini-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes lab-mini-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(233, 0, 82, 0.0); }
+  50%      { box-shadow: 0 0 0 4px rgba(233, 0, 82, 0.16); }
+}
+
+.lab-mini-sub {
+  margin-left: auto;
+  color: var(--color-muted, #6b7280);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lab-mini-arrow {
+  flex-shrink: 0;
+  color: var(--color-muted, #6b7280);
+  font-size: 1.05rem;
+  font-weight: 700;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.lab-mini:hover .lab-mini-arrow {
+  transform: translateX(3px);
+  color: var(--color-navy, #17243a);
+}
+
+@media (max-width: 600px) {
+  .lab-mini { width: 100%; }
+}
+
+/* ── Layout apilado (selección arriba, resultados abajo) ──────────────────────── */
+
+.ol-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Fila de selectores compactos (club / jugador / club) */
+.ol-picker-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.ol-form-actions {
+  margin-top: 1rem;
+}
+
+/* ── Picker trigger (botón que abre el modal) ────────────────────────────────── */
+
+.ol-picker-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 42px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-xs);
+  background: var(--ph-surface-raised);
+  color: var(--ph-text-strong);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.ol-picker-trigger:hover:not(:disabled) { border-color: var(--ph-border-strong); }
+.ol-picker-trigger:focus-visible {
+  outline: none;
+  border-color: var(--ph-red-600);
+  box-shadow: 0 0 0 3px var(--ph-ring);
+}
+.ol-picker-trigger:disabled { opacity: 0.55; cursor: not-allowed; }
+.ol-picker-trigger--filled { border-color: var(--ph-border-strong); }
+
+.ol-picker-trigger-crest { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
+
+.ol-picker-trigger-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ol-picker-trigger-placeholder {
+  flex: 1;
+  color: var(--ph-muted);
+  font-weight: 650;
+}
+
+.ol-picker-trigger-tag {
+  flex-shrink: 0;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--ph-radius-pill);
+  background: var(--ph-surface-soft);
+  border: 1px solid var(--ph-border);
+  color: var(--ph-muted);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.ol-picker-trigger-chevron {
+  flex-shrink: 0;
+  color: var(--ph-muted);
+  font-size: 0.8rem;
+}
+
+/* ── Picker / instructivo overlay ────────────────────────────────────────────── */
+
+.ol-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  animation: ol-fade-in 0.16s ease;
+}
+
+@keyframes ol-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ol-picker-modal {
+  width: min(640px, 100%);
+  max-height: min(80vh, 640px);
+  display: flex;
+  flex-direction: column;
+  background: var(--ph-surface-raised);
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+  animation: ol-slide-up 0.2s ease;
+}
+
+.ol-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid var(--ph-border-subtle);
+}
+
+.ol-picker-title {
+  margin: 0;
+  color: var(--ph-text-strong);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.ol-picker-close {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-xs);
+  background: transparent;
+  color: var(--ph-muted);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.ol-picker-close:hover {
+  background: var(--ph-surface-soft);
+  color: var(--ph-text);
+  border-color: var(--ph-border-strong);
+}
+
+.ol-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 0.6rem;
+  padding: 1.15rem;
+  overflow-y: auto;
+}
+
+.ol-picker-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--ph-muted);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+/* ── Picker cards (clubes / jugadores) ───────────────────────────────────────── */
+
+.ol-picker-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0.5rem;
+  border: 1.5px solid var(--ph-border);
+  border-radius: var(--ph-radius-md);
+  background: var(--ph-surface);
+  cursor: pointer;
+  transition: border-color 0.14s ease, background 0.14s ease, transform 0.14s ease;
+}
+
+.ol-picker-card:hover:not(:disabled) {
+  border-color: var(--ph-border-strong);
+  background: var(--ph-surface-soft);
+  transform: translateY(-2px);
+}
+
+.ol-picker-card--active {
+  border-color: var(--ph-red-600);
+  background: rgba(233, 0, 82, 0.06);
+}
+
+.ol-picker-card:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ol-picker-card-crest { width: 46px; height: 46px; object-fit: contain; }
+
+.ol-picker-card-name {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--ph-text);
+  text-align: center;
+  line-height: 1.25;
+}
+
+.ol-picker-card-pos {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ph-muted);
+  text-align: center;
+}
+
+/* Avatar de jugador con foto + fallback de iniciales */
+.ol-picker-avatar {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--ph-surface-soft);
+}
+
+.ol-picker-avatar--sm { width: 26px; height: 26px; }
+
+.ol-picker-avatar-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--ph-muted);
+  background: var(--ph-surface-soft);
+}
+
+.ol-picker-avatar--sm .ol-picker-avatar-fallback { font-size: 0.58rem; }
+
+.ol-picker-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Botón + modal instructivo ("¿Cómo funciona?") ───────────────────────────── */
+
+.ol-help-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-pill);
+  background: var(--ph-surface-raised);
+  color: var(--ph-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+
+.ol-help-btn:hover {
+  border-color: var(--ph-navy-700);
+  color: var(--ph-navy-700);
+  background: var(--ph-surface-soft);
+}
+
+.ol-help-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ph-navy-700);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.ol-help-modal {
+  width: min(480px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--ph-surface-raised);
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+  animation: ol-slide-up 0.2s ease;
+}
+
+.ol-help-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.2rem 1.3rem 0.5rem;
+}
+
+.ol-help-title {
+  margin: 0;
+  color: var(--ph-text-strong);
+  font-size: 1.1rem;
+  font-weight: 950;
+}
+
+.ol-help-intro {
+  margin: 0 1.3rem 0.5rem;
+  color: var(--ph-muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.ol-help-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 1.3rem 1.4rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ol-help-step {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.ol-help-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--ph-red-600);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.ol-help-step-body { flex: 1; min-width: 0; }
+
+.ol-help-step-title {
+  margin: 0 0 0.15rem;
+  color: var(--ph-text-strong);
+  font-size: 0.88rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.ol-help-step-text {
+  margin: 0;
+  color: var(--ph-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .ol-picker-row { grid-template-columns: 1fr; }
+}

@@ -2,13 +2,23 @@ import { useEffect, useState } from "react";
 import { crestUrl } from "../../components/offseason/ClubGrid";
 import type { IconicMatch, MatchPreview, RewindResult } from "../../components/offseason/types";
 import EventRow, { KIND_ABBR } from "../../components/offseason/EventRow";
+import InstructivoModal from "../../components/offseason/InstructivoModal";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const INSTRUCTIVO_PASOS = [
+  { titulo: "Elige un partido", detalle: "Selecciona uno de los partidos icónicos de la lista para cargar su línea de tiempo." },
+  { titulo: "Quita eventos clave", detalle: "Marca los goles o tarjetas rojas que quieres borrar del partido para construir el escenario hipotético." },
+  { titulo: "Calcula el resultado", detalle: "El modelo recalcula el marcador como si esos eventos nunca hubieran pasado." },
+  { titulo: "Compara", detalle: "Abajo verás el resultado real contra el alternativo y por qué cambió." },
+];
+
 export default function MatchRewind({
   onLoadingChange,
+  onActionSuccess,
 }: {
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [iconicMatches, setIconicMatches]   = useState<IconicMatch[]>([]);
   const [preview, setPreview]               = useState<MatchPreview | null>(null);
@@ -82,6 +92,7 @@ export default function MatchRewind({
       const data = await res.json();
       if (!data.success) { setError(data.message); return; }
       setResult(data.data);
+      onActionSuccess?.("match_rewind", { no_change: data.data.no_change });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {
@@ -95,12 +106,17 @@ export default function MatchRewind({
   const removableCount = homeEvents.length + awayEvents.length;
 
   return (
-    <div className="ol-grid">
-      {/* ── Panel izquierdo ─────────────────────────────────────────────── */}
+    <div className="ol-stack">
+      {/* ── Selección ───────────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title">
           <span className="ol-accent" />
           <h2>Seleccionar partido</h2>
+          <InstructivoModal
+            titulo="Match Rewind"
+            intro="Revive un partido histórico y cambia su desenlace quitando goles o expulsiones clave."
+            pasos={INSTRUCTIVO_PASOS}
+          />
         </div>
 
         <div className="ol-field-group" style={{ marginBottom: "0.65rem" }}>
@@ -194,7 +210,7 @@ export default function MatchRewind({
         )}
       </section>
 
-      {/* ── Panel derecho ────────────────────────────────────────────────── */}
+      {/* ── Resultado (abajo) ────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title ol-section-title--navy">
           <span className="ol-accent ol-accent--navy" />
