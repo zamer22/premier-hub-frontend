@@ -46,15 +46,12 @@ interface LiveMatchApi {
 
 interface PastMatchApi {
   id: number;
+  date: string;
   league: string;
   stadium: string;
-  home_name: string;
-  home_logo: string;
-  home_score: number;
-  away_name: string;
-  away_logo: string;
-  away_score: number;
-  archived_at: string;
+  round: string;
+  homeTeam: { name: string; logo: string; score: number };
+  awayTeam: { name: string; logo: string; score: number };
 }
 
 function PartidoPageHeader() {
@@ -97,7 +94,7 @@ export default function Partido({ user }: { user: any }) {
         fetchSection("/api/partidos/proximos"),
         fetchSection("/api/partidos/standings"),
         fetchSection("/api/partidos/live"),
-        fetchSection("/api/partidos/historial/pasados"),
+        fetchSection("/api/partidos/api-football/pasados"),
       ]);
 
       if (p?.success && Array.isArray(p.data)) {
@@ -119,23 +116,39 @@ export default function Partido({ user }: { user: any }) {
           homeTeam: { name: m.home_name, logo: m.home_logo, score: m.home_score ?? 0 },
           awayTeam: { name: m.away_name, logo: m.away_logo, score: m.away_score ?? 0 },
         }));
+
         setEnVivo(mappedLive);
       } else {
         setEnVivo([]);
       }
 
-      if (pa?.success && Array.isArray(pa.data)) {
-        const mappedPast: PastMatch[] = pa.data.map((m: PastMatchApi) => ({
-          id: m.id,
-          date: m.archived_at,
-          league: m.league,
-          stadium: m.stadium,
-          round: m.league,
-          homeTeam: { name: m.home_name, logo: m.home_logo, score: m.home_score },
-          awayTeam: { name: m.away_name, logo: m.away_logo, score: m.away_score },
-        }));
-        setPasados(mappedPast);
-      }
+if (pa?.success && Array.isArray(pa.data)) {
+  const mappedPast: PastMatch[] = pa.data.map((m: PastMatchApi) => ({
+    id: m.id,
+    date: m.date,
+    league: m.league,
+    stadium: m.stadium,
+    round: m.round,
+    homeTeam: {
+      name: m.homeTeam.name,
+      logo: m.homeTeam.logo,
+      score: m.homeTeam.score,
+    },
+    awayTeam: {
+      name: m.awayTeam.name,
+      logo: m.awayTeam.logo,
+      score: m.awayTeam.score,
+    },
+  }));
+
+  setPasados(
+    mappedPast
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5)
+  );
+} else {
+  setPasados([]);
+}
 
       if (!p && !s && !l && !pa) {
         setError("No se pudieron cargar los datos de partidos.");
@@ -165,16 +178,33 @@ export default function Partido({ user }: { user: any }) {
   const renderLastFive = (form?: string) => {
     if (!form) return <span className="partido_form-empty">-</span>;
     const results = form.slice(-5).split("");
+
     return (
       <div className="partido_form">
         {results.map((result, index) => {
           let className = "partido_form-badge partido_form-badge--neutral";
           let symbol = "•";
           let label = "Sin dato";
-          if (result === "W") { className = "partido_form-badge partido_form-badge--win"; symbol = "✓"; label = "Victoria"; }
-          else if (result === "D") { className = "partido_form-badge partido_form-badge--draw"; symbol = "–"; label = "Empate"; }
-          else if (result === "L") { className = "partido_form-badge partido_form-badge--loss"; symbol = "✕"; label = "Derrota"; }
-          return <span key={`${result}-${index}`} className={className} title={label}>{symbol}</span>;
+
+          if (result === "W") {
+            className = "partido_form-badge partido_form-badge--win";
+            symbol = "✓";
+            label = "Victoria";
+          } else if (result === "D") {
+            className = "partido_form-badge partido_form-badge--draw";
+            symbol = "–";
+            label = "Empate";
+          } else if (result === "L") {
+            className = "partido_form-badge partido_form-badge--loss";
+            symbol = "✕";
+            label = "Derrota";
+          }
+
+          return (
+            <span key={`${result}-${index}`} className={className} title={label}>
+              {symbol}
+            </span>
+          );
         })}
       </div>
     );
@@ -186,9 +216,11 @@ export default function Partido({ user }: { user: any }) {
         <img src={m.teams.home.logo} alt={m.teams.home.name} className="partido_team-logo" />
         <span className="partido_match-team">{m.teams.home.name}</span>
       </div>
+
       <div className="partido_match-score">
         {m.goals.home !== null ? `${m.goals.home} - ${m.goals.away}` : "vs"}
       </div>
+
       <div className="partido_match-side partido_match-side--away">
         <span className="partido_match-team">{m.teams.away.name}</span>
         <img src={m.teams.away.logo} alt={m.teams.away.name} className="partido_team-logo" />
@@ -196,7 +228,6 @@ export default function Partido({ user }: { user: any }) {
     </div>
   );
 
-  // Renders condicionales
   if (selectedLiveMatch) {
     return <PartidosVivo match={selectedLiveMatch} onBack={() => setSelectedLiveMatch(null)} user={user} />;
   }
@@ -226,8 +257,8 @@ export default function Partido({ user }: { user: any }) {
   return (
     <div className="ph-page">
       <PartidoPageHeader />
-      <div className="partido">
 
+      <div className="partido">
         {/* Tabla de Posiciones */}
         <div className="partido_standings">
           <div className="partido_section-header">
@@ -247,6 +278,7 @@ export default function Partido({ user }: { user: any }) {
                     ))}
                   </tr>
                 </thead>
+
                 <tbody>
                   {standings.map((s, i) => (
                     <tr key={s.rank} className={i % 2 === 0 ? "partido_tr--even" : "partido_tr--odd"}>
@@ -263,8 +295,17 @@ export default function Partido({ user }: { user: any }) {
                       <td className="partido_td">{s.all.lose}</td>
                       <td className="partido_td">{s.all.goals.for}</td>
                       <td className="partido_td">{s.all.goals.against}</td>
-                      <td className={`partido_td ${s.goalsDiff > 0 ? "partido_goal-diff--positive" : s.goalsDiff < 0 ? "partido_goal-diff--negative" : "partido_goal-diff--neutral"}`}>
-                        {s.goalsDiff > 0 ? "+" : ""}{s.goalsDiff}
+                      <td
+                        className={`partido_td ${
+                          s.goalsDiff > 0
+                            ? "partido_goal-diff--positive"
+                            : s.goalsDiff < 0
+                              ? "partido_goal-diff--negative"
+                              : "partido_goal-diff--neutral"
+                        }`}
+                      >
+                        {s.goalsDiff > 0 ? "+" : ""}
+                        {s.goalsDiff}
                       </td>
                       <td className="partido_td partido_td--form">{renderLastFive(s.form)}</td>
                       <td className="partido_td partido_points">{s.points}</td>
@@ -300,15 +341,20 @@ export default function Partido({ user }: { user: any }) {
                     <img src={m.homeTeam.logo} alt={m.homeTeam.name} className="partido_live-team-logo" />
                     <span>{m.homeTeam.name}</span>
                   </div>
+
                   <div className="partido_live-score-block">
-                    <div className="partido_live-score">{m.homeTeam.score} - {m.awayTeam.score}</div>
+                    <div className="partido_live-score">
+                      {m.homeTeam.score} - {m.awayTeam.score}
+                    </div>
                     <span className="partido_live-minute">{m.minute}</span>
                   </div>
+
                   <div className="partido_live-team">
                     <img src={m.awayTeam.logo} alt={m.awayTeam.name} className="partido_live-team-logo" />
                     <span>{m.awayTeam.name}</span>
                   </div>
                 </div>
+
                 <div className="partido_live-card-footer">
                   <span className="partido_live-badge">EN VIVO</span>
                   <span className="partido_live-stadium">{m.stadium || m.league}</span>
@@ -324,7 +370,9 @@ export default function Partido({ user }: { user: any }) {
             <div className="partido_accent" />
             <h3 className="partido_subtitle">Próximos partidos</h3>
           </div>
+
           {proximos.length === 0 && <p className="partido_empty">Sin próximos partidos</p>}
+
           {proximos.map((m) => (
             <div key={m.fixture.id}>
               <p className="partido_match-date">{formatDate(m.fixture.date)}</p>
@@ -333,28 +381,29 @@ export default function Partido({ user }: { user: any }) {
           ))}
         </div>
 
-        {/* Resultados Recientes — desde past_matches con click */}
+        {/* Resultados Recientes */}
         <div>
           <div className="partido_section-header partido_section-header--small">
             <div className="partido_accent" />
             <h3 className="partido_subtitle">Resultados recientes</h3>
           </div>
+
           {pasados.length === 0 && <p className="partido_empty">Sin resultados recientes</p>}
+
           {pasados.map((m) => (
-            <div
-              key={m.id}
-              className="partido_match-link"
-              onClick={() => setSelectedPastMatch(m)}
-            >
+            <div key={m.id} className="partido_match-link" onClick={() => setSelectedPastMatch(m)}>
               <p className="partido_match-date">{formatDate(m.date)}</p>
+
               <div className="partido_match-card">
                 <div className="partido_match-side">
                   <img src={m.homeTeam.logo} alt={m.homeTeam.name} className="partido_team-logo" />
                   <span className="partido_match-team">{m.homeTeam.name}</span>
                 </div>
+
                 <div className="partido_match-score">
                   {m.homeTeam.score} - {m.awayTeam.score}
                 </div>
+
                 <div className="partido_match-side partido_match-side--away">
                   <span className="partido_match-team">{m.awayTeam.name}</span>
                   <img src={m.awayTeam.logo} alt={m.awayTeam.name} className="partido_team-logo" />
@@ -363,7 +412,6 @@ export default function Partido({ user }: { user: any }) {
             </div>
           ))}
         </div>
-
       </div>
     </div>
   );

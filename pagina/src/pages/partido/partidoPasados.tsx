@@ -31,7 +31,7 @@ interface MatchStat {
 }
 
 interface LineupPlayer {
-  player_number: number;
+  player_number: number | null;
   player_name: string;
   is_sub: boolean;
   team: "home" | "away";
@@ -96,12 +96,14 @@ function eventLabel(type: string, detail: string): string {
     if (detail === "Missed Penalty") return "Penal fallado";
     return "Gol";
   }
+
   if (type === "Card") {
     if (detail === "Yellow Card") return "Amarilla";
     if (detail === "Red Card") return "Roja";
     if (detail === "Yellow Red Card") return "Segunda amarilla";
     return detail;
   }
+
   if (type === "subst") return "Sustitución";
   if (type === "Var") return "VAR";
   return detail;
@@ -247,11 +249,21 @@ export default function PartidoPasado({ match, onBack }: Props) {
   const [lineupsError, setLineupsError] = useState("");
 
   useEffect(() => {
+    const detailUrl = `${API_URL}/api/partidos/api-football/historial/${match.id}`;
+
+    setEvents([]);
+    setStats([]);
+    setLineups([]);
+
+    setEventsError("");
+    setStatsError("");
+    setLineupsError("");
+
     setLoadingEvents(true);
     setLoadingStats(true);
     setLoadingLineups(true);
 
-    fetch(`${API_URL}/api/partidos/historial/${match.id}/eventos`)
+    fetch(`${detailUrl}/eventos`)
       .then((r) => r.json())
       .then((json) => {
         if (json.success) setEvents(json.data);
@@ -260,7 +272,7 @@ export default function PartidoPasado({ match, onBack }: Props) {
       .catch(() => setEventsError("Error de conexión."))
       .finally(() => setLoadingEvents(false));
 
-    fetch(`${API_URL}/api/partidos/historial/${match.id}/stats`)
+    fetch(`${detailUrl}/stats`)
       .then((r) => r.json())
       .then((json) => {
         if (json.success) setStats(json.data);
@@ -269,7 +281,7 @@ export default function PartidoPasado({ match, onBack }: Props) {
       .catch(() => setStatsError("Error de conexión."))
       .finally(() => setLoadingStats(false));
 
-    fetch(`${API_URL}/api/partidos/historial/${match.id}/lineups`)
+    fetch(`${detailUrl}/lineups`)
       .then((r) => r.json())
       .then((json) => {
         if (json.success) setLineups(json.data);
