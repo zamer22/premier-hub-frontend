@@ -1703,3 +1703,378 @@
 @media (max-width: 600px) {
   .lab-mini { width: 100%; }
 }
+
+/* ── Layout apilado (selección arriba, resultados abajo) ──────────────────────── */
+
+.ol-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Fila de selectores compactos (club / jugador / club) */
+.ol-picker-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.ol-form-actions {
+  margin-top: 1rem;
+}
+
+/* ── Picker trigger (botón que abre el modal) ────────────────────────────────── */
+
+.ol-picker-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 42px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-xs);
+  background: var(--ph-surface-raised);
+  color: var(--ph-text-strong);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.ol-picker-trigger:hover:not(:disabled) { border-color: var(--ph-border-strong); }
+.ol-picker-trigger:focus-visible {
+  outline: none;
+  border-color: var(--ph-red-600);
+  box-shadow: 0 0 0 3px var(--ph-ring);
+}
+.ol-picker-trigger:disabled { opacity: 0.55; cursor: not-allowed; }
+.ol-picker-trigger--filled { border-color: var(--ph-border-strong); }
+
+.ol-picker-trigger-crest { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
+
+.ol-picker-trigger-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ol-picker-trigger-placeholder {
+  flex: 1;
+  color: var(--ph-muted);
+  font-weight: 650;
+}
+
+.ol-picker-trigger-tag {
+  flex-shrink: 0;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--ph-radius-pill);
+  background: var(--ph-surface-soft);
+  border: 1px solid var(--ph-border);
+  color: var(--ph-muted);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.ol-picker-trigger-chevron {
+  flex-shrink: 0;
+  color: var(--ph-muted);
+  font-size: 0.8rem;
+}
+
+/* ── Picker / instructivo overlay ────────────────────────────────────────────── */
+
+.ol-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  animation: ol-fade-in 0.16s ease;
+}
+
+@keyframes ol-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ol-picker-modal {
+  width: min(640px, 100%);
+  max-height: min(80vh, 640px);
+  display: flex;
+  flex-direction: column;
+  background: var(--ph-surface-raised);
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+  animation: ol-slide-up 0.2s ease;
+}
+
+.ol-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid var(--ph-border-subtle);
+}
+
+.ol-picker-title {
+  margin: 0;
+  color: var(--ph-text-strong);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.ol-picker-close {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-xs);
+  background: transparent;
+  color: var(--ph-muted);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.ol-picker-close:hover {
+  background: var(--ph-surface-soft);
+  color: var(--ph-text);
+  border-color: var(--ph-border-strong);
+}
+
+.ol-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 0.6rem;
+  padding: 1.15rem;
+  overflow-y: auto;
+}
+
+.ol-picker-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--ph-muted);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+/* ── Picker cards (clubes / jugadores) ───────────────────────────────────────── */
+
+.ol-picker-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0.5rem;
+  border: 1.5px solid var(--ph-border);
+  border-radius: var(--ph-radius-md);
+  background: var(--ph-surface);
+  cursor: pointer;
+  transition: border-color 0.14s ease, background 0.14s ease, transform 0.14s ease;
+}
+
+.ol-picker-card:hover:not(:disabled) {
+  border-color: var(--ph-border-strong);
+  background: var(--ph-surface-soft);
+  transform: translateY(-2px);
+}
+
+.ol-picker-card--active {
+  border-color: var(--ph-red-600);
+  background: rgba(233, 0, 82, 0.06);
+}
+
+.ol-picker-card:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ol-picker-card-crest { width: 46px; height: 46px; object-fit: contain; }
+
+.ol-picker-card-name {
+  font-size: 0.72rem;
+  font-weight: 750;
+  color: var(--ph-text);
+  text-align: center;
+  line-height: 1.25;
+}
+
+.ol-picker-card-pos {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ph-muted);
+  text-align: center;
+}
+
+/* Avatar de jugador con foto + fallback de iniciales */
+.ol-picker-avatar {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--ph-surface-soft);
+}
+
+.ol-picker-avatar--sm { width: 26px; height: 26px; }
+
+.ol-picker-avatar-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--ph-muted);
+  background: var(--ph-surface-soft);
+}
+
+.ol-picker-avatar--sm .ol-picker-avatar-fallback { font-size: 0.58rem; }
+
+.ol-picker-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Botón + modal instructivo ("¿Cómo funciona?") ───────────────────────────── */
+
+.ol-help-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-pill);
+  background: var(--ph-surface-raised);
+  color: var(--ph-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+
+.ol-help-btn:hover {
+  border-color: var(--ph-navy-700);
+  color: var(--ph-navy-700);
+  background: var(--ph-surface-soft);
+}
+
+.ol-help-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ph-navy-700);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.ol-help-modal {
+  width: min(480px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--ph-surface-raised);
+  border: 1px solid var(--ph-border);
+  border-radius: var(--ph-radius-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+  animation: ol-slide-up 0.2s ease;
+}
+
+.ol-help-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.2rem 1.3rem 0.5rem;
+}
+
+.ol-help-title {
+  margin: 0;
+  color: var(--ph-text-strong);
+  font-size: 1.1rem;
+  font-weight: 950;
+}
+
+.ol-help-intro {
+  margin: 0 1.3rem 0.5rem;
+  color: var(--ph-muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.ol-help-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 1.3rem 1.4rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ol-help-step {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.ol-help-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--ph-red-600);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.ol-help-step-body { flex: 1; min-width: 0; }
+
+.ol-help-step-title {
+  margin: 0 0 0.15rem;
+  color: var(--ph-text-strong);
+  font-size: 0.88rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.ol-help-step-text {
+  margin: 0;
+  color: var(--ph-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .ol-picker-row { grid-template-columns: 1fr; }
+}

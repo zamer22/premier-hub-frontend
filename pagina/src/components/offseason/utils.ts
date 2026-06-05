@@ -1,5 +1,10 @@
 // Helpers compartidos entre TransferPredictor / SeasonSimulator / MatchRewind.
 
+// Foto del jugador (API-Football media CDN). Si el id no tiene foto, la imagen
+// falla y los pickers muestran el fallback con iniciales.
+export const playerPhotoUrl = (id: number) =>
+  `https://media.api-sports.io/football/players/${id}.png`;
+
 // Iniciales del club para el badge cuando no hay crest cargado.
 export function clubInitials(name: string) {
   const words = name.split(" ").filter(Boolean);
