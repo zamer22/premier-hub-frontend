@@ -25,7 +25,7 @@ interface PartidosVivoProps {
   onBack: () => void;
   user: any;
 }
-const TABS = ["Alineaciones", "Estadisticas", "H2H"];
+const TABS = ["Alineaciones", "Estadísticas", "H2H"];
 
 function parseGrid(value: string | null): { row: number; col: number } | null {
   if (!value) return null;
@@ -748,18 +748,18 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
               </div>
             )}
 
-            {tab === "Estadisticas" && (
+            {tab === "Estadísticas" && (
               <div>
                 {loadingStats || statsError || effectiveStats.length === 0 ? (
                   <StateMessage
                     loading={loadingStats}
                     error={statsError}
-                    loadingText="Cargando estadisticas..."
-                    emptyText="No hay estadisticas disponibles para este partido."
+                    loadingText="Cargando estadísticas..."
+                    emptyText="No hay estadísticas disponibles para este partido."
                   />
                 ) : (
                   <>
-                    <p className="pv-stats-label">Estadisticas del partido</p>
+                    <p className="pv-stats-label">Estadísticas del partido</p>
                     <div className="pv-stat-teams">
                       <span>{currentMatch.homeTeam.name}</span>
                       <span />
@@ -946,7 +946,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
 
             <div className="pv-activation-history">
               <p className="pv-activation__eyebrow">Historial</p>
-              {activationHistory.length === 0 ? <span>Sin recompensas reclamadas aun.</span> : null}
+              {activationHistory.length === 0 ? <span>Sin recompensas reclamadas aún.</span> : null}
               {activationHistory.slice(-4).reverse().map((activation) => (
                 <div key={activation.id} className="pv-activation-history__item">
                   <strong>{activation.title}</strong>

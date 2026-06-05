@@ -189,7 +189,7 @@ export default function Foro({ user }: { user: User }) {
   const submitPost = async () => {
     if (!currentSubforum) return;
     if (postForm.title.trim().length < 4 || postForm.body.trim().length < 1) {
-      showNotice("Completa titulo y contenido", false);
+      showNotice("Completa título y contenido", false);
       return;
     }
 
@@ -206,9 +206,9 @@ export default function Foro({ user }: { user: User }) {
       });
       setPostForm({ title: "", body: "" });
       setImage(null);
-      if (json.pendingReview) showNotice("Tu publicacion quedo pendiente de revision");
+      if (json.pendingReview) showNotice("Tu publicación quedó pendiente de revisión");
       else {
-        showNotice("Publicacion creada");
+        showNotice("Publicación creada");
         await loadPosts();
         setCreateOpen(false);
         navigate(`/foro/${json.data.id}`);
@@ -309,7 +309,7 @@ export default function Foro({ user }: { user: User }) {
               className="ph-input"
               value={postForm.title}
               onChange={(event) => setPostForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Titulo de la discusion"
+              placeholder="Título de la discusión"
               maxLength={160}
             />
             <textarea
@@ -426,7 +426,7 @@ export default function Foro({ user }: { user: User }) {
           </div>
 
           {loading ? <p className="forum-muted">Cargando discusiones...</p> : posts.length === 0 ? (
-            <EmptyState title="Aun no hay discusiones" description="Se el primero en abrir una conversacion en este subforo." />
+            <EmptyState title="Aún no hay discusiones" description="Sé el primero en abrir una conversación en este subforo." />
           ) : (
             <div className="forum-feed">
               {posts.map((post) => (

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { PL_FACTS } from "./PL_FACTS";
 
-// Overlay con spinner que rota PL facts cada 4.2s mientras corre la inferencia ML.
+// Overlay con spinner que rota datos de la PL cada 4.2s mientras se calcula el resultado.
 // Bloquea el scroll del body para evitar que el usuario navegue durante el cómputo.
 export default function ComputingModal() {
   const [factIndex, setFactIndex] = useState(0);
@@ -23,7 +23,7 @@ export default function ComputingModal() {
       <div className="ol-overlay-card" onClick={(e) => e.stopPropagation()}>
         <div className="ol-overlay-header">
           <span className="ol-spinner ol-spinner--sm" />
-          <span className="ol-overlay-status">Calculando modelo…</span>
+          <span className="ol-overlay-status">Calculando resultado…</span>
         </div>
 
         <div className="ol-overlay-fact" key={factIndex}>

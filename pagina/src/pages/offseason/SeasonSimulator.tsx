@@ -112,7 +112,7 @@ export default function SeasonSimulator({
             <span className="ol-count-badge">{transfers.length}/5</span>
           )}
           <InstructivoModal
-            titulo="Season Simulator"
+            titulo="Simulador de Temporada"
             intro="Arma una ventana de fichajes hipotética y mira cómo quedaría la tabla de la Premier League."
             pasos={INSTRUCTIVO_PASOS}
           />

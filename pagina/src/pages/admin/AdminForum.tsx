@@ -133,7 +133,7 @@ export default function AdminForum({ user }: { user: AdminUser }) {
           <div className="adm-forum-form">
             <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Nombre" />
             <input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value })} placeholder="slug-opcional" />
-            <input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Descripcion" />
+            <input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Descripción" />
             <button onClick={createSubforum} disabled={!form.name.trim()}>Crear</button>
           </div>
           <div className="adm-forum-list">
