@@ -24,6 +24,7 @@ interface Listado {
   id_listado: number;
   id_vendedor: number;
   id_inventario: number | null;
+  id_producto?: number | null;
   precio: number;
   estado: "activo" | "vendido" | "cancelado";
   created_at?: string;
@@ -31,12 +32,18 @@ interface Listado {
   fecha_venta?: string | null;
   id_comprador?: number | null;
   nombre?: string | null;
+  descripcion?: string | null;
+  costo?: number | null;
+  stock?: number | null;
   imagen?: string | null;
   css?: string | null;
   tipo?: string | null;
   rareza?: string | null;
   categoria?: string | null;
   equipo?: string | null;
+  es_nuevo?: boolean | null;
+  es_de_liga?: boolean | null;
+  id_temporada?: number | null;
   vendedor_nickname?: string | null;
 }
 
@@ -62,6 +69,22 @@ const EMPTY_NEW_PRODUCT = {
   id_temporada: "",
   publicarMarketplace: false,
   precioMarketplace: "",
+};
+
+const EMPTY_EDIT_PRODUCT = {
+  precio: "",
+  nombre: "",
+  descripcion: "",
+  costo: "",
+  stock: "",
+  imagen: "",
+  categoria: "perfil" as "perfil" | "real",
+  tipo: "",
+  equipo: "",
+  rareza: "",
+  id_temporada: "",
+  es_nuevo: false,
+  es_de_liga: false,
 };
 
 const NEW_PRODUCT_TIPOS = [
@@ -208,7 +231,8 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   const [createError, setCreateError] = useState("");
 
   const [editingListado, setEditingListado] = useState<Listado | null>(null);
-  const [editPrecio, setEditPrecio] = useState("");
+  const [editProduct, setEditProduct] = useState(EMPTY_EDIT_PRODUCT);
+  const [editProductImageFile, setEditProductImageFile] = useState<File | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState("");
 
@@ -358,6 +382,27 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     setPublishOpen(true);
   };
 
+  const openEdit = (listado: Listado) => {
+    setEditingListado(listado);
+    setEditProduct({
+      precio: String(listado.precio || ""),
+      nombre: listado.nombre || "",
+      descripcion: listado.descripcion || "",
+      costo: String(listado.costo ?? ""),
+      stock: String(listado.stock ?? ""),
+      imagen: listado.imagen || "",
+      categoria: listado.categoria === "real" ? "real" : "perfil",
+      tipo: listado.tipo || "",
+      equipo: listado.equipo || "",
+      rareza: listado.rareza || "",
+      id_temporada: listado.id_temporada ? String(listado.id_temporada) : "",
+      es_nuevo: !!listado.es_nuevo,
+      es_de_liga: !!listado.es_de_liga,
+    });
+    setEditProductImageFile(null);
+    setEditError("");
+  };
+
   const handleCreateProduct = async () => {
     const precioMarketplace = Number(newProduct.precioMarketplace);
 
@@ -484,9 +529,14 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     }
   };
 
-  const handleEditPrecio = async () => {
-    if (!editingListado || !editPrecio || Number(editPrecio) <= 0) {
+  const handleEditProducto = async () => {
+    if (!editingListado || !editProduct.precio || Number(editProduct.precio) <= 0) {
       setEditError("Precio inválido.");
+      return;
+    }
+
+    if (!editProduct.nombre.trim()) {
+      setEditError("Nombre requerido.");
       return;
     }
 
@@ -494,16 +544,45 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     setSavingEdit(true);
 
     try {
+      let imagenUrl = editProduct.imagen.trim() || null;
+
+      if (editProductImageFile) {
+        const formData = new FormData();
+        formData.append("imagen", editProductImageFile);
+
+        const uploadJson = await adminFetch("/productos/imagen", {
+          method: "POST",
+          body: formData,
+        });
+
+        imagenUrl = uploadJson.data.publicUrl;
+      }
+
       const json = await adminFetch(`/marketplace/listados/${editingListado.id_listado}`, {
         method: "PUT",
-        body: JSON.stringify({ precio: Number(editPrecio) }),
+        body: JSON.stringify({
+          precio: Number(editProduct.precio),
+          nombre: editProduct.nombre.trim(),
+          descripcion: editProduct.descripcion.trim() || null,
+          costo: editProduct.costo === "" ? 0 : Number(editProduct.costo),
+          stock: editProduct.stock === "" ? 0 : Number(editProduct.stock),
+          imagen: imagenUrl,
+          categoria: editProduct.categoria,
+          tipo: editProduct.tipo || null,
+          equipo: editProduct.equipo.trim() || null,
+          rareza: editProduct.rareza.trim() || null,
+          id_temporada: editProduct.id_temporada ? Number(editProduct.id_temporada) : null,
+          es_nuevo: editProduct.es_nuevo,
+          es_de_liga: editProduct.es_de_liga,
+        }),
       });
 
       setListados((prev) =>
         prev.map((l) => (l.id_listado === json.data.id_listado ? json.data : l)),
       );
+
       setEditingListado(null);
-      showToast("Precio actualizado");
+      showToast("Datos del listado actualizados", true, "Actualizado");
     } catch (error) {
       setEditError(getErrorMessage(error));
     } finally {
@@ -514,20 +593,34 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   const handleCancelListado = async () => {
     if (!confirmCancel) return;
 
+    const listadoCancelado = confirmCancel;
+
     setCanceling(true);
 
     try {
-      await adminFetch(`/marketplace/cancelar/${confirmCancel.id_listado}`, {
+      const json = await adminFetch(`/marketplace/cancelar/${listadoCancelado.id_listado}`, {
         method: "DELETE",
       });
 
       setListados((prev) =>
-        prev.map((l) =>
-          l.id_listado === confirmCancel.id_listado ? { ...l, estado: "cancelado" } : l,
-        ),
+        json.removed
+          ? prev.filter((l) => l.id_listado !== listadoCancelado.id_listado)
+          : prev.map((l) =>
+              l.id_listado === listadoCancelado.id_listado
+                ? { ...l, estado: "cancelado" }
+                : l,
+            ),
       );
+
       setConfirmCancel(null);
-      showToast("Listado cancelado");
+
+      showToast(
+        json.removed
+          ? "Se eliminó el listado y su inventario asociado."
+          : "El listado quedó cancelado.",
+        true,
+        json.removed ? "Listado eliminado" : "Listado cancelado",
+      );
     } catch (error) {
       showToast(getErrorMessage(error), false);
     } finally {
@@ -563,8 +656,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
       <section className="adm-store-hero">
         <div>
-          <p className="adm-store-eyebrow">PremierHub Admin</p>
-          <h2>Tienda y Marketplace</h2>
+          <h2>Marketplace</h2>
           <p>Gestiona publicaciones, precios y estado de los objetos en marketplace.</p>
         </div>
 
@@ -684,14 +776,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
                   {l.estado === "activo" && (
                     <div className="adm-store-row-actions">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingListado(l);
-                          setEditPrecio(String(l.precio));
-                          setEditError("");
-                        }}
-                      >
+                      <button type="button" onClick={() => openEdit(l)}>
                         Editar
                       </button>
                       <button type="button" className="is-danger" onClick={() => setConfirmCancel(l)}>
@@ -984,10 +1069,10 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
       {editingListado && (
         <div className="adm-store-modal-backdrop">
-          <div className="adm-store-modal is-small">
+          <div className="adm-store-modal">
             <div className="adm-store-modal-head">
               <div>
-                <h3>Editar precio</h3>
+                <h3>Editar producto</h3>
                 <p>{editingListado.nombre}</p>
               </div>
               <button type="button" onClick={() => setEditingListado(null)}>
@@ -995,28 +1080,169 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
               </button>
             </div>
 
-            <label className="adm-store-field">
-              <span>Nuevo precio</span>
-              <input
-                type="number"
-                value={editPrecio}
-                onChange={(e) => setEditPrecio(e.target.value)}
-              />
-            </label>
+            <div className="adm-store-form-grid">
+              <label className="adm-store-field">
+                <span>Precio marketplace</span>
+                <input
+                  type="number"
+                  value={editProduct.precio}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, precio: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Nombre</span>
+                <input
+                  value={editProduct.nombre}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, nombre: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Costo</span>
+                <input
+                  type="number"
+                  value={editProduct.costo}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, costo: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Stock</span>
+                <input
+                  type="number"
+                  value={editProduct.stock}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, stock: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Categoría</span>
+                <select
+                  value={editProduct.categoria}
+                  onChange={(e) =>
+                    setEditProduct((p) => ({
+                      ...p,
+                      categoria: e.target.value as "perfil" | "real",
+                    }))
+                  }
+                >
+                  <option value="perfil">Perfil</option>
+                  <option value="real">Objeto real</option>
+                </select>
+              </label>
+
+              <label className="adm-store-field">
+                <span>Tipo</span>
+                <select
+                  value={editProduct.tipo}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, tipo: e.target.value }))}
+                >
+                  <option value="">Seleccionar</option>
+                  {NEW_PRODUCT_TIPOS.map((tipo) => (
+                    <option key={tipo} value={tipo}>
+                      {tipoLabel(tipo)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="adm-store-field">
+                <span>Equipo</span>
+                <input
+                  value={editProduct.equipo}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, equipo: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Rareza</span>
+                <input
+                  value={editProduct.rareza}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, rareza: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Temporada ID</span>
+                <input
+                  type="number"
+                  value={editProduct.id_temporada}
+                  onChange={(e) =>
+                    setEditProduct((p) => ({ ...p, id_temporada: e.target.value }))
+                  }
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Descripción</span>
+                <textarea
+                  value={editProduct.descripcion}
+                  onChange={(e) =>
+                    setEditProduct((p) => ({ ...p, descripcion: e.target.value }))
+                  }
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Imagen URL</span>
+                <input
+                  value={editProduct.imagen}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, imagen: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Nueva imagen desde computadora</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => setEditProductImageFile(e.target.files?.[0] || null)}
+                />
+              </label>
+
+              <div className="adm-store-checks is-wide">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editProduct.es_nuevo}
+                    onChange={(e) =>
+                      setEditProduct((p) => ({ ...p, es_nuevo: e.target.checked }))
+                    }
+                  />
+                  Nuevo
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editProduct.es_de_liga}
+                    onChange={(e) =>
+                      setEditProduct((p) => ({ ...p, es_de_liga: e.target.checked }))
+                    }
+                  />
+                  De liga
+                </label>
+              </div>
+            </div>
 
             {editError && <p className="adm-store-error">{editError}</p>}
 
             <div className="adm-store-modal-actions">
-              <button type="button" className="adm-store-btn is-ghost" onClick={() => setEditingListado(null)}>
+              <button
+                type="button"
+                className="adm-store-btn is-ghost"
+                onClick={() => setEditingListado(null)}
+              >
                 Cancelar
               </button>
               <button
                 type="button"
                 className="adm-store-btn is-primary"
-                onClick={handleEditPrecio}
+                onClick={handleEditProducto}
                 disabled={savingEdit}
               >
-                {savingEdit ? "Guardando..." : "Guardar"}
+                {savingEdit ? "Guardando..." : "Guardar cambios"}
               </button>
             </div>
           </div>
