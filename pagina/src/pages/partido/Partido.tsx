@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import "./Partido.css";
 import { PageHeader } from "../../components/ui";
-import PartidosVivo, { type LiveMatch } from "./PartidosVivo";
+import PartidosVivo from "./PartidosVivo";
+import type { LiveMatch } from "./liveTypes";
 import PartidoPasado, { type PastMatch } from "./partidoPasados";
 
 const API_URL = import.meta.env.VITE_API_URL;
