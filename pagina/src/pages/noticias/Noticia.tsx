@@ -258,7 +258,7 @@ export default function Noticia() {
           <div>
             <p className="noticias-related-section__eyebrow">Siguiente lectura</p>
             <h3 className="noticias-related-section__title">
-              MÃ¡s noticias de la Premier League
+              Más noticias de la Premier League
             </h3>
           </div>
 

@@ -134,7 +134,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           )}
 
           <Button type="submit" disabled={loading}>
-            {loading ? "Cargando..." : isRegister ? "Crear cuenta" : "Iniciar sesion"}
+            {loading ? "Cargando..." : isRegister ? "Crear cuenta" : "Iniciar sesión"}
           </Button>
 
           <div className="auth-divider">
@@ -149,13 +149,13 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           </Button>
 
           <p className="auth-switch-copy">
-            {isRegister ? "Ya tienes cuenta? " : "No tienes cuenta? "}
+            {isRegister ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
             <button
               type="button"
               className="auth-switch-button"
               onClick={() => setIsRegister(!isRegister)}
             >
-              {isRegister ? "Inicia sesion" : "Registrate"}
+              {isRegister ? "Inicia sesión" : "Regístrate"}
             </button>
           </p>
         </form>

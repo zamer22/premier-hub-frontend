@@ -544,7 +544,7 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
             ) : filteredItems.length === 0 ? (
               <div style={emptyStateStyle}>
                 <p style={{ margin: 0, fontSize: "0.9rem", fontWeight: 800, color: "var(--ph-navy-700)" }}>No hay objetos con ese filtro</p>
-                <p style={{ margin: "0.3rem 0 0", fontSize: "0.8rem" }}>Compra o desbloquea objetos de perfil para verlos aqui.</p>
+                <p style={{ margin: "0.3rem 0 0", fontSize: "0.8rem" }}>Compra o desbloquea objetos de perfil para verlos aquí.</p>
               </div>
             ) : (
               <div style={objectScrollStyle}>
@@ -565,13 +565,13 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
           ) : (
             <div style={settingsListStyle}>
               <SettingsRow
-                title="Cerrar sesion"
-                description="Termina la sesion actual en este navegador sin borrar datos de la cuenta."
-                action={<button onClick={onLogout} style={settingsButtonStyle}>Cerrar sesion</button>}
+                title="Cerrar sesión"
+                description="Termina la sesión actual en este navegador sin borrar datos de la cuenta."
+                action={<button onClick={onLogout} style={settingsButtonStyle}>Cerrar sesión</button>}
               />
               <SettingsRow
                 title="Eliminar cuenta"
-                description="Borra la cuenta y sus datos asociados. Se pedira confirmacion antes de continuar."
+                description="Borra la cuenta y sus datos asociados. Se pedirá confirmación antes de continuar."
                 danger
                 action={<button onClick={() => setDeleteModalOpen(true)} style={settingsDangerButtonStyle}>Eliminar cuenta</button>}
               />
@@ -678,7 +678,7 @@ function InventoryItemModal({
           {tipoLabel(item.tipo)}{item.equipo ? ` - ${item.equipo}` : ""}
         </p>
         <h2 id="inventory-item-title" style={{ margin: 0, color: "var(--ph-navy-700)", fontSize: "1.35rem", fontWeight: 900 }}>{item.nombre}</h2>
-        <p style={{ ...detailTextStyle, marginTop: "0.75rem" }}>{item.descripcion || "Sin descripcion registrada."}</p>
+        <p style={{ ...detailTextStyle, marginTop: "0.75rem" }}>{item.descripcion || "Sin descripción registrada."}</p>
         <div style={detailGridStyle}>
           <span>Rareza</span><strong>{item.rareza || item.metadata?.tier || "No definida"}</strong>
           <span>Equipo</span><strong>{item.equipo || "General"}</strong>
@@ -733,8 +733,8 @@ function DeleteAccountModal(props: {
 
         {props.step === 1 ? (
           <>
-            <p style={deleteCopyStyle}>Esto borrara tu cuenta, sesion, puntos, inventario, publicaciones del marketplace y simulaciones asociadas.</p>
-            <div style={deleteWarningStyle}>Antes de continuar, asegurate de que realmente quieres borrar todos los datos de <strong>{props.user.nickname}</strong>.</div>
+            <p style={deleteCopyStyle}>Esto borrará tu cuenta, sesión, puntos, inventario, publicaciones del marketplace y simulaciones asociadas.</p>
+            <div style={deleteWarningStyle}>Antes de continuar, asegúrate de que realmente quieres borrar todos los datos de <strong>{props.user.nickname}</strong>.</div>
             <div style={modalActionsStyle}>
               <button onClick={props.onClose} style={secondaryButtonStyle}>Cancelar</button>
               <button onClick={() => props.onStep(2)} style={dangerButtonStyle}>Entiendo, continuar</button>

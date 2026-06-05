@@ -1,4 +1,4 @@
-export type LeaderboardGame = "all" | "wordle" | "missing_xi";
+export type LeaderboardGame = "all" | "wordle" | "missing_xi" | "lab";
 export type LeaderboardPeriod = "all" | "week" | "month";
 
 export type LeaderboardItem = {

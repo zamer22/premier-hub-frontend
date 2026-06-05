@@ -10,13 +10,13 @@ import ComputingModal from "../../components/offseason/ComputingModal";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// La vista activa puede ser uno de los 3 módulos ML o la pantalla de Desafíos.
+// La vista activa puede ser uno de los 3 módulos del Laboratorio o la pantalla de Desafíos.
 type LabView = OffseasonTab | "desafios";
 
 const MODULE_LABELS: Record<OffseasonTab, string> = {
-  transfer:  "Transfer Predictor",
-  simulator: "Season Simulator",
-  rewind:    "Match Rewind",
+  transfer:  "Predictor de Fichajes",
+  simulator: "Simulador de Temporada",
+  rewind:    "Rebobina el Partido",
 };
 
 type Props = {
@@ -55,7 +55,7 @@ export default function OffseasonLab({ user: _user, onSaldoChange }: Props) {
     setLabRefreshKey((k) => k + 1);
   }, [onSaldoChange]);
 
-  // Bloqueamos el botón Volver mientras corre la inferencia ML para evitar estado inconsistente.
+  // Bloqueamos el botón Volver mientras se calcula el resultado para evitar estado inconsistente.
   const handleBack = () => {
     if (isComputing) return;
     setActiveModule(null);

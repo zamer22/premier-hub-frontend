@@ -59,7 +59,7 @@ export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComple
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
           <Field
             label="Nickname"
-            hint="Solo letras, numeros y guiones bajos. Maximo 20 caracteres."
+            hint="Solo letras, números y guiones bajos. Máximo 20 caracteres."
           >
             <Input
               type="text"

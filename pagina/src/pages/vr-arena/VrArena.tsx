@@ -18,7 +18,7 @@ const featureCards = [
   {
     label: "Puntos y tienda web",
     title: "Gana puntos para comprar objetos",
-    text: "Suma puntos en cada partida y usalos en la tienda de la pagina para comprar objetos.",
+    text: "Suma puntos en cada partida y úsalos en la tienda de la página para comprar objetos.",
   },
 ] as const;
 

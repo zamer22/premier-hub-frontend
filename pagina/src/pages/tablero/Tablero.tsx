@@ -12,6 +12,7 @@ const GAME_FILTERS: Array<{ key: LeaderboardGame; label: string }> = [
   { key: "all", label: "General" },
   { key: "wordle", label: "Reto Diario" },
   { key: "missing_xi", label: "Missing XI" },
+  { key: "lab", label: "Laboratorio" },
 ];
 
 const PERIOD_FILTERS: Array<{ key: LeaderboardPeriod; label: string }> = [
@@ -42,10 +43,6 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat("es-MX").format(value);
 }
 
-function formatPercent(value: number) {
-  return `${Number(value || 0).toFixed(1)}%`;
-}
-
 function formatDate(value: string | null) {
   if (!value) return "Sin partidas";
 
@@ -59,6 +56,7 @@ function formatDate(value: string | null) {
 function getGameLabel(game: string | null) {
   if (game === "wordle") return "Reto Diario";
   if (game === "missing_xi") return "Missing XI";
+  if (game === "lab") return "Laboratorio";
   if (game === "all") return "General";
   return "Arcade";
 }
@@ -246,10 +244,10 @@ function MyPositionBanner({ me }: { me: LeaderboardItem | null }) {
         </div>
         <div className="hidden sm:block">
           <p className="m-0 text-[0.6rem] font-black uppercase tracking-widest text-[#9aa3b2]">
-            Acierto
+            Partidas
           </p>
-          <p className="m-0 mt-0.5 text-sm font-black text-[#cf275f]">
-            {formatPercent(me.accuracy)}
+          <p className="m-0 mt-0.5 text-sm font-black text-[#162b4d]">
+            {formatNumber(me.games_played)}
           </p>
         </div>
       </div>
@@ -297,12 +295,10 @@ function PodiumCard({ player }: { player: LeaderboardItem }) {
         Puntos
       </p>
 
-      <div className="mt-4 flex w-full items-center justify-center gap-4 border-t border-[#edf0f5] pt-3 text-[0.74rem]">
+      <div className="mt-4 flex w-full items-center justify-center border-t border-[#edf0f5] pt-3 text-[0.74rem]">
         <span className="font-semibold text-[#5f6c80]">
           {player.games_played} partidas
         </span>
-        <span className="text-[#dde3ec]">·</span>
-        <span className="font-black text-[#cf275f]">{formatPercent(player.accuracy)}</span>
       </div>
     </article>
   );
@@ -359,9 +355,6 @@ function LeaderboardRow({ row, me }: { row: LeaderboardItem; me: LeaderboardItem
       <td className="px-4 py-3 text-right text-sm font-semibold text-[#5f6c80]">
         {row.games_played}
       </td>
-      <td className="px-4 py-3 text-right text-sm font-semibold text-[#5f6c80]">
-        {formatPercent(row.accuracy)}
-      </td>
       <td className="hidden px-4 py-3 text-right text-sm font-semibold text-[#5f6c80] lg:table-cell">
         {getGameLabel(row.favorite_game)}
       </td>
@@ -404,7 +397,7 @@ function MobileRow({ row, me }: { row: LeaderboardItem; me: LeaderboardItem | nu
 
       <div className="mt-3 flex items-center justify-between border-t border-[#edf0f5] pt-3 text-[0.74rem]">
         <span className="font-semibold text-[#7a8494]">{formatDate(row.last_played_at)}</span>
-        <span className="font-black text-[#cf275f]">{formatPercent(row.accuracy)}</span>
+        <span className="font-black text-[#162b4d]">{getGameLabel(row.favorite_game)}</span>
       </div>
     </article>
   );
@@ -458,16 +451,11 @@ export default function Tablero() {
     const totalPlayers = rows.length;
     const topPoints = rows[0]?.total_points || 0;
     const totalGames = rows.reduce((total, row) => total + row.games_played, 0);
-    const avgAccuracy =
-      rows.length > 0
-        ? rows.reduce((total, row) => total + row.accuracy, 0) / rows.length
-        : 0;
 
     return {
       totalPlayers,
       topPoints,
       totalGames,
-      avgAccuracy,
     };
   }, [rows]);
 
@@ -543,13 +531,12 @@ export default function Tablero() {
 
       {!loading && !error && rows.length > 0 ? (
         <section
-          className="grid gap-3 md:grid-cols-2 lg:grid-cols-4"
+          className="grid gap-3 md:grid-cols-3"
           aria-label="Métricas generales"
         >
           <StatTile label="Jugadores" value={formatNumber(stats.totalPlayers)} />
           <StatTile label="Líder" value={formatNumber(stats.topPoints)} accent />
           <StatTile label="Partidas" value={formatNumber(stats.totalGames)} />
-          <StatTile label="Acierto medio" value={formatPercent(stats.avgAccuracy)} />
         </section>
       ) : null}
 
@@ -557,7 +544,7 @@ export default function Tablero() {
         <section className="rounded-xl border border-dashed border-[#cbd5e1] bg-white px-6 py-10 text-center shadow-sm">
           <p className="m-0 text-[1rem] font-black text-[#162b4d]">Aún no hay partidas</p>
           <p className="m-0 mx-auto mt-2 max-w-xl text-sm leading-relaxed text-[#7a8494]">
-            Cuando los usuarios completen Reto Diario o Missing XI, la clasificación se llenará automáticamente.
+            Cuando los usuarios completen Reto Diario, Missing XI o desafíos del Laboratorio, la clasificación se llenará automáticamente.
           </p>
         </section>
       ) : null}
@@ -594,11 +581,8 @@ export default function Tablero() {
                   <th className="px-4 py-3 text-right text-[0.66rem] font-black uppercase tracking-widest text-[#7a8494]">
                     Partidas
                   </th>
-                  <th className="px-4 py-3 text-right text-[0.66rem] font-black uppercase tracking-widest text-[#7a8494]">
-                    Acierto
-                  </th>
                   <th className="hidden px-4 py-3 text-right text-[0.66rem] font-black uppercase tracking-widest text-[#7a8494] lg:table-cell">
-                    Juego
+                    Juego con más puntos
                   </th>
                   <th className="hidden px-4 py-3 text-right text-[0.66rem] font-black uppercase tracking-widest text-[#7a8494] lg:table-cell">
                     Última

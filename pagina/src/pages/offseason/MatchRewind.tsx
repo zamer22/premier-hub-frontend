@@ -9,7 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const INSTRUCTIVO_PASOS = [
   { titulo: "Elige un partido", detalle: "Selecciona uno de los partidos icónicos de la lista para cargar su línea de tiempo." },
   { titulo: "Quita eventos clave", detalle: "Marca los goles o tarjetas rojas que quieres borrar del partido para construir el escenario hipotético." },
-  { titulo: "Calcula el resultado", detalle: "El modelo recalcula el marcador como si esos eventos nunca hubieran pasado." },
+  { titulo: "Calcula el resultado", detalle: "Recalculamos el marcador como si esos eventos nunca hubieran pasado." },
   { titulo: "Compara", detalle: "Abajo verás el resultado real contra el alternativo y por qué cambió." },
 ];
 
@@ -113,7 +113,7 @@ export default function MatchRewind({
           <span className="ol-accent" />
           <h2>Seleccionar partido</h2>
           <InstructivoModal
-            titulo="Match Rewind"
+            titulo="Rebobina el Partido"
             intro="Revive un partido histórico y cambia su desenlace quitando goles o expulsiones clave."
             pasos={INSTRUCTIVO_PASOS}
           />
@@ -296,7 +296,7 @@ export default function MatchRewind({
 
             {result.key_changes.length > 0 && (
               <div className="ol-reasons-block">
-                <p className="ol-meta-label">Cómo lo calcula el modelo</p>
+                <p className="ol-meta-label">Cómo se calculó el resultado</p>
                 <ul className="ol-reasons-list">
                   {result.key_changes.map((kc, i) => (
                     <li key={i}>{kc.description}</li>
