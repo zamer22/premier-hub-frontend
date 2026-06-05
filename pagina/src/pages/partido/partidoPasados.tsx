@@ -122,6 +122,7 @@ function eventTone(type: string) {
   if (type === "Goal") return "goal";
   if (type === "Card") return "card";
   if (type === "subst") return "subst";
+  if (type.toUpperCase() === "var") return "var";
   return "default";
 }
 
@@ -158,15 +159,24 @@ function HalfSeparator({ label }: { label: string }) {
 
 function EventRow({ event, match }: { event: MatchEvent; match: PastMatch }) {
   const isHome = event.team.name === match.homeTeam.name;
+  const isVar = event.type.toLowerCase() === "var";
   const iconUrl = eventIconUrl(event.type, event.detail);
   const tone = eventTone(event.type);
 
   const content = (
     <div className={`pp-event-content ${isHome ? "pp-event-content--home" : "pp-event-content--away"}`}>
-      <span className={`pp-event-player ${tone === "goal" ? "pp-event-player--goal" : ""}`}>{event.player}</span>
-      <span className={`pp-event-label pp-event-label--${tone}`}>{eventLabel(event.type, event.detail)}</span>
-      {event.assist && event.type === "Goal" ? <span className="pp-event-assist">Asist. {event.assist}</span> : null}
-      {event.type === "subst" && event.assist ? <span className="pp-event-sub">Entra {event.assist}</span> : null}
+      <span className={`pp-event-player ${tone === "goal" ? "pp-event-player--goal" : ""}`}>
+        {event.player}
+      </span>
+      <span className={`pp-event-label pp-event-label--${tone}`}>
+        {eventLabel(event.type, event.detail)}
+      </span>
+      {event.assist && event.type === "Goal" ? (
+        <span className="pp-event-assist">Asist. {event.assist}</span>
+      ) : null}
+      {event.type === "subst" && event.assist ? (
+        <span className="pp-event-sub">Entra {event.assist}</span>
+      ) : null}
     </div>
   );
 
@@ -176,7 +186,9 @@ function EventRow({ event, match }: { event: MatchEvent; match: PastMatch }) {
 
       <div className="pp-event-center">
         <div className={`pp-event-icon pp-event-icon--${tone}`}>
-          {iconUrl ? (
+          {isVar ? (
+            <span className="pp-event-var">VAR</span>
+          ) : iconUrl ? (
             <img src={iconUrl} alt={eventLabel(event.type, event.detail)} className="pp-event-icon-img" />
           ) : (
             <span className="pp-event-dot">•</span>
