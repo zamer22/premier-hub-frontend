@@ -306,20 +306,16 @@
 .adm-store-field select {
   min-height: 42px;
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   cursor: pointer;
-  padding-right: 2.7rem;
+  padding-right: 3rem;
   font-weight: 750;
   background-color: #fff;
-  background-image:
-    linear-gradient(45deg, transparent 50%, #e90052 50%),
-    linear-gradient(135deg, #e90052 50%, transparent 50%),
-    linear-gradient(to right, #edf0f3, #edf0f3);
-  background-position:
-    calc(100% - 19px) 50%,
-    calc(100% - 13px) 50%,
-    calc(100% - 2.45rem) 50%;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.5 7.5L10 12L14.5 7.5' stroke='%23263A55' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-size: 6px 6px, 6px 6px, 1px 56%;
+  background-position: right 1rem center;
+  background-size: 20px 20px;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease,
@@ -332,10 +328,28 @@
   box-shadow: 0 6px 16px rgba(38, 58, 85, 0.07);
 }
 
+.adm-store-field select:focus {
+  border-color: #263a55;
+  box-shadow: 0 0 0 3px rgba(38, 58, 85, 0.11);
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.5 12.5L10 8L14.5 12.5' stroke='%23263A55' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
 .adm-store-field select option {
   background: #fff;
   color: #263a55;
   font-weight: 700;
+}
+
+.adm-store-field input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.adm-store-field input[type="number"]::-webkit-outer-spin-button,
+.adm-store-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .adm-store-field textarea {
@@ -351,13 +365,6 @@
   box-shadow: 0 0 0 3px rgba(38, 58, 85, 0.11);
 }
 
-.adm-store-field select:focus {
-  background-color: #fff;
-  background-image:
-    linear-gradient(45deg, #e90052 50%, transparent 50%),
-    linear-gradient(135deg, transparent 50%, #e90052 50%),
-    linear-gradient(to right, #d9dee7, #d9dee7);
-}
 
 .adm-store-chips {
   display: flex;
@@ -806,4 +813,26 @@
   .adm-store-pick strong {
     grid-column: 2;
   }
+}
+
+.adm-store-toast-action {
+  margin-top: 0.55rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--toast-accent);
+  color: #fff;
+  padding: 0.42rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  transition: transform 0.15s ease, opacity 0.15s ease, filter 0.15s ease;
+}
+
+.adm-store-toast-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(0.96);
+}
+
+.adm-store-toast-action:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }

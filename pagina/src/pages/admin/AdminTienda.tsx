@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./AdminTienda.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "";
@@ -47,12 +47,25 @@ interface Listado {
   vendedor_nickname?: string | null;
 }
 
+interface AdminUser {
+  id_usuario?: number | string | null;
+  id?: number | string | null;
+  usuario?: { id_usuario?: number | string | null } | null;
+  profile?: { id_usuario?: number | string | null } | null;
+  perfil?: { id_usuario?: number | string | null } | null;
+}
+
 interface AdminTiendaProps {
-  user: { id_usuario: number };
+  user: AdminUser | null | undefined;
 }
 
 type EstadoFilter = "todos" | "activo" | "vendido" | "cancelado";
 type ToastTone = "success" | "error" | "warning";
+
+type ToastAction = {
+  label: string;
+  id_listado: number;
+};
 
 const EMPTY_NEW_PRODUCT = {
   nombre: "",
@@ -147,6 +160,18 @@ function getErrorMessage(error: unknown) {
   return "Error de conexión";
 }
 
+function resolveAdminId(user: AdminUser | null | undefined) {
+  const rawId =
+    user?.id_usuario ??
+    user?.usuario?.id_usuario ??
+    user?.profile?.id_usuario ??
+    user?.perfil?.id_usuario ??
+    user?.id;
+
+  const id = Number(rawId);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
 function ProductThumb({
   item,
 }: {
@@ -202,11 +227,14 @@ function ChipGroup({
 }
 
 export default function AdminTienda({ user }: AdminTiendaProps) {
+  const toastTimerRef = useRef<number | null>(null);
+
   const [toast, setToast] = useState<{
     msg: string;
     ok: boolean;
     title?: string;
     tone: ToastTone;
+    action?: ToastAction;
   } | null>(null);
 
   const [listados, setListados] = useState<Listado[]>([]);
@@ -239,16 +267,47 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   const [confirmCancel, setConfirmCancel] = useState<Listado | null>(null);
   const [canceling, setCanceling] = useState(false);
 
-  const showToast = (msg: string, ok = true, title?: string, tone?: ToastTone) => {
-    setToast({ msg, ok, title, tone: tone || (ok ? "success" : "error") });
-    setTimeout(() => setToast(null), 2800);
-  };
+  const adminId = useMemo(() => resolveAdminId(user), [user]);
+
+  const showToast = useCallback(
+    (
+      msg: string,
+      ok = true,
+      title?: string,
+      tone?: ToastTone,
+      action?: ToastAction,
+    ) => {
+      if (toastTimerRef.current) {
+        window.clearTimeout(toastTimerRef.current);
+      }
+
+      setToast({ msg, ok, title, tone: tone || (ok ? "success" : "error"), action });
+
+      toastTimerRef.current = window.setTimeout(
+        () => setToast(null),
+        action ? 6500 : 2800,
+      );
+    },
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        window.clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
 
   const adminFetch = useCallback(
     async (path: string, init: RequestInit = {}) => {
+      if (!adminId) {
+        throw new Error("No se encontró id_usuario del admin.");
+      }
+
       const joiner = path.includes("?") ? "&" : "?";
       const pathWithAdmin = `${path}${joiner}id_usuario=${encodeURIComponent(
-        String(user.id_usuario),
+        String(adminId),
       )}`;
 
       const headers = new Headers(init.headers);
@@ -263,7 +322,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
         headers.set("Content-Type", "application/json");
       }
 
-      headers.set("x-id-usuario", String(user.id_usuario));
+      headers.set("x-id-usuario", String(adminId));
 
       const baseUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
       const url = `${baseUrl}/api/admin${pathWithAdmin}`;
@@ -290,7 +349,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
       return json;
     },
-    [user.id_usuario],
+    [adminId],
   );
 
   const fetchListados = useCallback(async () => {
@@ -304,7 +363,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     } finally {
       setLoadingMarket(false);
     }
-  }, [adminFetch]);
+  }, [adminFetch, showToast]);
 
   const fetchCatalogo = useCallback(async () => {
     try {
@@ -313,12 +372,22 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     } catch (error) {
       showToast(getErrorMessage(error), false);
     }
-  }, [adminFetch]);
+  }, [adminFetch, showToast]);
 
   useEffect(() => {
+    if (!adminId) {
+      setLoadingMarket(false);
+      showToast(
+        "No se encontró id_usuario del admin. Revisa que el componente reciba el usuario completo.",
+        false,
+        "Sesión incompleta",
+      );
+      return;
+    }
+
     fetchListados();
     fetchCatalogo();
-  }, [fetchListados, fetchCatalogo]);
+  }, [adminId, fetchListados, fetchCatalogo, showToast]);
 
   const marketTypes = useMemo(() => {
     const tipos = listados.map((l) => l.tipo).filter(Boolean) as string[];
@@ -403,6 +472,36 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     setEditError("");
   };
 
+  const handleToastDeleteListado = async (id_listado: number) => {
+    setCanceling(true);
+
+    try {
+      const json = await adminFetch(`/marketplace/cancelar/${id_listado}`, {
+        method: "DELETE",
+      });
+
+      setListados((prev) =>
+        json.removed
+          ? prev.filter((l) => l.id_listado !== id_listado)
+          : prev.map((l) =>
+              l.id_listado === id_listado ? { ...l, estado: "cancelado" } : l,
+            ),
+      );
+
+      showToast(
+        json.removed
+          ? "Se eliminó el listado y su inventario asociado."
+          : "El listado quedó cancelado.",
+        true,
+        json.removed ? "Listado eliminado" : "Listado cancelado",
+      );
+    } catch (error) {
+      showToast(getErrorMessage(error), false);
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const handleCreateProduct = async () => {
     const precioMarketplace = Number(newProduct.precioMarketplace);
 
@@ -418,6 +517,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
         precioMarketplace <= 0)
     ) {
       setCreateError("Agrega un precio válido para publicar en marketplace.");
+      return;
+    }
+
+    if (!adminId) {
+      setCreateError("No se encontró id_usuario del admin.");
       return;
     }
 
@@ -468,17 +572,25 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
           const publishJson = await adminFetch("/marketplace/publicar", {
             method: "POST",
             body: JSON.stringify({
-              id_admin: user.id_usuario,
-              id_producto: createdProduct.id_producto,
+              id_admin: adminId,
+              id_producto: Number(createdProduct.id_producto),
               precio: precioMarketplace,
             }),
           });
 
-          setListados((prev) => [publishJson.data, ...prev]);
+          const publishedListado = publishJson.data as Listado;
+          const publishedId = Number(publishedListado.id_listado);
+
+          setListados((prev) => [publishedListado, ...prev]);
+
           showToast(
             "Ya aparece como publicación activa en marketplace.",
             true,
             "Objeto creado y publicado",
+            "success",
+            Number.isInteger(publishedId) && publishedId > 0
+              ? { label: "Borrar listado", id_listado: publishedId }
+              : undefined,
           );
         } catch (error) {
           showToast(
@@ -501,7 +613,20 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   };
 
   const handlePublicar = async () => {
-    if (!selectedProductId || !publishPrice || Number(publishPrice) <= 0) {
+    const productoId = Number(selectedProductId);
+    const precioNum = Number(publishPrice);
+
+    if (!adminId) {
+      setPublishError("No se encontró id_usuario del admin.");
+      return;
+    }
+
+    if (
+      !Number.isInteger(productoId) ||
+      productoId <= 0 ||
+      !Number.isFinite(precioNum) ||
+      precioNum <= 0
+    ) {
       setPublishError("Selecciona un producto y un precio mayor a 0.");
       return;
     }
@@ -513,15 +638,27 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
       const json = await adminFetch("/marketplace/publicar", {
         method: "POST",
         body: JSON.stringify({
-          id_admin: user.id_usuario,
-          id_producto: selectedProductId,
-          precio: Number(publishPrice),
+          id_admin: adminId,
+          id_producto: productoId,
+          precio: precioNum,
         }),
       });
 
-      setListados((prev) => [json.data, ...prev]);
+      const publishedListado = json.data as Listado;
+      const publishedId = Number(publishedListado.id_listado);
+
+      setListados((prev) => [publishedListado, ...prev]);
       setPublishOpen(false);
-      showToast("El producto ya aparece activo en marketplace.", true, "Publicado");
+
+      showToast(
+        "El producto ya aparece activo en marketplace.",
+        true,
+        "Publicado",
+        "success",
+        Number.isInteger(publishedId) && publishedId > 0
+          ? { label: "Borrar listado", id_listado: publishedId }
+          : undefined,
+      );
     } catch (error) {
       setPublishError(getErrorMessage(error));
     } finally {
@@ -647,10 +784,26 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
           <span className="adm-store-toast-icon">
             {toast.tone === "warning" ? "!" : toast.ok ? "✓" : "✕"}
           </span>
-          <span className="adm-store-toast-copy">
+
+          <div className="adm-store-toast-copy">
             <b>{toast.title || (toast.ok ? "Listo" : "No se pudo completar")}</b>
             <small>{toast.msg}</small>
-          </span>
+
+            {toast.action && (
+              <button
+                type="button"
+                className="adm-store-toast-action"
+                onClick={() => {
+                  if (toast.action) {
+                    handleToastDeleteListado(toast.action.id_listado);
+                  }
+                }}
+                disabled={canceling}
+              >
+                {canceling ? "Borrando..." : toast.action.label}
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -779,7 +932,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
                       <button type="button" onClick={() => openEdit(l)}>
                         Editar
                       </button>
-                      <button type="button" className="is-danger" onClick={() => setConfirmCancel(l)}>
+                      <button
+                        type="button"
+                        className="is-danger"
+                        onClick={() => setConfirmCancel(l)}
+                      >
                         Cancelar
                       </button>
                     </div>
@@ -982,7 +1139,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             {createError && <p className="adm-store-error">{createError}</p>}
 
             <div className="adm-store-modal-actions">
-              <button type="button" className="adm-store-btn is-ghost" onClick={() => setCreateOpen(false)}>
+              <button
+                type="button"
+                className="adm-store-btn is-ghost"
+                onClick={() => setCreateOpen(false)}
+              >
                 Cancelar
               </button>
               <button
@@ -1024,7 +1185,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
                   key={p.id_producto}
                   type="button"
                   onClick={() => setSelectedProductId(p.id_producto)}
-                  className={selectedProductId === p.id_producto ? "adm-store-pick is-selected" : "adm-store-pick"}
+                  className={
+                    selectedProductId === p.id_producto
+                      ? "adm-store-pick is-selected"
+                      : "adm-store-pick"
+                  }
                 >
                   <ProductThumb item={p} />
                   <span>
@@ -1051,7 +1216,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             {publishError && <p className="adm-store-error">{publishError}</p>}
 
             <div className="adm-store-modal-actions">
-              <button type="button" className="adm-store-btn is-ghost" onClick={() => setPublishOpen(false)}>
+              <button
+                type="button"
+                className="adm-store-btn is-ghost"
+                onClick={() => setPublishOpen(false)}
+              >
                 Cancelar
               </button>
               <button
@@ -1263,7 +1432,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             </div>
 
             <div className="adm-store-modal-actions">
-              <button type="button" className="adm-store-btn is-ghost" onClick={() => setConfirmCancel(null)}>
+              <button
+                type="button"
+                className="adm-store-btn is-ghost"
+                onClick={() => setConfirmCancel(null)}
+              >
                 Volver
               </button>
               <button
