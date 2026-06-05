@@ -1,4 +1,4 @@
-import type { PLClub } from "../../components/offseason/types";
+import type { PLClub } from "./types";
 
 export const crestUrl = (id: number) => `https://media.api-sports.io/football/teams/${id}.png`;
 

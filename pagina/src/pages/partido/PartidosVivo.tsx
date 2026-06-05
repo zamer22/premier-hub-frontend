@@ -1,260 +1,31 @@
-import { type CSSProperties, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "./PartidosVivo.css";
-
-export interface LiveMatch {
-  id: number;
-  league: string;
-  minute: string;
-  stadium: string;
-  status: string;
-  isDemo?: boolean;
-  homeTeam: { name: string; logo: string; score: number };
-  awayTeam: { name: string; logo: string; score: number };
-}
+import {
+  useDemoClock,
+  useLiveActivations,
+  useLiveChat,
+  useLiveConfig,
+  useLiveDetails,
+  useLiveSummary,
+} from "./liveHooks";
+import type {
+  ChatEmoteConfig,
+  H2HRow,
+  LineupRow,
+  LiveEvent,
+  LiveMatch,
+  StatRow,
+  StatSnapshotRow,
+  SubstitutionItem,
+} from "./liveTypes";
 
 interface PartidosVivoProps {
   match: LiveMatch;
   onBack: () => void;
   user: any;
 }
-
-interface LineupRow {
-  fixture_id: number;
-  team: "home" | "away";
-  player_number: number | null;
-  player_name: string;
-  player_grid: string | null;
-  player_position?: string | null;
-  is_sub: boolean;
-  substitution_status?: "in" | "out";
-  substitution_minute?: number;
-}
-
-interface StatRow {
-  fixture_id: number;
-  label: string;
-  home_value: string;
-  away_value: string;
-}
-
-interface H2HRow {
-  fixture_id: number;
-  date: string;
-  league: string;
-  status: string;
-  home: {
-    id: number;
-    name: string;
-    logo: string;
-    goals: number;
-  };
-  away: {
-    id: number;
-    name: string;
-    logo: string;
-    goals: number;
-  };
-}
-
-interface LiveChatMessage {
-  id: number;
-  fixture_id: number;
-  id_usuario: number;
-  username: string;
-  message: string;
-  created_at: string;
-}
-
-interface LiveMatchApi {
-  id: number;
-  league: string;
-  minute: string;
-  stadium: string;
-  status: string;
-  is_demo?: boolean;
-  home_name: string;
-  home_logo: string;
-  home_score: number;
-  away_name: string;
-  away_logo: string;
-  away_score: number;
-}
-
-interface LiveEvent {
-  id?: number;
-  fixture_id: number;
-  minute: number | null;
-  extra?: number | null;
-  display_minute?: string;
-  team?: "home" | "away" | null;
-  team_name?: string;
-  player?: string | null;
-  assist?: string | null;
-  type: string;
-  detail: string;
-  comments?: string | null;
-}
-
-interface SubstitutionItem {
-  team: "home" | "away";
-  minute: number | null;
-  displayMinute: string;
-  playerIn: string;
-  playerOut: string;
-  numberIn: number | null;
-  numberOut: number | null;
-}
-
-interface ActivationOption {
-  id: string;
-  label: string;
-}
-
-interface LiveActivation {
-  id: number;
-  fixture_id: number;
-  type: "poll" | "drop";
-  title: string;
-  description: string | null;
-  payload: {
-    options?: ActivationOption[];
-    correct_option?: string;
-    event_minute?: number;
-    event_type?: string;
-  };
-  reward_points: number;
-  starts_at_minute: number;
-  expires_at_minute: number;
-  status: string;
-  claimed?: boolean;
-  claim?: {
-    selected_option: string | null;
-    is_correct: boolean;
-    reward_points: number;
-    claimed_at: string;
-  } | null;
-}
-
-const API_URL = import.meta.env.VITE_API_URL;
 const TABS = ["Alineaciones", "Estadisticas", "H2H"];
-const DEMO_SPEED_MS = 2000;
-
-const STATS_ES: Record<string, string> = {
-  "Shots on Goal": "Tiros a puerta",
-  "Shots off Goal": "Tiros fuera",
-  "Total Shots": "Tiros totales",
-  "Blocked Shots": "Tiros bloqueados",
-  "Shots insidebox": "Tiros dentro del area",
-  "Shots outsidebox": "Tiros fuera del area",
-  Fouls: "Faltas",
-  "Corner Kicks": "Tiros de esquina",
-  Offsides: "Fueras de juego",
-  "Ball Possession": "Posesion del balon",
-  "Yellow Cards": "Tarjetas amarillas",
-  "Red Cards": "Tarjetas rojas",
-  "Goalkeeper Saves": "Atajadas",
-  "Total passes": "Pases totales",
-  "Passes accurate": "Pases precisos",
-  "Passes %": "Precision de pases",
-  expected_goals: "Goles esperados (xG)",
-  goals_prevented: "Goles evitados",
-};
-
-const CHAT_EMOTES = [
-  { token: ":pog:", label: "KomodoHype", src: "https://static-cdn.jtvnw.net/emoticons/v2/81274/default/dark/2.0", kind: "sticker" },
-  { token: ":kappa:", label: "Kappa", src: "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0", kind: "emote" },
-  { token: ":lul:", label: "LUL", src: "https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/2.0", kind: "emote" },
-  { token: ":hey:", label: "HeyGuys", src: "https://static-cdn.jtvnw.net/emoticons/v2/30259/default/dark/2.0", kind: "emote" },
-  { token: ":good:", label: "SeemsGood", src: "https://static-cdn.jtvnw.net/emoticons/v2/64138/default/dark/2.0", kind: "emote" },
-  { token: ":sleep:", label: "ResidentSleeper", src: "https://static-cdn.jtvnw.net/emoticons/v2/245/default/dark/2.0", kind: "emote" },
-  { token: ":rage:", label: "SwiftRage", src: "https://static-cdn.jtvnw.net/emoticons/v2/34/default/dark/2.0", kind: "sticker" },
-  { token: ":cat:", label: "CoolCat", src: "https://static-cdn.jtvnw.net/emoticons/v2/58127/default/dark/2.0", kind: "emote" },
-] as const;
-
-const CHAT_EMOTE_MAP: Map<string, (typeof CHAT_EMOTES)[number]> = new Map(CHAT_EMOTES.map((emote) => [emote.token, emote]));
-const CHAT_EMOTE_PATTERN = /(:pog:|:kappa:|:lul:|:hey:|:good:|:sleep:|:rage:|:cat:)/g;
-
-const DEMO_EVENTS: LiveEvent[] = [
-  { id: 1, fixture_id: 990000001, minute: 8, team: "home", type: "Chance", detail: "Tiro a puerta", player: "Bukayo Saka", assist: "Martin Odegaard" },
-  { id: 2, fixture_id: 990000001, minute: 17, team: "away", type: "Goal", detail: "Gol", player: "Mohamed Salah", assist: "Darwin Nunez" },
-  { id: 3, fixture_id: 990000001, minute: 28, team: "home", type: "Card", detail: "Amarilla", player: "Declan Rice" },
-  { id: 4, fixture_id: 990000001, minute: 41, team: "home", type: "Goal", detail: "Gol", player: "Gabriel Jesus", assist: "Bukayo Saka" },
-  { id: 5, fixture_id: 990000001, minute: 45, team: null, type: "Half", detail: "Medio tiempo", player: null },
-  { id: 6, fixture_id: 990000001, minute: 58, team: "home", type: "subst", detail: "Cambio", player: "Leandro Trossard", assist: "Gabriel Martinelli" },
-  { id: 7, fixture_id: 990000001, minute: 63, team: "away", type: "Card", detail: "Amarilla", player: "Ibrahima Konate" },
-  { id: 8, fixture_id: 990000001, minute: 67, team: "home", type: "Goal", detail: "Gol", player: "Bukayo Saka", assist: "Leandro Trossard" },
-  { id: 9, fixture_id: 990000001, minute: 74, team: "away", type: "subst", detail: "Cambio", player: "Diogo Jota", assist: "Darwin Nunez" },
-  { id: 10, fixture_id: 990000001, minute: 83, team: "away", type: "Goal", detail: "Gol", player: "Diogo Jota", assist: "Trent Alexander-Arnold" },
-];
-
-const DEMO_STAT_CHECKPOINTS: Array<{ minute: number; stats: StatRow[] }> = [
-  {
-    minute: 0,
-    stats: [
-      { fixture_id: 990000001, label: "Shots on Goal", home_value: "0", away_value: "0" },
-      { fixture_id: 990000001, label: "Total Shots", home_value: "0", away_value: "0" },
-      { fixture_id: 990000001, label: "Ball Possession", home_value: "50%", away_value: "50%" },
-      { fixture_id: 990000001, label: "Corner Kicks", home_value: "0", away_value: "0" },
-      { fixture_id: 990000001, label: "Fouls", home_value: "0", away_value: "0" },
-      { fixture_id: 990000001, label: "Yellow Cards", home_value: "0", away_value: "0" },
-      { fixture_id: 990000001, label: "Total passes", home_value: "0", away_value: "0" },
-      { fixture_id: 990000001, label: "Passes accurate", home_value: "0", away_value: "0" },
-    ],
-  },
-  {
-    minute: 17,
-    stats: [
-      { fixture_id: 990000001, label: "Shots on Goal", home_value: "1", away_value: "2" },
-      { fixture_id: 990000001, label: "Total Shots", home_value: "3", away_value: "4" },
-      { fixture_id: 990000001, label: "Ball Possession", home_value: "48%", away_value: "52%" },
-      { fixture_id: 990000001, label: "Corner Kicks", home_value: "1", away_value: "1" },
-      { fixture_id: 990000001, label: "Fouls", home_value: "2", away_value: "1" },
-      { fixture_id: 990000001, label: "Yellow Cards", home_value: "0", away_value: "0" },
-      { fixture_id: 990000001, label: "Total passes", home_value: "92", away_value: "101" },
-      { fixture_id: 990000001, label: "Passes accurate", home_value: "78", away_value: "88" },
-    ],
-  },
-  {
-    minute: 41,
-    stats: [
-      { fixture_id: 990000001, label: "Shots on Goal", home_value: "4", away_value: "3" },
-      { fixture_id: 990000001, label: "Total Shots", home_value: "8", away_value: "7" },
-      { fixture_id: 990000001, label: "Ball Possession", home_value: "52%", away_value: "48%" },
-      { fixture_id: 990000001, label: "Corner Kicks", home_value: "3", away_value: "2" },
-      { fixture_id: 990000001, label: "Fouls", home_value: "5", away_value: "4" },
-      { fixture_id: 990000001, label: "Yellow Cards", home_value: "1", away_value: "0" },
-      { fixture_id: 990000001, label: "Total passes", home_value: "234", away_value: "218" },
-      { fixture_id: 990000001, label: "Passes accurate", home_value: "203", away_value: "188" },
-    ],
-  },
-  {
-    minute: 67,
-    stats: [
-      { fixture_id: 990000001, label: "Shots on Goal", home_value: "6", away_value: "4" },
-      { fixture_id: 990000001, label: "Total Shots", home_value: "14", away_value: "10" },
-      { fixture_id: 990000001, label: "Ball Possession", home_value: "54%", away_value: "46%" },
-      { fixture_id: 990000001, label: "Corner Kicks", home_value: "5", away_value: "3" },
-      { fixture_id: 990000001, label: "Fouls", home_value: "8", away_value: "11" },
-      { fixture_id: 990000001, label: "Yellow Cards", home_value: "1", away_value: "2" },
-      { fixture_id: 990000001, label: "Total passes", home_value: "412", away_value: "351" },
-      { fixture_id: 990000001, label: "Passes accurate", home_value: "359", away_value: "298" },
-    ],
-  },
-  {
-    minute: 90,
-    stats: [
-      { fixture_id: 990000001, label: "Shots on Goal", home_value: "7", away_value: "6" },
-      { fixture_id: 990000001, label: "Total Shots", home_value: "16", away_value: "14" },
-      { fixture_id: 990000001, label: "Ball Possession", home_value: "51%", away_value: "49%" },
-      { fixture_id: 990000001, label: "Corner Kicks", home_value: "6", away_value: "5" },
-      { fixture_id: 990000001, label: "Fouls", home_value: "10", away_value: "13" },
-      { fixture_id: 990000001, label: "Yellow Cards", home_value: "1", away_value: "2" },
-      { fixture_id: 990000001, label: "Total passes", home_value: "563", away_value: "529" },
-      { fixture_id: 990000001, label: "Passes accurate", home_value: "489", away_value: "454" },
-    ],
-  },
-];
 
 function parseGrid(value: string | null): { row: number; col: number } | null {
   if (!value) return null;
@@ -285,8 +56,8 @@ function getDemoMinuteLabel(minute: number) {
   return `${minute}'`;
 }
 
-function getDemoScores(minute: number) {
-  return DEMO_EVENTS.reduce(
+function getDemoScores(events: LiveEvent[], minute: number) {
+  return events.reduce(
     (score, event) => {
       if ((event.minute ?? 0) > minute || event.type !== "Goal") return score;
       if (event.team === "home") score.home += 1;
@@ -297,11 +68,14 @@ function getDemoScores(minute: number) {
   );
 }
 
-function getDemoStats(minute: number) {
-  const checkpoint = [...DEMO_STAT_CHECKPOINTS]
+function getDemoStats(snapshots: StatSnapshotRow[], minute: number) {
+  const snapshotMinutes = Array.from(new Set(snapshots.map((item) => item.minute)));
+  const checkpointMinute = [...snapshotMinutes]
     .reverse()
-    .find((item) => minute >= item.minute) ?? DEMO_STAT_CHECKPOINTS[0];
-  return checkpoint.stats;
+    .find((currentMinute) => minute >= currentMinute);
+
+  if (checkpointMinute === undefined) return [];
+  return snapshots.filter((item) => item.minute === checkpointMinute);
 }
 
 function normalizeText(value: string | null | undefined) {
@@ -542,9 +316,17 @@ function StateMessage({
   return <p className="pv-empty">{emptyText}</p>;
 }
 
-function ChatEmote({ token, compact = false }: { token: string; compact?: boolean }) {
+function ChatEmote({
+  token,
+  emoteMap,
+  compact = false,
+}: {
+  token: string;
+  emoteMap: Map<string, ChatEmoteConfig>;
+  compact?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
-  const emote = CHAT_EMOTE_MAP.get(token);
+  const emote = emoteMap.get(token);
   if (!emote) return <>{token}</>;
   const className = `pv-emote ${emote.kind === "sticker" && !compact ? "pv-emote--sticker" : ""}${failed ? " pv-emote--failed" : ""}`;
 
@@ -559,19 +341,31 @@ function ChatEmote({ token, compact = false }: { token: string; compact?: boolea
   );
 }
 
-function ChatMessageText({ message }: { message: string }) {
+function ChatMessageText({
+  message,
+  emoteMap,
+  emotePattern,
+}: {
+  message: string;
+  emoteMap: Map<string, ChatEmoteConfig>;
+  emotePattern: RegExp | null;
+}) {
   const trimmed = message.trim();
-  const singleEmote = CHAT_EMOTE_MAP.get(trimmed);
+  const singleEmote = emoteMap.get(trimmed);
 
   if (singleEmote?.kind === "sticker") {
-    return <ChatEmote token={trimmed} />;
+    return <ChatEmote token={trimmed} emoteMap={emoteMap} />;
+  }
+
+  if (!emotePattern) {
+    return <>{message}</>;
   }
 
   return (
     <>
-      {message.split(CHAT_EMOTE_PATTERN).map((part, index) => (
-        CHAT_EMOTE_MAP.has(part)
-          ? <ChatEmote key={`${part}-${index}`} token={part} compact />
+      {message.split(emotePattern).map((part, index) => (
+        emoteMap.has(part)
+          ? <ChatEmote key={`${part}-${index}`} token={part} emoteMap={emoteMap} compact />
           : <span key={`text-${index}`}>{part}</span>
       ))}
     </>
@@ -583,42 +377,40 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
   const [tab, setTab] = useState("Alineaciones");
   const [equipoSust, setEquipoSust] = useState<"home" | "away">("home");
   const [showScorePill, setShowScorePill] = useState(false);
-  const [liveSnapshot, setLiveSnapshot] = useState<LiveMatch | null>(null);
-  const [demoMinute, setDemoMinute] = useState(0);
-  const [demoRunning, setDemoRunning] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const chatListRef = useRef<HTMLDivElement | null>(null);
   const scoreboardRef = useRef<HTMLDivElement | null>(null);
 
-  const [lineups, setLineups] = useState<LineupRow[]>([]);
-  const [stats, setStats] = useState<StatRow[]>([]);
-  const [h2h, setH2H] = useState<H2HRow[]>([]);
-  const [events, setEvents] = useState<LiveEvent[]>([]);
-  const [chatMessages, setChatMessages] = useState<LiveChatMessage[]>([]);
   const [chatDraft, setChatDraft] = useState("");
   const [showEmotePicker, setShowEmotePicker] = useState(false);
-  const [chatLoading, setChatLoading] = useState(true);
-  const [chatSending, setChatSending] = useState(false);
-  const [activeActivation, setActiveActivation] = useState<LiveActivation | null>(null);
-  const [activationHistory, setActivationHistory] = useState<LiveActivation[]>([]);
   const [selectedActivationOption, setSelectedActivationOption] = useState<string | null>(null);
-  const [activationLoading, setActivationLoading] = useState(false);
-  const [activationClaiming, setActivationClaiming] = useState(false);
-  const [activationError, setActivationError] = useState("");
-  const [activationToast, setActivationToast] = useState("");
 
-  const [loadingLineups, setLoadingLineups] = useState(true);
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [loadingH2H, setLoadingH2H] = useState(true);
-  const [loadingEvents, setLoadingEvents] = useState(true);
+  const liveConfig = useLiveConfig();
+  const { demoMinute, demoRunning, setDemoRunning, resetDemo: resetDemoClock } = useDemoClock(
+    isDemo,
+    liveConfig.demoSpeedMs,
+  );
+  const liveSnapshot = useLiveSummary(match, isDemo, liveConfig.liveSummaryRefreshMs);
+  const details = useLiveDetails(match.id, isDemo, {
+    detailsRefreshMs: liveConfig.detailsRefreshMs,
+    eventsRefreshMs: liveConfig.eventsRefreshMs,
+    lineupsRefreshMs: liveConfig.lineupsRefreshMs,
+  });
+  const lineups = details.lineups.data;
+  const stats = details.stats.data;
+  const h2h = details.h2h.data;
+  const events = details.events.data;
+  const statSnapshots = details.statSnapshots.data;
+  const loadingLineups = details.lineups.loading;
+  const loadingStats = details.stats.loading;
+  const loadingH2H = details.h2h.loading;
+  const loadingEvents = details.events.loading;
+  const lineupsError = details.lineups.error;
+  const statsError = details.stats.error;
+  const h2hError = details.h2h.error;
+  const eventsError = details.events.error;
 
-  const [lineupsError, setLineupsError] = useState("");
-  const [statsError, setStatsError] = useState("");
-  const [h2hError, setH2HError] = useState("");
-  const [eventsError, setEventsError] = useState("");
-  const [chatError, setChatError] = useState("");
-
-  const demoScore = useMemo(() => getDemoScores(demoMinute), [demoMinute]);
+  const demoScore = useMemo(() => getDemoScores(events, demoMinute), [demoMinute, events]);
   const currentMatch = useMemo<LiveMatch>(() => {
     if (!isDemo) return liveSnapshot ?? match;
 
@@ -632,16 +424,45 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
   }, [demoMinute, demoScore.away, demoScore.home, isDemo, liveSnapshot, match]);
 
   const effectiveEvents = useMemo(() => {
-    const source = isDemo ? DEMO_EVENTS : events;
+    const source = events;
     return source
       .filter((event) => !isDemo || (event.minute ?? 0) <= demoMinute)
       .sort((a, b) => (b.minute ?? 0) - (a.minute ?? 0));
   }, [demoMinute, events, isDemo]);
 
   const effectiveStats = useMemo(
-    () => applyEventStats(isDemo ? getDemoStats(demoMinute) : stats, effectiveEvents, currentMatch),
-    [currentMatch, demoMinute, effectiveEvents, isDemo, stats],
+    () => applyEventStats(isDemo ? getDemoStats(statSnapshots, demoMinute) : stats, effectiveEvents, currentMatch),
+    [currentMatch, demoMinute, effectiveEvents, isDemo, statSnapshots, stats],
   );
+
+  const activationMinute = isDemo ? demoMinute : extractMinute(currentMatch.minute);
+  const {
+    activeActivation,
+    activationHistory,
+    activationLoading,
+    activationClaiming,
+    activationError,
+    activationToast,
+    setActivationToast,
+    claimActivation: submitActivationClaim,
+  } = useLiveActivations(match.id, activationMinute);
+  const {
+    chatMessages,
+    chatLoading,
+    chatSending,
+    chatError,
+    sendMessage,
+  } = useLiveChat(match.id, liveConfig.chatRefreshMs);
+  const chatEmoteMap = useMemo(
+    () => new Map(liveConfig.config.chatEmotes.map((emote) => [emote.token, emote])),
+    [liveConfig.config.chatEmotes],
+  );
+  const chatEmotePattern = useMemo(() => {
+    const tokens = liveConfig.config.chatEmotes.map((emote) => emote.token);
+    if (tokens.length === 0) return null;
+    const escaped = tokens.map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    return new RegExp(`(${escaped.join("|")})`, "g");
+  }, [liveConfig.config.chatEmotes]);
 
   const lineupRuntime = useMemo(
     () => applyEventLineupChanges(lineups, effectiveEvents, currentMatch),
@@ -650,238 +471,6 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
 
   const effectiveLineups = lineupRuntime.lineups;
   const matchSubstitutions = lineupRuntime.substitutions;
-
-  const loadResource = useCallback(async <T,>(
-    path: string,
-    setData: (data: T[]) => void,
-    setLoading: (loading: boolean) => void,
-    setError: (error: string) => void,
-    fallbackError: string,
-    showLoading = true,
-  ) => {
-    try {
-      if (showLoading) setLoading(true);
-      setError("");
-
-      const res = await fetch(`${API_URL}${path}`, { credentials: "include" });
-      if (!res.ok) {
-        throw new Error(`Error HTTP ${res.status}`);
-      }
-
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        setData(json.data);
-      } else {
-        setData([]);
-        setError("La respuesta no vino en el formato esperado.");
-      }
-    } catch (error: any) {
-      setData([]);
-      setError(error?.message || fallbackError);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const refreshLiveDetails = useCallback((showLoading = false) => {
-    if (!match?.id) return;
-
-    loadResource<LineupRow>(
-      `/api/partidos/live/${match.id}/lineups`,
-      setLineups,
-      setLoadingLineups,
-      setLineupsError,
-      "No se pudieron cargar las alineaciones.",
-      showLoading,
-    );
-    loadResource<StatRow>(
-      `/api/partidos/live/${match.id}/stats`,
-      setStats,
-      setLoadingStats,
-      setStatsError,
-      "No se pudieron cargar las estadisticas.",
-      showLoading,
-    );
-    loadResource<LiveEvent>(
-      `/api/partidos/live/${match.id}/events`,
-      setEvents,
-      setLoadingEvents,
-      setEventsError,
-      "No se pudieron cargar los eventos.",
-      showLoading,
-    );
-  }, [loadResource, match.id]);
-
-  const loadH2H = useCallback((showLoading = false) => {
-    if (!match?.id) return;
-
-    loadResource<H2HRow>(
-      `/api/partidos/live/${match.id}/h2h`,
-      setH2H,
-      setLoadingH2H,
-      setH2HError,
-      "No se pudo cargar el H2H.",
-      showLoading,
-    );
-  }, [loadResource, match.id]);
-
-  const activationMinute = isDemo ? demoMinute : extractMinute(currentMatch.minute);
-
-  const loadActivations = useCallback(async (showLoading = false) => {
-    if (!match?.id) return;
-
-    try {
-      if (showLoading) setActivationLoading(true);
-      setActivationError("");
-      const minuteQuery = activationMinute !== null ? `?minute=${activationMinute}` : "";
-
-      const [activeRes, historyRes] = await Promise.all([
-        fetch(`${API_URL}/api/partidos/live/${match.id}/activations${minuteQuery}`, { credentials: "include" }),
-        fetch(`${API_URL}/api/partidos/live/${match.id}/activations/history${minuteQuery}`, { credentials: "include" }),
-      ]);
-
-      const activeJson = await activeRes.json();
-      const historyJson = await historyRes.json();
-
-      if (!activeRes.ok || !activeJson.success) {
-        throw new Error(activeJson.error || `Error HTTP ${activeRes.status}`);
-      }
-
-      if (!historyRes.ok || !historyJson.success) {
-        throw new Error(historyJson.error || `Error HTTP ${historyRes.status}`);
-      }
-
-      const nextActive = Array.isArray(activeJson.data) ? activeJson.data[0] ?? null : null;
-      setActiveActivation(nextActive);
-      setActivationHistory(Array.isArray(historyJson.data) ? historyJson.data : []);
-      setSelectedActivationOption(null);
-    } catch (error: any) {
-      setActivationError(error?.message || "No se pudieron cargar las activaciones.");
-    } finally {
-      setActivationLoading(false);
-    }
-  }, [activationMinute, match.id]);
-
-  useEffect(() => {
-    if (!match?.id) {
-      setLineups([]);
-      setStats([]);
-      setH2H([]);
-      setEvents([]);
-      setLineupsError("No llego el id del partido.");
-      setStatsError("No llego el id del partido.");
-      setH2HError("No llego el id del partido.");
-      setEventsError("No llego el id del partido.");
-      setLoadingLineups(false);
-      setLoadingStats(false);
-      setLoadingH2H(false);
-      setLoadingEvents(false);
-      return;
-    }
-
-    refreshLiveDetails(true);
-    loadH2H(true);
-  }, [loadH2H, match.id, refreshLiveDetails]);
-
-  useEffect(() => {
-    if (isDemo) return;
-
-    const statsInterval = window.setInterval(() => {
-      loadResource<StatRow>(
-        `/api/partidos/live/${match.id}/stats`,
-        setStats,
-        setLoadingStats,
-        setStatsError,
-        "No se pudieron cargar las estadisticas.",
-        false,
-      );
-    }, 60000);
-
-    const lineupsInterval = window.setInterval(() => {
-      loadResource<LineupRow>(
-        `/api/partidos/live/${match.id}/lineups`,
-        setLineups,
-        setLoadingLineups,
-        setLineupsError,
-        "No se pudieron cargar las alineaciones.",
-        false,
-      );
-    }, 180000);
-
-    const eventsInterval = window.setInterval(() => {
-      loadResource<LiveEvent>(
-        `/api/partidos/live/${match.id}/events`,
-        setEvents,
-        setLoadingEvents,
-        setEventsError,
-        "No se pudieron cargar los eventos.",
-        false,
-      );
-    }, 15000);
-
-    return () => {
-      window.clearInterval(statsInterval);
-      window.clearInterval(lineupsInterval);
-      window.clearInterval(eventsInterval);
-    };
-  }, [isDemo, loadResource, match.id]);
-
-  useEffect(() => {
-    if (!isDemo || !demoRunning) return;
-
-    const interval = window.setInterval(() => {
-      setDemoMinute((current) => {
-        if (current >= 90) {
-          setDemoRunning(false);
-          return 90;
-        }
-        return current + 1;
-      });
-    }, DEMO_SPEED_MS);
-
-    return () => window.clearInterval(interval);
-  }, [demoRunning, isDemo]);
-
-  useEffect(() => {
-    loadActivations(false);
-  }, [loadActivations]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadChat = async (showLoading = false) => {
-      try {
-        if (showLoading) setChatLoading(true);
-        setChatError("");
-
-        const res = await fetch(`${API_URL}/api/partidos/live/${match.id}/chat`, {
-          credentials: "include",
-        });
-        if (!res.ok) {
-          throw new Error(`Error HTTP ${res.status}`);
-        }
-
-        const json = await res.json();
-        if (!cancelled && json.success && Array.isArray(json.data)) {
-          setChatMessages(json.data);
-        }
-      } catch (error: any) {
-        if (!cancelled) {
-          setChatError(error?.message || "No se pudo cargar el chat.");
-        }
-      } finally {
-        if (!cancelled) setChatLoading(false);
-      }
-    };
-
-    loadChat(true);
-    const interval = window.setInterval(() => loadChat(false), 5000);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, [match.id]);
 
   useEffect(() => {
     chatListRef.current?.scrollTo({
@@ -927,53 +516,6 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
       window.clearInterval(interval);
     };
   }, []);
-
-  useEffect(() => {
-    if (isDemo) return;
-    let cancelled = false;
-
-    const refreshLiveSummary = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/partidos/live`);
-        if (!res.ok) return;
-
-        const json = await res.json();
-        if (!json.success || !Array.isArray(json.data)) return;
-
-        const found = json.data.find((item: LiveMatchApi) => Number(item.id) === Number(match.id));
-        if (!found || cancelled) return;
-
-        setLiveSnapshot({
-          id: found.id,
-          league: found.league,
-          minute: found.minute,
-          stadium: found.stadium,
-          status: found.status,
-          isDemo: Boolean(found.is_demo),
-          homeTeam: {
-            name: found.home_name,
-            logo: found.home_logo,
-            score: found.home_score ?? 0,
-          },
-          awayTeam: {
-            name: found.away_name,
-            logo: found.away_logo,
-            score: found.away_score ?? 0,
-          },
-        });
-      } catch {
-        // Keep the last known score if the live refresh fails.
-      }
-    };
-
-    refreshLiveSummary();
-    const interval = window.setInterval(refreshLiveSummary, 15000);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, [isDemo, match.id]);
 
   const homeStarters = useMemo(
     () => effectiveLineups.filter((player) => player.team === "home" && !player.is_sub),
@@ -1038,30 +580,9 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
     const message = chatDraft.trim();
     if (!message || chatSending) return;
 
-    try {
-      setChatSending(true);
-      setChatError("");
-
-      const res = await fetch(`${API_URL}/api/partidos/live/${match.id}/chat`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
-      const json = await res.json();
-
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || `Error HTTP ${res.status}`);
-      }
-
-      setChatMessages((current) => [...current, json.data]);
-      setChatDraft("");
-      setShowEmotePicker(false);
-    } catch (error: any) {
-      setChatError(error?.message || "No se pudo enviar el mensaje.");
-    } finally {
-      setChatSending(false);
-    }
+    await sendMessage(message);
+    setChatDraft("");
+    setShowEmotePicker(false);
   };
 
   const insertChatEmote = (token: string) => {
@@ -1073,42 +594,12 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
 
   const claimActivation = async (selectedOption?: string | null) => {
     if (!activeActivation || activationClaiming) return;
-
-    try {
-      setActivationClaiming(true);
-      setActivationError("");
-      setActivationToast("");
-
-      const option = selectedOption ?? selectedActivationOption;
-      const res = await fetch(`${API_URL}/api/partidos/live/${match.id}/activations/${activeActivation.id}/claim`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selected_option: option }),
-      });
-      const json = await res.json();
-
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || `Error HTTP ${res.status}`);
-      }
-
-      setActivationToast(
-        Number(json.reward_points) > 0
-          ? `Ganaste ${json.reward_points} puntos`
-          : "Participacion registrada",
-      );
-      setActiveActivation(null);
-      await loadActivations(false);
-    } catch (error: any) {
-      setActivationError(error?.message || "No se pudo reclamar la activacion.");
-    } finally {
-      setActivationClaiming(false);
-    }
+    setActivationToast("");
+    await submitActivationClaim(selectedOption ?? selectedActivationOption);
   };
 
   const resetDemo = () => {
-    setDemoRunning(false);
-    setDemoMinute(0);
+    resetDemoClock();
     setActivationToast("");
     setSelectedActivationOption(null);
   };
@@ -1281,7 +772,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
                           <span className={`pv-stat-home ${winner === "home" ? "pv-stat-value--winner" : ""}`}>
                             {stat.home_value}
                           </span>
-                          <span className="pv-stat-label">{STATS_ES[stat.label] ?? stat.label}</span>
+                          <span className="pv-stat-label">{liveConfig.statLabels.get(stat.label) ?? stat.label}</span>
                           <span className={`pv-stat-away ${winner === "away" ? "pv-stat-value--winner" : ""}`}>
                             {stat.away_value}
                           </span>
@@ -1491,7 +982,13 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
                       <strong>{item.username}</strong>
                       <span>{formatChatTime(item.created_at)}</span>
                     </div>
-                    <p><ChatMessageText message={item.message} /></p>
+                    <p>
+                      <ChatMessageText
+                        message={item.message}
+                        emoteMap={chatEmoteMap}
+                        emotePattern={chatEmotePattern}
+                      />
+                    </p>
                   </div>
                 );
               })}
@@ -1503,14 +1000,14 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
               <div className="pv-chat__composer">
                 {showEmotePicker ? (
                   <div className="pv-emote-picker" role="menu" aria-label="Emotes del chat">
-                    {CHAT_EMOTES.map((emote) => (
+                    {liveConfig.config.chatEmotes.map((emote) => (
                       <button
                         key={emote.token}
                         type="button"
                         className="pv-emote-picker__item"
                         onClick={() => insertChatEmote(emote.token)}
                       >
-                        <ChatEmote token={emote.token} compact />
+                        <ChatEmote token={emote.token} emoteMap={chatEmoteMap} compact />
                         <span>{emote.label}</span>
                       </button>
                     ))}
