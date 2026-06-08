@@ -217,13 +217,13 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
       })
       .catch((error: Error & { status?: number }) => {
         if (error.status === 409) {
-          setSaveMsg("Este Missing XI ya habia sido guardado.");
+          setSaveMsg("Este Missing XI ya había sido guardado.");
           setMatch((prev) => (prev ? { ...prev, played: true } : prev));
           return;
         }
 
         console.error("[MissingXI] Error al guardar puntos", error);
-        setSaveMsg("No se pudieron guardar los puntos. Tu avance quedo en cache.");
+        setSaveMsg("No se pudieron guardar los puntos. Tu avance quedó en caché.");
       });
   }, [gameOver, match, onSaldoChange, players]);
 

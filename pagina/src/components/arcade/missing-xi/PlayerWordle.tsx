@@ -232,7 +232,7 @@ export default function PlayerWordle({
               onClick={handleHint}
               className={`${compact ? "px-3 py-2" : "px-4 py-2.5"} rounded-xl border-2 border-[#cf275f]/25 bg-white text-center shadow-sm transition-all hover:border-[#cf275f]/50 hover:bg-[#fef0f4] hover:shadow-md active:scale-95`}
             >
-              <p className="text-[0.82rem] font-black text-[#cf275f]">Ver Pista</p>
+              <p className="text-[0.82rem] font-black text-[#cf275f]">Ver pista</p>
               <p className={`${compact ? "hidden sm:block" : ""} mt-0.5 text-[0.62rem] font-medium text-[#cf275f]/55`}>
                 Penalización −50 pts
               </p>
