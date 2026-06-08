@@ -236,7 +236,7 @@ export default function TransferPredictor({
           onClick={handlePredict}
           disabled={!canPredict || loading}
         >
-          {loading ? "Analizando transferencia…" : "Predecir transferencia"}
+          {loading ? "Analizando transferencia..." : "Predecir transferencia"}
         </button>
         {error && <p className="ol-error">{error}</p>}
       </section>
@@ -271,7 +271,7 @@ export default function TransferPredictor({
         {loading && (
           <div className="ol-loading">
             <span className="ol-spinner" />
-            <p>Analizando la transferencia…</p>
+            <p>Analizando la transferencia...</p>
           </div>
         )}
 
