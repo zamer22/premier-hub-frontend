@@ -107,7 +107,7 @@ export default function OrderDetailPane({
         <div>
           <div className="adm-map-header">
             <h4 className="adm-section-title">Ubicación del paquete</h4>
-            {!isLocked && <p className="adm-map-hint">Busca un lugar o haz click en el mapa</p>}
+            {!isLocked && <p className="adm-map-hint">Busca un lugar o haz clic en el mapa</p>}
           </div>
 
           {!isLocked && (
@@ -144,7 +144,7 @@ export default function OrderDetailPane({
 
         <div className="adm-info-grid">
           <input
-            placeholder="Número de tracking"
+            placeholder="Número de seguimiento"
             value={tracking}
             onChange={(e) => onTrackingChange(e.target.value)}
             disabled={isLocked}
