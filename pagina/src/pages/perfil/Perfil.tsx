@@ -63,15 +63,15 @@ type ProfileCustomization = {
 function tipoLabel(tipo: string) {
   const map: Record<string, string> = {
     jersey: "Jersey",
-    balonazo: "Balon",
+    balonazo: "Balón",
     ropa: "Ropa",
     accesorio: "Accesorio",
     banner: "Banner",
     marco: "Marco",
-    titulo: "Titulo",
+    titulo: "Título",
     trofeo: "Trofeo",
-    achievement: "Achievement",
-    foto_perfil: "Postcard",
+    achievement: "Logro",
+    foto_perfil: "Postal",
   };
   return map[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1).replace(/_/g, " ");
 }
@@ -248,9 +248,9 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
   const filterOptions: { key: FilterType; label: string }[] = [
     { key: "todos", label: "Todos" },
     { key: "marco", label: "Marcos" },
-    { key: "titulo", label: "Titulos" },
+    { key: "titulo", label: "Títulos" },
     { key: "trofeo", label: "Trofeos" },
-    { key: "foto_perfil", label: "Postcards" },
+    { key: "foto_perfil", label: "Postales" },
     { key: "banner", label: "Banners" },
     { key: "otros", label: "Otros" },
   ];
@@ -289,7 +289,7 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
     const data = await res.json();
 
     if (!data.success) {
-      setSaveMessage(data.error || "No se pudo equipar el item");
+      setSaveMessage(data.error || "No se pudo equipar el objeto");
       return;
     }
 
@@ -455,7 +455,7 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
               </h1>
             )}
             <p style={{ margin: "0.35rem 0 0", color: "rgba(255,255,255,0.76)", fontSize: "0.88rem" }}>
-              {activeTitle?.nombre || "Sin titulo equipado"}
+              {activeTitle?.nombre || "Sin título equipado"}
             </p>
             <p style={{ margin: "0.25rem 0 0", color: "rgba(255,255,255,0.62)", fontSize: "0.76rem", fontWeight: 700 }}>
               Marco: {activeFrame?.nombre || "sin marco"} · Banner: {activeBanner?.nombre || "sin banner"}
@@ -480,7 +480,7 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.8rem" }}>
         <Metric icon={<WalletIcon />} label="Puntos disponibles" value={`${saldo.toLocaleString()} pts`} />
-        <Metric icon={<BoxIcon />} label="Items en inventario" value={String(items.length)} />
+        <Metric icon={<BoxIcon />} label="Objetos en inventario" value={String(items.length)} />
         <Metric icon={<UserIcon />} label="Objetos de perfil" value={String(profileItems.length)} />
         <Metric icon={<BoxIcon />} label="Publicaciones activas" value={String(listados.length)} />
       </div>
@@ -489,7 +489,7 @@ export default function Perfil({ user, profileImage, onLogout, onUserUpdated, on
         <aside style={{ ...panelStyle, ...sidebarPanelStyle }}>
           <div style={panelHeaderStyle}>
             <h2 style={panelTitleStyle}>Perfil</h2>
-            <span style={badgeStyle}>Activa</span>
+            <span style={badgeStyle}>Activo</span>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem", marginBottom: "1rem" }}>
@@ -747,12 +747,12 @@ function DeleteAccountModal(props: {
             <input value={props.text} onChange={(event) => props.onText(event.target.value)} placeholder={props.phrase} autoFocus style={inputStyle} />
             {props.requiresPassword && (
               <>
-                <p style={{ ...deleteCopyStyle, marginTop: "0.5rem" }}>Y reingresa tu contrasena:</p>
+                <p style={{ ...deleteCopyStyle, marginTop: "0.5rem" }}>Y reingresa tu contraseña:</p>
                 <input
                   type="password"
                   value={props.password}
                   onChange={(event) => props.onPassword(event.target.value)}
-                  placeholder="Tu contrasena actual"
+                  placeholder="Tu contraseña actual"
                   autoComplete="current-password"
                   style={inputStyle}
                 />
@@ -760,11 +760,11 @@ function DeleteAccountModal(props: {
             )}
             <label style={checkboxRowStyle}>
               <input type="checkbox" checked={props.acknowledged} onChange={(event) => props.onAcknowledged(event.target.checked)} />
-              <span>Se que esta accion borra mi cuenta y mis datos de forma definitiva.</span>
+              <span>Sé que esta acción borra mi cuenta y mis datos de forma definitiva.</span>
             </label>
             {props.error && <p style={{ color: "var(--ph-danger-600)", fontSize: "0.82rem", fontWeight: 700 }}>{props.error}</p>}
             <div style={modalActionsStyle}>
-              <button onClick={() => props.onStep(1)} disabled={props.loading} style={secondaryButtonStyle}>Atras</button>
+              <button onClick={() => props.onStep(1)} disabled={props.loading} style={secondaryButtonStyle}>Atrás</button>
               <button onClick={props.onDelete} disabled={!props.canDelete} style={{ ...dangerButtonStyle, opacity: props.canDelete ? 1 : 0.45, cursor: props.canDelete ? "pointer" : "not-allowed" }}>
                 {props.loading ? "Eliminando..." : "Eliminar todo"}
               </button>

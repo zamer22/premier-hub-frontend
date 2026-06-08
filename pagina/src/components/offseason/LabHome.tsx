@@ -25,7 +25,7 @@ const MODULE_CARDS: ModuleCard[] = [
   {
     key: "simulator",
     title: "Simulador de Temporada",
-    description: "Diseña una ventana de fichajes hipotética — hasta 5 traspasos — y simula cómo cambiaría la tabla de posiciones de la Premier League temporada completa.",
+    description: "Diseña una ventana de fichajes hipotética — hasta 5 traspasos — y simula cómo cambiaría la tabla de posiciones de la Premier League durante una temporada completa.",
     meta: "Simula la temporada completa miles de veces",
     visual: <SimulatorVisual />,
   },

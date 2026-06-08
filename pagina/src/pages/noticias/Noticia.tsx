@@ -134,7 +134,7 @@ export default function Noticia() {
 
         console.error(requestError);
         setNews([]);
-        setError("Error conectando con API");
+        setError("Error al conectar con la API");
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -183,7 +183,7 @@ export default function Noticia() {
     return (
       <div className="noticias-page">
         <div className="noticias-empty">
-          No encontramos esa noticia. Quieres regresar al listado?.
+          No encontramos esa noticia. ¿Quieres regresar al listado?
         </div>
       </div>
     );
