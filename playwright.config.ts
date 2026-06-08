@@ -1,23 +1,23 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.APP_URL ?? 'http://localhost:5173';
+const baseURL = process.env.APP_URL ?? "http://localhost:5173";
 
 export default defineConfig({
-  testDir: './pagina/tests',
+  testDir: "./pagina/tests",
 
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [["list"], ["html", { open: "never" }]],
 
   use: {
     baseURL,
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
 
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
 });
