@@ -36,7 +36,7 @@ function flaggedCategories(item: ModerationItem) {
   return Object.entries(item.categories || {})
     .filter(([, value]) => value)
     .map(([key]) => key)
-    .join(", ") || "flagged";
+    .join(", ") || "marcado";
 }
 
 export default function AdminForum({ user }: { user: AdminUser }) {
@@ -120,11 +120,11 @@ export default function AdminForum({ user }: { user: AdminUser }) {
       {toast && <div className="adm-toast adm-toast--ok">{toast}</div>}
       <section className="adm-forum-hero">
         <div>
-          <p>Moderacion</p>
+          <p>Moderación</p>
           <h2>Foro PremierHub</h2>
           <span>Revisa alertas, reportes y comunidades.</span>
         </div>
-        <strong>{moderation.length} pendientes</strong>
+        <strong>{moderation.length} pendiente{moderation.length === 1 ? "" : "s"}</strong>
       </section>
 
       <section className="adm-forum-grid">
@@ -150,7 +150,7 @@ export default function AdminForum({ user }: { user: AdminUser }) {
         </div>
 
         <div className="adm-forum-panel">
-          <h3>Cola de revision AI</h3>
+          <h3>Cola de revisión IA</h3>
           <div className="adm-forum-list">
             {moderation.map((item) => (
               <article key={item.id}>
