@@ -17,27 +17,14 @@ interface Props {
   compact?: boolean;
 }
 
-function cellSizeClass(answerLen: number, compact: boolean): string {
-  if (compact) {
-    if (answerLen <= 6) return "h-10 w-10 text-base";
-    if (answerLen === 7) return "h-9 w-8 text-sm";
-    return "h-9 w-7 text-xs";
-  }
-
-  if (answerLen <= 5) return "h-14 w-14 text-xl";
-  if (answerLen === 6) return "h-[52px] w-[52px] text-lg";
-  if (answerLen === 7) return "h-12 w-10 text-base";
-  return "h-12 w-9 text-sm";
-}
-
 interface LetterCellProps {
   letter?: string;
   result?: LetterResult;
   isActive?: boolean;
-  sizeClass: string;
+  compact?: boolean;
 }
 
-function LetterCell({ letter, result, isActive, sizeClass }: LetterCellProps) {
+function LetterCell({ letter, result, isActive, compact }: LetterCellProps) {
   const color =
     result === "correct"
       ? "bg-green-500 border-green-500 text-white"
@@ -49,9 +36,14 @@ function LetterCell({ letter, result, isActive, sizeClass }: LetterCellProps) {
             ? "border-[#162b4d] bg-white text-[#162b4d]"
             : "border-[#dde3ec] bg-[#f8fafc]";
 
+  // compact móvil: ancho manda. compact desktop (≥981): alto manda → escala a la altura del pitch.
+  const sizing = compact
+    ? "aspect-square min-w-0 flex-1 min-[981px]:flex-none min-[981px]:h-full min-[981px]:max-h-[3.1rem] min-[981px]:max-w-[3.1rem]"
+    : "aspect-square min-w-0 flex-1";
+
   return (
     <div
-      className={`flex items-center justify-center rounded-xl border-2 font-black uppercase transition-all duration-150 ${sizeClass} ${color} ${
+      className={`flex items-center justify-center rounded-lg border-2 text-[clamp(0.7rem,3.4vw,1.25rem)] font-black uppercase transition-all duration-150 ${sizing} ${color} ${
         isActive && !result ? "ring-2 ring-[#cf275f] ring-offset-1" : ""
       }`}
     >
@@ -71,7 +63,6 @@ export default function PlayerWordle({
 }: Props) {
   const { answer } = player;
   const answerLen = answer.length;
-  const sz = cellSizeClass(answerLen, compact);
   const jerseyNumber = player.number ?? "?";
 
   const [currentLetters, setCurrentLetters] = useState<string[]>([]);
@@ -173,10 +164,10 @@ export default function PlayerWordle({
   const keyboardStates = getKeyboardStates(player.attempts);
 
   return (
-    <div className={compact ? "flex max-h-[calc(100vh-280px)] min-h-0 flex-col overflow-y-auto rounded-xl border border-[#dde3ec] bg-white shadow-sm" : "flex flex-col"}>
+    <div className={compact ? "flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-[#dde3ec] bg-white shadow-sm" : "flex flex-col"}>
 
       {/* ── Top bar ──────────────────────────────── */}
-      <div className={`flex items-center justify-between border-b border-[#edf0f5] ${compact ? "px-4 py-3" : "px-5 py-3.5"}`}>
+      <div className={`flex shrink-0 items-center justify-between border-b border-[#edf0f5] ${compact ? "px-4 py-3" : "px-5 py-3.5"}`}>
         <button
           type="button"
           onClick={onClose}
@@ -214,7 +205,7 @@ export default function PlayerWordle({
       </div>
 
       {/* ── Player info + hint ───────────────────── */}
-      <div className={`flex items-start justify-between ${compact ? "px-4 pb-3 pt-4" : "px-5 pt-5 pb-4"}`}>
+      <div className={`flex shrink-0 items-start justify-between ${compact ? "px-4 pb-3 pt-4" : "px-5 pt-5 pb-4"}`}>
         <div>
           <h2 className={`${compact ? "text-[1.25rem]" : "text-[1.5rem]"} font-black leading-tight text-[#162b4d]`}>
             Jugador #{jerseyNumber}
@@ -262,20 +253,38 @@ export default function PlayerWordle({
       </div>
 
       {/* ── Grid ─────────────────────────────────── */}
-      <div className={`flex flex-col items-center gap-1 px-4 ${compact ? "pb-2" : "pb-3"}`}>
-        {rows.map((row, ri) => (
-          <div key={ri} className="flex gap-1">
-            {Array.from({ length: answerLen }).map((_, ci) => (
-              <LetterCell
-                key={ci}
-                letter={row.letters[ci]}
-                result={row.results?.[ci]}
-                isActive={row.isCurrent && ci === row.letters.length}
-                sizeClass={sz}
-              />
-            ))}
-          </div>
-        ))}
+      <div
+        className={
+          compact
+            ? "flex flex-col items-center gap-1 px-4 pb-2 min-[981px]:min-h-0 min-[981px]:flex-1 min-[981px]:justify-center min-[981px]:gap-0 min-[981px]:py-2"
+            : "flex flex-col items-center gap-1 px-4 pb-3"
+        }
+      >
+        <div
+          className={
+            compact
+              ? "flex w-full flex-col gap-1 min-[981px]:h-full min-[981px]:max-h-full min-[981px]:justify-center"
+              : "flex w-full flex-col gap-1"
+          }
+          style={{ maxWidth: `min(100%, ${answerLen * 3.25}rem)` }}
+        >
+          {rows.map((row, ri) => (
+            <div
+              key={ri}
+              className={compact ? "flex w-full gap-1 min-[981px]:min-h-0 min-[981px]:flex-1 min-[981px]:justify-center" : "flex w-full gap-1"}
+            >
+              {Array.from({ length: answerLen }).map((_, ci) => (
+                <LetterCell
+                  key={ci}
+                  letter={row.letters[ci]}
+                  result={row.results?.[ci]}
+                  isActive={row.isCurrent && ci === row.letters.length}
+                  compact={compact}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── Error ────────────────────────────────── */}
@@ -316,7 +325,7 @@ export default function PlayerWordle({
 
       {/* ── Keyboard ─────────────────────────────── */}
       {!isFinished && (
-        <div className="mt-1">
+        <div className="mt-1 shrink-0">
           <WordleKeyboard letterStates={keyboardStates} onKey={handleKey} compact={compact} />
         </div>
       )}
