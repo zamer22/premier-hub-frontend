@@ -91,7 +91,7 @@
 
 .vr-button--primary {
   color: #fff;
-  background: linear-gradient(135deg, var(--ph-red-600), var(--ph-bordeaux-700));
+  background: #871d54;
   box-shadow: 0 16px 34px rgba(233, 0, 82, 0.26);
 }
 
