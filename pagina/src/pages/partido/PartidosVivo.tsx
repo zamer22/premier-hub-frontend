@@ -647,9 +647,9 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
           <span className="pv-score-minute">{currentMatch.minute}</span>
           <div className="pv-stadium">{currentMatch.stadium}</div>
           {isDemo ? (
-            <div className="pv-demo-controls" aria-label="Controles de simulacion">
+            <div className="pv-demo-controls" aria-label="Controles de simulación">
               <button type="button" onClick={() => setDemoRunning(true)} disabled={demoRunning || demoMinute >= 90}>
-                Start
+                Iniciar
               </button>
               <button type="button" onClick={() => setDemoRunning(false)} disabled={!demoRunning}>
                 Pausa
@@ -733,7 +733,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
                       ))}
                     </>
                   ) : (
-                    <span className="pv-pitch__empty">Sin mapa de alineacion desde el API</span>
+                    <span className="pv-pitch__empty">Sin mapa de alineación desde la API</span>
                   )}
                 </div>
 
@@ -795,7 +795,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
                   />
                 ) : (
                   <>
-                    <p className="pv-stats-label">Ultimos enfrentamientos</p>
+                    <p className="pv-stats-label">Últimos enfrentamientos</p>
                     {h2h.map((item, index) => {
                       const winner = getH2HWinner(item);
                       return (
@@ -921,7 +921,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
                     disabled={activationClaiming}
                     onClick={() => claimActivation(null)}
                   >
-                    {activationClaiming ? "..." : "Claim"}
+                    {activationClaiming ? "..." : "Reclamar"}
                   </button>
                 ) : (
                   <div className="pv-poll-options">
@@ -969,7 +969,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
             <div className="pv-chat__messages" ref={chatListRef}>
               {chatLoading ? <p className="pv-empty">Cargando chat...</p> : null}
               {!chatLoading && chatMessages.length === 0 ? (
-                <p className="pv-empty">Se el primero en comentar este partido.</p>
+                <p className="pv-empty">Sé el primero en comentar este partido.</p>
               ) : null}
               {chatMessages.map((item) => {
                 const isMine = Number(item.id_usuario) === Number(user?.id_usuario);
