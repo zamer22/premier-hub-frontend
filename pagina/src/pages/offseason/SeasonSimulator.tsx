@@ -210,7 +210,7 @@ export default function SeasonSimulator({
             onClick={handleSimulate}
             disabled={!transfers.length || loading}
           >
-            {loading ? "Calculando…" : "Simular temporada"}
+            {loading ? "Calculando..." : "Simular temporada"}
           </button>
           {error && <p className="ol-error">{error}</p>}
         </div>
@@ -232,7 +232,7 @@ export default function SeasonSimulator({
         {loading && (
           <div className="ol-loading">
             <span className="ol-spinner" />
-            <p>Calculando tabla proyectada…</p>
+            <p>Calculando tabla proyectada...</p>
           </div>
         )}
 

@@ -23,7 +23,7 @@ export default function ComputingModal() {
       <div className="ol-overlay-card" onClick={(e) => e.stopPropagation()}>
         <div className="ol-overlay-header">
           <span className="ol-spinner ol-spinner--sm" />
-          <span className="ol-overlay-status">Calculando resultado…</span>
+          <span className="ol-overlay-status">Calculando resultado...</span>
         </div>
 
         <div className="ol-overlay-fact" key={factIndex}>

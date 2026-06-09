@@ -173,7 +173,7 @@ export default function LabDesafios({ refreshKey = 0, onSaldoChange, showTitle =
                     disabled={reclamando.has(d.id)}
                     onClick={() => handleReclamar(d)}
                   >
-                    {reclamando.has(d.id) ? "Reclamando…" : `Reclamar ${d.puntos} pts`}
+                    {reclamando.has(d.id) ? "Reclamando..." : `Reclamar ${d.puntos} pts`}
                   </button>
                 )}
               </div>

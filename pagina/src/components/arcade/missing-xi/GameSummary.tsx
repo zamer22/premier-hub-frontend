@@ -25,7 +25,7 @@ export default function GameSummary({
       {/* Score */}
       <div className="text-center">
         <p className="mb-1 text-[0.75rem] font-semibold uppercase tracking-wide text-[#5f6c80]">
-          Resultado Final
+          Resultado final
         </p>
         <div className="text-6xl font-black text-[#162b4d]">{totalPoints}</div>
         <p className="mt-1 text-[0.82rem] text-[#5f6c80]">puntos</p>

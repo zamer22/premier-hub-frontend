@@ -128,7 +128,7 @@ export default function MatchRewind({
               onChange={(e) => { if (e.target.value) handleLoadMatch(Number(e.target.value)); }}
               disabled={iconicMatches.length === 0 || previewLoading}
             >
-              <option value="">{iconicMatches.length === 0 ? "Cargando partidos…" : "Seleccionar partido icónico…"}</option>
+              <option value="">{iconicMatches.length === 0 ? "Cargando partidos..." : "Seleccionar partido icónico..."}</option>
               {iconicMatches.map((m) => (
                 <option key={m.fixture_id} value={m.fixture_id}>{m.label}</option>
               ))}
@@ -219,7 +219,7 @@ export default function MatchRewind({
 
         {preview && selectedList.length > 0 ? (
           <div className="ol-mod-summary-list">
-            <p className="ol-meta-label">Si esto no hubiera pasado…</p>
+            <p className="ol-meta-label">Si esto no hubiera pasado...</p>
             {selectedList.map((e) => (
               <div key={e.id} className="ol-mod-tag">
                 <span className="ol-mod-tag-icon">{KIND_ABBR[e.kind]}</span>
@@ -264,7 +264,7 @@ export default function MatchRewind({
         {loading && (
           <div className="ol-loading">
             <span className="ol-spinner" />
-            <p>Calculando el escenario alternativo…</p>
+            <p>Calculando el escenario alternativo...</p>
           </div>
         )}
 

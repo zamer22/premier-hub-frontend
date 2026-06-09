@@ -46,7 +46,7 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
       const data: GeoResult[] = await r.json();
       if (!Array.isArray(data) || data.length === 0) {
         setResults([]);
-        if (manual) setSearchError("Sin resultados. Intentá con más detalle o menos términos.");
+        if (manual) setSearchError("Sin resultados. Intenta con más detalle o menos términos.");
       } else {
         setResults(data);
       }

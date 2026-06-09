@@ -7,13 +7,13 @@ const hasMetaAccess = META_ACCESS_URL.trim().length > 0;
 const featureCards = [
   {
     label: "Modo portero",
-    title: "Ataja bajo presion",
-    text: "Enfrenta rondas de 5 balones y demuestra tus reflejos desde la porteria.",
+    title: "Ataja bajo presión",
+    text: "Enfrenta rondas de 5 balones y demuestra tus reflejos desde la portería.",
   },
   {
     label: "Racha de atajadas",
     title: "Encadena paradas perfectas",
-    text: "Cada balon detenido aumenta tu racha y te reta a superar tu mejor marca.",
+    text: "Cada balón detenido aumenta tu racha y te reta a superar tu mejor marca.",
   },
   {
     label: "Puntos y tienda web",
@@ -39,7 +39,7 @@ export default function VrArena() {
           </h1>
           <p className="vr-hero__lead">
             Ataja rondas de 5 balones, cuida tu racha y gana puntos para
-            progresar en la tienda del juego.
+            progresar en la tienda de la página.
           </p>
 
           <div className="vr-hero__actions">
