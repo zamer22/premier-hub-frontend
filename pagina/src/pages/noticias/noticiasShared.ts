@@ -96,7 +96,7 @@ export type FetchNewsResult = {
 const PREVIEW_MAX_LENGTH = 220;
 const PREVIEW_MIN_LENGTH = 120;
 const DUPLICATE_LEAD_WORDS = 6;
-const FRONTEND_NEWS_CACHE_KEY = "premierhub_news_cache_v1";
+const FRONTEND_NEWS_CACHE_KEY = "premierhub_news_cache_v2";
 const FRONTEND_NEWS_CACHE_TTL_MS = 1000 * 60 * 15;
 let memoryNewsCache: NewsCacheSnapshot | null = null;
 
