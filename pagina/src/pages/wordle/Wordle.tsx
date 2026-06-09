@@ -85,11 +85,6 @@ function WordleHeader() {
       >
         ← Volver
       </button>
-      <GameInstructions
-        title={RETO_DIARIO_TITLE}
-        steps={RETO_DIARIO_STEPS}
-        buttonClassName="ml-auto"
-      />
     </div>
   );
 }
@@ -385,7 +380,14 @@ export default function Wordle() {
       <WordleHeader />
       <header className="wordle-page-header">
         <p className="ph-eyebrow">Arcade</p>
-        <h1 className="wordle-theme">{theme}</h1>
+        <div className="wordle-title-row">
+          <h1 className="wordle-theme">{theme}</h1>
+          <GameInstructions
+            title={RETO_DIARIO_TITLE}
+            steps={RETO_DIARIO_STEPS}
+            buttonClassName="wordle-info-button"
+          />
+        </div>
         {!submitted ? (
           <p className="wordle-instructions">Ordena de mayor a menor y confirma tu respuesta</p>
         ) : null}

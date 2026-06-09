@@ -20,6 +20,22 @@
   margin-bottom: 1.25rem;
 }
 
+.wordle-title-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.wordle-title-row .wordle-theme {
+  flex: 1;
+  min-width: 0;
+}
+
+.wordle-info-button {
+  margin-left: auto;
+}
+
 .wordle-back {
   background: none;
   border: none;
