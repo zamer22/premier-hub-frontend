@@ -124,8 +124,8 @@ function tipoLabel(tipo?: string | null) {
 
   const labels: Record<string, string> = {
     balonazo: "Balón",
-    foto_perfil: "Foto perfil",
-    achievement: "Achievement",
+    foto_perfil: "Foto de perfil",
+    achievement: "Logro",
     jersey: "Jersey",
     ropa: "Ropa",
     accesorio: "Accesorio",
@@ -302,7 +302,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   const adminFetch = useCallback(
     async (path: string, init: RequestInit = {}) => {
       if (!adminId) {
-        throw new Error("No se encontró id_usuario del admin.");
+        throw new Error("No se encontró el ID de usuario del administrador.");
       }
 
       const joiner = path.includes("?") ? "&" : "?";
@@ -378,7 +378,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     if (!adminId) {
       setLoadingMarket(false);
       showToast(
-        "No se encontró id_usuario del admin. Revisa que el componente reciba el usuario completo.",
+        "No se encontró el ID de usuario del administrador. Revisa que el componente reciba el usuario completo.",
         false,
         "Sesión incompleta",
       );
@@ -506,7 +506,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     const precioMarketplace = Number(newProduct.precioMarketplace);
 
     if (!newProduct.nombre.trim() || newProduct.costo === "" || Number(newProduct.costo) < 0) {
-      setCreateError("Nombre y costo válido son requeridos.");
+      setCreateError("El nombre y un costo válido son obligatorios.");
       return;
     }
 
@@ -516,12 +516,12 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
         !Number.isFinite(precioMarketplace) ||
         precioMarketplace <= 0)
     ) {
-      setCreateError("Agrega un precio válido para publicar en marketplace.");
+      setCreateError("Agrega un precio válido para publicar en el marketplace.");
       return;
     }
 
     if (!adminId) {
-      setCreateError("No se encontró id_usuario del admin.");
+      setCreateError("No se encontró el ID de usuario del administrador.");
       return;
     }
 
@@ -584,7 +584,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
           setListados((prev) => [publishedListado, ...prev]);
 
           showToast(
-            "Ya aparece como publicación activa en marketplace.",
+            "Ya aparece como publicación activa en el marketplace.",
             true,
             "Objeto creado y publicado",
             "success",
@@ -617,7 +617,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     const precioNum = Number(publishPrice);
 
     if (!adminId) {
-      setPublishError("No se encontró id_usuario del admin.");
+      setPublishError("No se encontró el ID de usuario del administrador.");
       return;
     }
 
@@ -651,7 +651,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
       setPublishOpen(false);
 
       showToast(
-        "El producto ya aparece activo en marketplace.",
+        "El producto ya aparece activo en el marketplace.",
         true,
         "Publicado",
         "success",
@@ -673,7 +673,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     }
 
     if (!editProduct.nombre.trim()) {
-      setEditError("Nombre requerido.");
+      setEditError("El nombre es obligatorio.");
       return;
     }
 
@@ -810,7 +810,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
       <section className="adm-store-hero">
         <div>
           <h2>Marketplace</h2>
-          <p>Gestiona publicaciones, precios y estado de los objetos en marketplace.</p>
+          <p>Gestiona publicaciones, precios y estado de los objetos en el marketplace.</p>
         </div>
 
         <div className="adm-store-hero-actions">
@@ -841,7 +841,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
           <b>{stats.cancelados}</b>
         </div>
         <div>
-          <span>Ventas pts</span>
+          <span>Ventas (pts)</span>
           <b>{stats.ventasPts.toLocaleString()}</b>
         </div>
       </section>
@@ -858,7 +858,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
           <input
             value={marketSearch}
             onChange={(e) => setMarketSearch(e.target.value)}
-            placeholder="Buscar publicación, vendedor, equipo o #id..."
+            placeholder="Buscar publicación, vendedor, equipo o #ID..."
             className="adm-store-input"
           />
 
@@ -954,7 +954,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             <div className="adm-store-modal-head">
               <div>
                 <h3>Crear objeto</h3>
-                <p>Agrega un item nuevo al catálogo base de la tienda.</p>
+                <p>Agrega un objeto nuevo al catálogo base de la tienda.</p>
               </div>
               <button type="button" onClick={() => setCreateOpen(false)}>
                 ×
@@ -1035,12 +1035,12 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
                 <input
                   value={newProduct.rareza}
                   onChange={(e) => setNewProduct((p) => ({ ...p, rareza: e.target.value }))}
-                  placeholder="Common, Rare, Elite..."
+                  placeholder="Común, Raro, Élite..."
                 />
               </label>
 
               <label className="adm-store-field">
-                <span>Temporada ID</span>
+                <span>ID de temporada</span>
                 <input
                   type="number"
                   value={newProduct.id_temporada}
@@ -1063,7 +1063,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
               </label>
 
               <label className="adm-store-field is-wide">
-                <span>Imagen URL</span>
+                <span>URL de imagen</span>
                 <input
                   value={newProduct.imagen}
                   onChange={(e) => setNewProduct((p) => ({ ...p, imagen: e.target.value }))}
@@ -1114,13 +1114,13 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
                       }))
                     }
                   />
-                  Publicar en marketplace
+                  Publicar en el marketplace
                 </label>
               </div>
 
               {newProduct.publicarMarketplace && (
                 <label className="adm-store-field is-wide">
-                  <span>Precio en marketplace</span>
+                  <span>Precio en el marketplace</span>
                   <input
                     type="number"
                     value={newProduct.precioMarketplace}
@@ -1165,7 +1165,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             <div className="adm-store-modal-head">
               <div>
                 <h3>Publicar producto</h3>
-                <p>Selecciona cualquier objeto del catálogo y publícalo en marketplace.</p>
+                <p>Selecciona cualquier objeto del catálogo y publícalo en el marketplace.</p>
               </div>
               <button type="button" onClick={() => setPublishOpen(false)}>
                 ×
@@ -1204,7 +1204,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             </div>
 
             <label className="adm-store-field">
-              <span>Precio en marketplace</span>
+              <span>Precio en el marketplace</span>
               <input
                 type="number"
                 value={publishPrice}
@@ -1251,7 +1251,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
             <div className="adm-store-form-grid">
               <label className="adm-store-field">
-                <span>Precio marketplace</span>
+                <span>Precio en el marketplace</span>
                 <input
                   type="number"
                   value={editProduct.precio}
@@ -1333,7 +1333,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
               </label>
 
               <label className="adm-store-field">
-                <span>Temporada ID</span>
+                <span>ID de temporada</span>
                 <input
                   type="number"
                   value={editProduct.id_temporada}
@@ -1354,7 +1354,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
               </label>
 
               <label className="adm-store-field is-wide">
-                <span>Imagen URL</span>
+                <span>URL de imagen</span>
                 <input
                   value={editProduct.imagen}
                   onChange={(e) => setEditProduct((p) => ({ ...p, imagen: e.target.value }))}

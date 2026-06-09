@@ -43,7 +43,7 @@ export const PL_FACTS: PLFact[] = [
     club: "Liverpool",
     label: "30 años de espera — 2019/20",
     stat: "99", unit: "puntos",
-    detail: "Liverpool ganó su primera Premier League en 30 años con 99 puntos, rompiéndole el dominio al City.",
+    detail: "Liverpool ganó su primera Premier League en 30 años con 99 puntos, rompiendo el dominio del City.",
   },
   {
     badge: "https://media.api-sports.io/football/teams/41.png",

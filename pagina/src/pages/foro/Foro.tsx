@@ -43,9 +43,9 @@ type SortMode = "hot" | "recent" | "top" | "commented";
 type NormalizedImage = { dataUrl: string; width: number; height: number };
 
 const SORTS: Array<{ key: SortMode; label: string }> = [
-  { key: "hot", label: "Hot" },
+  { key: "hot", label: "Populares" },
   { key: "recent", label: "Recientes" },
-  { key: "top", label: "Top" },
+  { key: "top", label: "Más votados" },
   { key: "commented", label: "Comentados" },
 ];
 
@@ -169,7 +169,7 @@ export default function Foro({ user }: { user: User }) {
       setSelectedPost(json.data.post);
       setComments(json.data.comments || []);
     } catch (error) {
-      showNotice(error instanceof Error ? error.message : "No se pudo cargar la discusion", false);
+      showNotice(error instanceof Error ? error.message : "No se pudo cargar la discusión", false);
       setSelectedPostId(null);
     } finally {
       setDetailLoading(false);
@@ -229,7 +229,7 @@ export default function Foro({ user }: { user: User }) {
         body: JSON.stringify({ body: commentText.trim() }),
       });
       setCommentText("");
-      if (json.pendingReview) showNotice("Tu comentario quedo pendiente de revision");
+      if (json.pendingReview) showNotice("Tu comentario quedó pendiente de revisión");
       else setComments((prev) => [...prev, json.data]);
       await loadPosts();
     } catch (error) {
@@ -268,7 +268,7 @@ export default function Foro({ user }: { user: User }) {
   const removeOwn = async (kind: "post" | "comment", id: number) => {
     try {
       await api(kind === "post" ? `/api/foro/posts/${id}` : `/api/foro/comments/${id}`, { method: "DELETE" });
-      showNotice(kind === "post" ? "Post eliminado" : "Comentario eliminado");
+      showNotice(kind === "post" ? "Publicación eliminada" : "Comentario eliminado");
       if (kind === "post") {
         navigate("/foro");
         await loadPosts();
@@ -289,7 +289,7 @@ export default function Foro({ user }: { user: User }) {
     try {
       setImage(await normalizeImage(file));
     } catch (error) {
-      setImageError(error instanceof Error ? error.message : "Imagen invalida");
+      setImageError(error instanceof Error ? error.message : "Imagen inválida");
       setImage(null);
     }
   };
@@ -301,7 +301,7 @@ export default function Foro({ user }: { user: User }) {
             <div className="forum-create-head">
               <div>
                 <Badge tone="accent">/{currentSubforum?.slug || "foro"}</Badge>
-                <h2>Nueva discusion</h2>
+                <h2>Nueva discusión</h2>
               </div>
               <button type="button" aria-label="Cerrar" onClick={() => setCreateOpen(false)}>×</button>
             </div>
@@ -315,7 +315,7 @@ export default function Foro({ user }: { user: User }) {
             <textarea
               value={postForm.body}
               onChange={(event) => setPostForm((prev) => ({ ...prev, body: event.target.value }))}
-              placeholder="Que quieres debatir?"
+              placeholder="¿Qué quieres debatir?"
               rows={5}
             />
             <div className="forum-image-row">
@@ -326,7 +326,7 @@ export default function Foro({ user }: { user: User }) {
               {image && <button type="button" onClick={() => setImage(null)}>Quitar imagen</button>}
               {imageError && <span>{imageError}</span>}
             </div>
-            {image && <img src={image.dataUrl} alt="Preview" className="forum-preview" />}
+            {image && <img src={image.dataUrl} alt="Vista previa" className="forum-preview" />}
             <div className="forum-composer-actions">
               <span>{postForm.title.length}/160</span>
               <Button type="button" onClick={submitPost} disabled={posting}>{posting ? "Publicando..." : "Publicar"}</Button>
@@ -349,7 +349,7 @@ export default function Foro({ user }: { user: User }) {
             subtitle="Publica, vota y comenta con la comunidad. El contenido sensible se revisa antes de aparecer."
           />
           <button type="button" className="forum-create-btn" onClick={() => setCreateOpen(true)}>
-            Crear post
+            Crear publicación
           </button>
         </div>
       )}
@@ -392,7 +392,7 @@ export default function Foro({ user }: { user: User }) {
                         </div>
                       </article>
                     ))}
-                    {comments.length === 0 && <p className="forum-muted">Sin comentarios todavia.</p>}
+                    {comments.length === 0 && <p className="forum-muted">Sin comentarios todavía.</p>}
                   </div>
                 </div>
               )}
@@ -446,8 +446,8 @@ export default function Foro({ user }: { user: User }) {
                     <p>{post.body}</p>
                     {post.image_url && <img src={post.image_url} alt="" className="forum-post-image" />}
                     <div className="forum-post-footer">
-                      <span>{post.comments_count} comentarios</span>
-                      <span>Ver discusion</span>
+                      <span>{post.comments_count} comentario{post.comments_count === 1 ? "" : "s"}</span>
+                      <span>Ver discusión</span>
                     </div>
                   </button>
                   <div className="forum-post-actions">

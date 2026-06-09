@@ -132,7 +132,7 @@ export default function Historia() {
       .then((r) => r.json())
       .then((data) => {
         if (data.success) setEvents(data.data);
-        else setEventsError("No se pudo cargar el timeline.");
+        else setEventsError("No se pudo cargar la línea de tiempo.");
       })
       .catch(() => setEventsError("Error de conexión."))
       .finally(() => setLoadingEvents(false));

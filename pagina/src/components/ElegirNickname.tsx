@@ -53,7 +53,7 @@ export default function ElegirNickname({ correo, nombre, fotoPerfilUrl, onComple
         <span className="ph-badge ph-badge--accent">Perfil nuevo</span>
         <h1 className="ph-title mt-4">Casi listo</h1>
         <p className="ph-subtitle text-sm">
-          Hola <strong>{nombre}</strong>, elige el nickname que aparecera en rankings, tienda y comunidad.
+          Hola <strong>{nombre}</strong>, elige el nickname que aparecerá en ranking, tienda y comunidad.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4">

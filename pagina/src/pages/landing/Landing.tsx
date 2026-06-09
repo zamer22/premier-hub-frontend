@@ -41,7 +41,7 @@ export default function Landing({ onLoginSuccess }: LandingProps) {
         <div className="landing-hero__content">
           <div className="lnd-1 landing-hero__badge">
             <span className="landing-hero__badge-text">
-              Premier League · Temporada 24/25
+              Premier League · Comunidad fan
             </span>
           </div>
 
@@ -53,7 +53,7 @@ export default function Landing({ onLoginSuccess }: LandingProps) {
           </h1>
 
           <p className="lnd-3 landing-hero__lead">
-            Sigue los partidos en vivo, compite en el leaderboard, consigue objetos exclusivos
+            Sigue los partidos en vivo, compite en el ranking, consigue objetos exclusivos
             y demuestra que sabes de fútbol.
           </p>
 
@@ -72,7 +72,7 @@ export default function Landing({ onLoginSuccess }: LandingProps) {
         </div>
 
         <div className="landing-hero__scroll">
-          <span className="landing-hero__scroll-text">Scroll</span>
+          <span className="landing-hero__scroll-text">Desliza</span>
           <svg
             className="landing-hero__scroll-icon"
             width="14"
@@ -117,8 +117,8 @@ export default function Landing({ onLoginSuccess }: LandingProps) {
             {[
               {
                 accentClass: "landing-feature__title--gold",
-                title: "Leaderboard",
-                desc: "Compite con otros fans. Acumula puntos prediciendo resultados y sube en el ranking global.",
+                title: "Ranking",
+                desc: "Compite con otros fans. Gana puntos en los juegos de Premier Hub y sube en el ranking global.",
               },
               {
                 accentClass: "landing-feature__title--crimson",
@@ -128,12 +128,12 @@ export default function Landing({ onLoginSuccess }: LandingProps) {
               {
                 accentClass: "landing-feature__title--navy",
                 title: "Tienda Premier",
-                desc: "Canjea tus puntos por jerseys, balones y accesorios exclusivos de tus equipos favoritos.",
+                desc: "Usa tus puntos para conseguir jerseys, balones y accesorios exclusivos de tus equipos favoritos.",
               },
               {
                 accentClass: "landing-feature__title--bordeaux",
                 title: "Marketplace",
-                desc: "Intercambia objetos con otros fans. Compra, vende y colecciona items únicos de temporada.",
+                desc: "Intercambia objetos con otros fans. Compra, vende y colecciona objetos únicos de temporada.",
               },
             ].map((feature) => (
               <div key={feature.title} className="feat-card landing-feature">
@@ -203,7 +203,7 @@ export default function Landing({ onLoginSuccess }: LandingProps) {
               width="100%"
               height="100%"
               src={`https://www.youtube.com/embed/${YT_VIDEO_ID}?rel=0&modestbranding=1`}
-              title="Premier League Highlights"
+              title="Mejores momentos de la Premier League"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="landing-video__iframe"

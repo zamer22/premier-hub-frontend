@@ -85,8 +85,8 @@ export default function Arcade() {
           <article className="@container flex flex-1 flex-col overflow-hidden rounded-xl border border-[#ddd8e6] bg-white shadow-[0_18px_38px_rgba(27,34,61,0.07)] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-[#cf275f]/50 group-hover:shadow-[0_24px_46px_rgba(207,39,95,0.16)]">
             <div className="relative flex flex-1 flex-col bg-[#f7f8fb] px-8 pb-8 pt-7">
               <div className="mb-4 text-center">
-                <h3 className="m-0 text-[4cqw] font-black leading-tight text-[#162b4d]">
-                  Adivina la Alineación
+                <h3 className="m-0 text-[1.05rem] font-black leading-tight text-[#162b4d]">
+                  Adivina la alineación
                 </h3>
                 <span className="mx-auto mt-2 block h-1 w-[12.7cqw] rounded-full bg-[#cf275f]" />
                 <p className="m-0 mt-3 text-[2.9cqw] font-medium text-[#7b8494]">

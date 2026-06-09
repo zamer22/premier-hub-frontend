@@ -26,7 +26,7 @@ export default function AdminUsers({ user }: { user: AdminUser }) {
   const [users, setUsers] = useState<FlaggedUser[]>([]);
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
   const [manualUserId, setManualUserId] = useState("");
-  const [reason, setReason] = useState("Moderacion del foro");
+  const [reason, setReason] = useState("Moderación del foro");
   const [toast, setToast] = useState("");
 
   const adminFetch = useCallback(async (path: string, init: RequestInit = {}) => {
@@ -71,7 +71,7 @@ export default function AdminUsers({ user }: { user: AdminUser }) {
 
   const unban = async (restrictionId: number) => {
     await adminFetch(`/forum/restrictions/${restrictionId}`, { method: "DELETE" });
-    show("Restriccion removida");
+    show("Restricción removida");
     await load();
   };
 
@@ -81,18 +81,18 @@ export default function AdminUsers({ user }: { user: AdminUser }) {
       <section className="adm-forum-hero">
         <div>
           <p>Usuarios</p>
-          <h2>Bans y alertas</h2>
-          <span>Por ahora el ban bloquea publicar y comentar en foro; el modelo queda listo para scopes futuros.</span>
+          <h2>Bloqueos y alertas</h2>
+          <span>El bloqueo impide publicar y comentar en el foro; la estructura queda lista para permisos futuros.</span>
         </div>
-        <strong>{restrictions.length} activos</strong>
+        <strong>{restrictions.length} bloqueo{restrictions.length === 1 ? "" : "s"} activo{restrictions.length === 1 ? "" : "s"}</strong>
       </section>
 
       <section className="adm-forum-panel">
-        <h3>Aplicar restriccion manual</h3>
+        <h3>Aplicar restricción manual</h3>
         <div className="adm-forum-form is-row">
-          <input value={manualUserId} onChange={(event) => setManualUserId(event.target.value)} placeholder="ID usuario" />
+          <input value={manualUserId} onChange={(event) => setManualUserId(event.target.value)} placeholder="ID de usuario" />
           <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Motivo" />
-          <button onClick={() => ban(Number(manualUserId))} disabled={!Number(manualUserId)}>Ban foro</button>
+          <button onClick={() => ban(Number(manualUserId))} disabled={!Number(manualUserId)}>Bloquear en foro</button>
         </div>
       </section>
 
@@ -103,11 +103,11 @@ export default function AdminUsers({ user }: { user: AdminUser }) {
             {users.map((item) => (
               <article key={item.id_usuario}>
                 <b>{nameOf(item)}</b>
-                <span>{item.alert_count} alertas AI</span>
+                <span>{item.alert_count} alertas IA</span>
                 {item.restriction ? (
-                  <button onClick={() => unban(item.restriction!.id)}>Quitar ban</button>
+                  <button onClick={() => unban(item.restriction!.id)}>Quitar bloqueo</button>
                 ) : (
-                  <button onClick={() => ban(item.id_usuario)}>Ban foro</button>
+                  <button onClick={() => ban(item.id_usuario)}>Bloquear en foro</button>
                 )}
               </article>
             ))}
@@ -122,10 +122,10 @@ export default function AdminUsers({ user }: { user: AdminUser }) {
               <article key={item.id}>
                 <b>{nameOf(item.usuario)} · #{item.id_usuario}</b>
                 <span>{item.reason || "Sin motivo"}</span>
-                <button onClick={() => unban(item.id)}>Quitar ban</button>
+                <button onClick={() => unban(item.id)}>Quitar bloqueo</button>
               </article>
             ))}
-            {restrictions.length === 0 && <p className="adm-forum-empty">No hay bans activos.</p>}
+            {restrictions.length === 0 && <p className="adm-forum-empty">No hay bloqueos activos.</p>}
           </div>
         </div>
       </section>

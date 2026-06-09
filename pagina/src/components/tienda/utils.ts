@@ -3,7 +3,7 @@ import type { Producto, Listado } from "./types";
 export function tipoLabel(tipo: string): string {
   const map: Record<string, string> = {
     jersey: "Jersey", balonazo: "Balón", ropa: "Ropa", accesorio: "Accesorio",
-    banner: "Banner", marco: "Marco", titulo: "Titulo", trofeo: "Trofeo",
+    banner: "Banner", marco: "Marco", titulo: "Título", trofeo: "Trofeo",
     achievement: "Achievement", foto_perfil: "Postcard",
   };
   return map[tipo] || tipo.charAt(0).toUpperCase() + tipo.slice(1).replace(/_/g, " ");

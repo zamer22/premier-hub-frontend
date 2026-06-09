@@ -11,7 +11,7 @@ type Props = {
 
 export default function ClubGrid({ clubs, selectedId, onSelect, disabled }: Props) {
   if (clubs.length === 0) {
-    return <p className="lab-club-grid-empty">Cargando clubes…</p>;
+    return <p className="lab-club-grid-empty">Cargando clubes...</p>;
   }
 
   return (
