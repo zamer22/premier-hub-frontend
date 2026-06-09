@@ -17,6 +17,78 @@ const INITIAL_NEWS_LIMIT = 7;
 const LOAD_MORE_NEWS_LIMIT = 6;
 const SEARCH_DEBOUNCE_MS = 300;
 
+function TeamFilterDropdown({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: string[];
+  onChange: (team: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="noticias-team-filter" ref={containerRef}>
+      <button
+        type="button"
+        className={isOpen ? "noticias-select-trigger is-open" : "noticias-select-trigger"}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span className="noticias-select-trigger__value">{value}</span>
+        <span className="noticias-select-trigger__chevron" aria-hidden="true" />
+      </button>
+
+      {isOpen && (
+        <div className="noticias-select-menu" role="listbox" aria-label="Equipos de la Premier League">
+          {options.map((team) => {
+            const isSelected = team === value;
+            return (
+              <button
+                key={team}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                className={isSelected ? "noticias-select-option is-selected" : "noticias-select-option"}
+                onClick={() => {
+                  onChange(team);
+                  setIsOpen(false);
+                }}
+              >
+                <span>{team}</span>
+                {isSelected && <span className="noticias-select-option__check" aria-hidden="true">✓</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NewsImage({
   image,
   alt,
@@ -271,20 +343,14 @@ export default function NoticiasLanding() {
       </div>
 
       <div className="noticias-toolbar">
-        <label className="noticias-filter-field">
+        <div className="noticias-filter-field">
           <span className="noticias-filter-label">Filtrar por equipo</span>
-          <select
+          <TeamFilterDropdown
             value={teamFilter}
-            onChange={(event) => setTeamFilter(event.target.value)}
-            className="noticias-select"
-          >
-            {teamOptions.map((team) => (
-              <option key={team} value={team}>
-                {team}
-              </option>
-            ))}
-          </select>
-        </label>
+            options={teamOptions}
+            onChange={setTeamFilter}
+          />
+        </div>
 
         <label className="noticias-filter-field noticias-filter-field--search">
           <span className="noticias-filter-label">Buscar</span>
