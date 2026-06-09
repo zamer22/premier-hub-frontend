@@ -278,15 +278,17 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
         <div className="relative mb-4 grid justify-items-start gap-2">
-          <GameInstructions
-            title={MISSING_XI_TITLE}
-            steps={MISSING_XI_STEPS}
-            buttonClassName="absolute right-0 top-0"
-          />
           <BackButton />
-          <div>
+          <div className="w-full">
             <p className="ph-eyebrow">Arcade</p>
-            <h1 className="ph-title">Missing XI</h1>
+            <div className="flex w-full items-center gap-4">
+              <h1 className="ph-title min-w-0 flex-1">Missing XI</h1>
+              <GameInstructions
+                title={MISSING_XI_TITLE}
+                steps={MISSING_XI_STEPS}
+                buttonClassName="ml-auto"
+              />
+            </div>
             <p className="ph-subtitle">Cargando reto diario desde Premier Hub</p>
           </div>
         </div>
@@ -307,15 +309,17 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
         <div className="relative mb-4 grid justify-items-start gap-2">
-          <GameInstructions
-            title={MISSING_XI_TITLE}
-            steps={MISSING_XI_STEPS}
-            buttonClassName="absolute right-0 top-0"
-          />
           <BackButton />
-          <div>
+          <div className="w-full">
             <p className="ph-eyebrow">Arcade</p>
-            <h1 className="ph-title">Missing XI</h1>
+            <div className="flex w-full items-center gap-4">
+              <h1 className="ph-title min-w-0 flex-1">Missing XI</h1>
+              <GameInstructions
+                title={MISSING_XI_TITLE}
+                steps={MISSING_XI_STEPS}
+                buttonClassName="ml-auto"
+              />
+            </div>
             <p className="ph-subtitle">No se pudo cargar el reto diario</p>
           </div>
         </div>
@@ -341,15 +345,17 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
         <div className="relative mb-5 grid justify-items-start gap-3">
-          <GameInstructions
-            title={MISSING_XI_TITLE}
-            steps={MISSING_XI_STEPS}
-            buttonClassName="absolute right-0 top-0"
-          />
           <BackButton />
-          <div>
+          <div className="w-full">
             <p className="ph-eyebrow">Arcade</p>
-            <h1 className="ph-title">Missing XI</h1>
+            <div className="flex w-full items-center gap-4">
+              <h1 className="ph-title min-w-0 flex-1">Missing XI</h1>
+              <GameInstructions
+                title={MISSING_XI_TITLE}
+                steps={MISSING_XI_STEPS}
+                buttonClassName="ml-auto"
+              />
+            </div>
           </div>
         </div>
         <GameSummary
@@ -370,17 +376,19 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
 
       {/* Back button + title */}
       <div className="relative mb-[clamp(0.5rem,1.4vh,1rem)] grid justify-items-start gap-2 [@media_(min-width:841px)_and_(max-height:700px)]:mb-[0.35rem]">
-        <GameInstructions
-          title={MISSING_XI_TITLE}
-          steps={MISSING_XI_STEPS}
-          buttonClassName="absolute right-0 top-0 z-10"
-        />
         <BackButton />
-        <div>
+        <div className="w-full">
           <p className="ph-eyebrow">Arcade</p>
-          <h1 className="ph-title [@media_(min-width:841px)_and_(max-height:780px)]:text-[clamp(1.35rem,2vw,1.8rem)]">
-            Missing XI
-          </h1>
+          <div className="flex w-full items-center gap-4">
+            <h1 className="ph-title min-w-0 flex-1 [@media_(min-width:841px)_and_(max-height:780px)]:text-[clamp(1.35rem,2vw,1.8rem)]">
+              Missing XI
+            </h1>
+            <GameInstructions
+              title={MISSING_XI_TITLE}
+              steps={MISSING_XI_STEPS}
+              buttonClassName="ml-auto"
+            />
+          </div>
           <p className="ph-subtitle [@media_(min-width:841px)_and_(max-height:780px)]:mt-1 [@media_(min-width:841px)_and_(max-height:780px)]:leading-[1.35]">
             Adivina la alineación del equipo ganador
           </p>
