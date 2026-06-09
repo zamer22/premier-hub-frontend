@@ -41,6 +41,7 @@ type ForumComment = {
 };
 type SortMode = "hot" | "recent" | "top" | "commented";
 type NormalizedImage = { dataUrl: string; width: number; height: number };
+type ReportTarget = { type: "post" | "comment"; id: number };
 
 const SORTS: Array<{ key: SortMode; label: string }> = [
   { key: "hot", label: "Populares" },
@@ -121,6 +122,9 @@ export default function Foro({ user }: { user: User }) {
   const [commentText, setCommentText] = useState("");
   const [commenting, setCommenting] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   const currentSubforum = useMemo(
     () => subforums.find((subforum) => subforum.slug === selectedSubforum) || subforums[0],
@@ -251,17 +255,51 @@ export default function Foro({ user }: { user: User }) {
     }
   };
 
-  const report = async (targetType: "post" | "comment", targetId: number) => {
-    const reason = window.prompt("Motivo del reporte");
-    if (!reason?.trim()) return;
+  const openReport = (type: ReportTarget["type"], id: number) => {
+    setReportReason("");
+    setReportTarget({ type, id });
+  };
+
+  const closeReport = () => {
+    if (reporting) return;
+    setReportTarget(null);
+    setReportReason("");
+  };
+
+  useEffect(() => {
+    if (!reportTarget) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !reporting) {
+        setReportTarget(null);
+        setReportReason("");
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [reportTarget, reporting]);
+
+  const report = async () => {
+    const reason = reportReason.trim();
+    if (!reportTarget || reason.length < 3) return;
+    setReporting(true);
     try {
       await api("/api/foro/reports", {
         method: "POST",
-        body: JSON.stringify({ target_type: targetType, target_id: targetId, reason: reason.trim() }),
+        body: JSON.stringify({
+          target_type: reportTarget.type,
+          target_id: reportTarget.id,
+          reason,
+        }),
       });
+      setReportTarget(null);
+      setReportReason("");
       showNotice("Reporte enviado");
     } catch (error) {
       showNotice(error instanceof Error ? error.message : "No se pudo reportar", false);
+    } finally {
+      setReporting(false);
     }
   };
 
@@ -337,9 +375,66 @@ export default function Foro({ user }: { user: User }) {
       )
     : null;
 
+  const reportModal = reportTarget
+    ? createPortal(
+        <div className="forum-report-backdrop" onClick={closeReport}>
+          <form
+            className="forum-report-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forum-report-title"
+            onClick={(event) => event.stopPropagation()}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void report();
+            }}
+          >
+            <div className="forum-report-icon" aria-hidden="true">!</div>
+            <div className="forum-report-copy">
+              <span className="forum-report-eyebrow">Ayuda a cuidar la comunidad</span>
+              <h2 id="forum-report-title">
+                Reportar {reportTarget.type === "post" ? "publicación" : "comentario"}
+              </h2>
+              <p>Cuéntanos brevemente qué sucede. El equipo de moderación revisará el contenido.</p>
+            </div>
+
+            <label className="forum-report-field">
+              <span>Motivo del reporte</span>
+              <textarea
+                autoFocus
+                value={reportReason}
+                onChange={(event) => setReportReason(event.target.value)}
+                placeholder="Ej. Contiene insultos, spam o información inapropiada..."
+                rows={4}
+                minLength={3}
+                maxLength={800}
+                disabled={reporting}
+              />
+              <span className="forum-report-counter">{reportReason.length}/800</span>
+            </label>
+
+            <div className="forum-report-actions">
+              <button type="button" className="forum-report-cancel" onClick={closeReport} disabled={reporting}>
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="forum-report-submit"
+                disabled={reporting || reportReason.trim().length < 3}
+              >
+                {reporting ? "Enviando..." : "Enviar reporte"}
+              </button>
+            </div>
+          </form>
+        </div>,
+        document.body,
+      )
+    : null;
+
   return (
     <div className="forum-page">
       {createPostModal}
+      {reportModal}
       {notice && <div className={notice.ok ? "forum-toast is-ok" : "forum-toast is-error"}>{notice.text}</div>}
       {!detailPostId && (
         <div className="forum-topbar">
@@ -387,7 +482,7 @@ export default function Foro({ user }: { user: User }) {
                           <button type="button" className={comment.my_vote === 1 ? "is-active" : ""} onClick={() => void vote("comment", comment.id, comment.my_vote, 1)}>▲</button>
                           <strong>{comment.score}</strong>
                           <button type="button" className={comment.my_vote === -1 ? "is-active" : ""} onClick={() => void vote("comment", comment.id, comment.my_vote, -1)}>▼</button>
-                          <button type="button" onClick={() => void report("comment", comment.id)}>Reportar</button>
+                          <button type="button" onClick={() => openReport("comment", comment.id)}>Reportar</button>
                           {comment.id_usuario === user.id_usuario && <button type="button" onClick={() => void removeOwn("comment", comment.id)}>Borrar</button>}
                         </div>
                       </article>
@@ -451,7 +546,7 @@ export default function Foro({ user }: { user: User }) {
                     </div>
                   </button>
                   <div className="forum-post-actions">
-                    <button type="button" onClick={() => void report("post", post.id)}>Reportar</button>
+                    <button type="button" onClick={() => openReport("post", post.id)}>Reportar</button>
                     {post.id_usuario === user.id_usuario && <button type="button" onClick={() => void removeOwn("post", post.id)}>Borrar</button>}
                   </div>
                 </article>
