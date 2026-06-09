@@ -100,7 +100,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     } catch { } finally { setLoading(false); }
   }, []);
 
-  // /api/tienda/mis-items — el backend lee el id de usuario de la cookie de sesion; excluye avatares
+  // /api/tienda/mis-items — el backend lee el id de usuario de la cookie de sesión; excluye avatares
   const fetchMisItems = useCallback(async () => {
     try {
       const r = await fetch(`${API_URL}/api/tienda/mis-items`, { credentials: "include" });
@@ -210,7 +210,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         }
         return true;
       } else { setConfirmAction(null); showToast(data.error, false); return false; }
-    } catch { setConfirmAction(null); showToast("Error de conexion", false); return false; }
+    } catch { setConfirmAction(null); showToast("Error de conexión", false); return false; }
   };
 
   // Abre CheckoutModal y precarga las direcciones. Si no hay ninguna, muestra el form de nueva dirección.
@@ -288,9 +288,9 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         credentials: "include",
       });
       const data = await res.json();
-      if (data.success) { onSaldoChange(Number(data.dinero)); showToast(`+${data.bonus} pts reclamados!`, true); }
+      if (data.success) { onSaldoChange(Number(data.dinero)); showToast(`¡+${data.bonus} pts reclamados!`, true); }
       else { showToast(data.error, false); }
-    } catch { showToast("Error de conexion", false); }
+    } catch { showToast("Error de conexión", false); }
   };
 
   const comprarMarketplace = async (id_listado: number, nombre: string) => {
@@ -309,7 +309,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         setConfirmAction(null);
         setSuccessMsg(`¡${nombre} comprado en marketplace! Tu nuevo saldo es ${nuevoSaldo.toLocaleString()} pts.`);
       } else { setConfirmAction(null); showToast(data.error, false); }
-    } catch { setConfirmAction(null); showToast("Error de conexion", false); }
+    } catch { setConfirmAction(null); showToast("Error de conexión", false); }
   };
 
   const publicar = async () => {
@@ -326,7 +326,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         setSuccessMsg(`¡${confirmAction.item.nombre} publicado en el marketplace por ${confirmAction.precio.toLocaleString()} pts!`);
         fetchMisItems(); fetchMisListados();
       } else { setConfirmAction(null); showToast(data.error, false); }
-    } catch { setConfirmAction(null); showToast("Error de conexion", false); }
+    } catch { setConfirmAction(null); showToast("Error de conexión", false); }
   };
 
   const prepararPublicacion = () => {
@@ -346,7 +346,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
       const data = await res.json();
       if (data.success) { showToast("Publicación cancelada", true); fetchMisListados(); fetchMisItems(); }
       else { showToast(data.error, false); }
-    } catch { showToast("Error de conexion", false); }
+    } catch { showToast("Error de conexión", false); }
   };
 
   const enviarReseña = async () => {
@@ -520,7 +520,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           subtitle="Compra con tus puntos"
           actions={
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={reclamarBonus} className="t-bonus-btn">+ 500 pts bonus</button>
+              <button onClick={reclamarBonus} className="t-bonus-btn">+ 500 pts extra</button>
               <div className="t-saldo">{saldo.toLocaleString()} pts</div>
             </div>
           }
@@ -530,17 +530,17 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           value={subTab}
           onChange={(k) => setSubTab(k as SubTab)}
           items={[
-            { key: "perfil", label: "Objetos de Perfil" },
-            { key: "real", label: "Objetos Reales" },
+            { key: "perfil", label: "Objetos de perfil" },
+            { key: "real", label: "Objetos reales" },
             { key: "marketplace", label: "Marketplace" },
-            { key: "pedidos", label: "Mis Pedidos" },
+            { key: "pedidos", label: "Mis pedidos" },
           ]}
         />
 
         {subTab !== "perfil" && subTab !== "pedidos" && (subTab !== "marketplace" || marketView === "explorar") && (
           <div className="flex flex-wrap items-center gap-3 mt-4 mb-5">
             <div className="relative flex-1 min-w-[200px]">
-              <input type="text" placeholder="Buscar por nombre, equipo..." value={busqueda}
+              <input type="text" placeholder="Buscar por nombre o equipo..." value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)} className="t-input" />
             </div>
             <div className="flex flex-wrap gap-1">
@@ -633,7 +633,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
             <div className="t-market-toggle">
               {([
                 { key: "explorar" as MarketView, label: "Explorar" },
-                { key: "mis-items" as MarketView, label: "Mis Items" },
+                { key: "mis-items" as MarketView, label: "Mis objetos" },
               ]).map((v) => (
                 <button key={v.key}
                   onClick={() => { setMarketView(v.key); if (v.key === "mis-items") { fetchMisItems(); fetchMisListados(); } }}
@@ -659,9 +659,9 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
             {marketView === "mis-items" && (
               <div>
-                <h3 className="t-text-dark font-bold text-base mb-3">Mi Inventario</h3>
+                <h3 className="t-text-dark font-bold text-base mb-3">Mi inventario</h3>
                 {misItems.length === 0
-                  ? <p className="text-muted text-sm mb-6">No tienes items. Compra algo en la tienda primero.</p>
+                  ? <p className="text-muted text-sm mb-6">No tienes objetos. Compra algo en la tienda primero.</p>
                   : (
                     <div className="t-grid--inv mb-8">
                       {misItems.map(item => (
@@ -684,7 +684,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                     </div>
                   )}
 
-                <h3 className="t-text-dark font-bold text-base mb-3">Mis Publicaciones Activas</h3>
+                <h3 className="t-text-dark font-bold text-base mb-3">Mis publicaciones activas</h3>
                 {misListados.length === 0
                   ? <p className="text-muted text-sm">No tienes publicaciones activas</p>
                   : (
@@ -716,7 +716,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
               ? (
                 <EmptyState
                   title="Aún no tienes pedidos"
-                  description='Compra un objeto real desde la pestaña "Objetos Reales" y aparecerá aquí.'
+                  description='Compra un objeto real desde la pestaña "Objetos reales" y aparecerá aquí.'
                 />
               )
               : (

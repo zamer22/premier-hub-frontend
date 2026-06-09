@@ -2,8 +2,16 @@ import { useEffect, useState } from "react";
 import { crestUrl } from "../../components/offseason/ClubGrid";
 import type { IconicMatch, MatchPreview, RewindResult } from "../../components/offseason/types";
 import EventRow, { KIND_ABBR } from "../../components/offseason/EventRow";
+import InstructivoModal from "../../components/offseason/InstructivoModal";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+const INSTRUCTIVO_PASOS = [
+  { titulo: "Elige un partido", detalle: "Selecciona uno de los partidos icónicos de la lista para cargar su línea de tiempo." },
+  { titulo: "Quita eventos clave", detalle: "Marca los goles o tarjetas rojas que quieres borrar del partido para construir el escenario hipotético." },
+  { titulo: "Calcula el resultado", detalle: "Recalculamos el marcador como si esos eventos nunca hubieran pasado." },
+  { titulo: "Compara", detalle: "Abajo verás el resultado real contra el alternativo y por qué cambió." },
+];
 
 export default function MatchRewind({
   onLoadingChange,
@@ -98,12 +106,17 @@ export default function MatchRewind({
   const removableCount = homeEvents.length + awayEvents.length;
 
   return (
-    <div className="ol-grid">
-      {/* ── Panel izquierdo ─────────────────────────────────────────────── */}
+    <div className="ol-stack">
+      {/* ── Selección ───────────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title">
           <span className="ol-accent" />
           <h2>Seleccionar partido</h2>
+          <InstructivoModal
+            titulo="Rebobina el Partido"
+            intro="Revive un partido histórico y cambia su desenlace quitando goles o expulsiones clave."
+            pasos={INSTRUCTIVO_PASOS}
+          />
         </div>
 
         <div className="ol-field-group" style={{ marginBottom: "0.65rem" }}>
@@ -115,7 +128,7 @@ export default function MatchRewind({
               onChange={(e) => { if (e.target.value) handleLoadMatch(Number(e.target.value)); }}
               disabled={iconicMatches.length === 0 || previewLoading}
             >
-              <option value="">{iconicMatches.length === 0 ? "Cargando partidos…" : "Seleccionar partido icónico…"}</option>
+              <option value="">{iconicMatches.length === 0 ? "Cargando partidos..." : "Seleccionar partido icónico..."}</option>
               {iconicMatches.map((m) => (
                 <option key={m.fixture_id} value={m.fixture_id}>{m.label}</option>
               ))}
@@ -197,7 +210,7 @@ export default function MatchRewind({
         )}
       </section>
 
-      {/* ── Panel derecho ────────────────────────────────────────────────── */}
+      {/* ── Resultado (abajo) ────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title ol-section-title--navy">
           <span className="ol-accent ol-accent--navy" />
@@ -206,7 +219,7 @@ export default function MatchRewind({
 
         {preview && selectedList.length > 0 ? (
           <div className="ol-mod-summary-list">
-            <p className="ol-meta-label">Si esto no hubiera pasado…</p>
+            <p className="ol-meta-label">Si esto no hubiera pasado...</p>
             {selectedList.map((e) => (
               <div key={e.id} className="ol-mod-tag">
                 <span className="ol-mod-tag-icon">{KIND_ABBR[e.kind]}</span>
@@ -251,7 +264,7 @@ export default function MatchRewind({
         {loading && (
           <div className="ol-loading">
             <span className="ol-spinner" />
-            <p>Calculando el escenario alternativo…</p>
+            <p>Calculando el escenario alternativo...</p>
           </div>
         )}
 
@@ -283,7 +296,7 @@ export default function MatchRewind({
 
             {result.key_changes.length > 0 && (
               <div className="ol-reasons-block">
-                <p className="ol-meta-label">Cómo lo calcula el modelo</p>
+                <p className="ol-meta-label">Cómo se calculó el resultado</p>
                 <ul className="ol-reasons-list">
                   {result.key_changes.map((kc, i) => (
                     <li key={i}>{kc.description}</li>

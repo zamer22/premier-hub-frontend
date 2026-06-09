@@ -64,7 +64,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
       if (d.success) setPedidos(d.data);
       else showToast(d.error || "Error", false);
     } catch {
-      showToast("Error de conexion", false);
+      showToast("Error de conexión", false);
     } finally {
       setLoading(false);
     }
@@ -208,7 +208,7 @@ export default function AdminEnvios({ user, onLogout }: AdminEnviosProps) {
 
             {!selected ? (
               <div className="adm-detail--empty">
-                <p className="adm-detail__empty-text">Seleccioná un pedido para gestionarlo</p>
+                <p className="adm-detail__empty-text">Selecciona un pedido para gestionarlo</p>
               </div>
             ) : (
               <OrderDetailPane

@@ -6,13 +6,13 @@ import "./Wordle.css";
 // Instrucciones del juego "Reto Diario".
 const RETO_DIARIO_TITLE = "Cómo jugar Reto Diario";
 const RETO_DIARIO_STEPS: InstructionStep[] = [
-  { icon: "📅", text: "Observa la pregunta o categoría diaria." },
-  { icon: "✋", text: "Arrastra las 10 tarjetas para ordenar a los jugadores de mayor a menor." },
-  { icon: "🥇", text: "La posición número 1 corresponde al jugador con el valor más alto." },
-  { icon: "✅", text: "Presiona “Confirmar” cuando estés seguro del orden." },
-  { icon: "🟩", text: "Después de confirmar, las posiciones correctas aparecerán en verde y las incorrectas en rojo." },
-  { icon: "🎯", text: "Tu puntuación depende de cuántos jugadores estén exactamente en la posición correcta." },
-  { icon: "🗓️", text: "Solo hay un reto disponible cada día." },
+  { titulo: "Pregunta del día", detalle: "Observa la pregunta o categoría diaria." },
+  { titulo: "Ordena las tarjetas", detalle: "Arrastra las 10 tarjetas para ordenar a los jugadores de mayor a menor." },
+  { titulo: "Mayor primero", detalle: "La posición número 1 corresponde al jugador con el valor más alto." },
+  { titulo: "Confirma tu orden", detalle: "Presiona “Confirmar” cuando estés seguro del orden." },
+  { titulo: "Revisa el resultado", detalle: "Tras confirmar, las posiciones correctas aparecen en verde y las incorrectas en rojo." },
+  { titulo: "Puntuación", detalle: "Tu puntuación depende de cuántos jugadores queden exactamente en la posición correcta." },
+  { titulo: "Un reto por día", detalle: "Solo hay un reto disponible cada día." },
 ];
 
 // Tipos de datos que usa el juego.
@@ -85,11 +85,6 @@ function WordleHeader() {
       >
         ← Volver
       </button>
-      <GameInstructions
-        title={RETO_DIARIO_TITLE}
-        steps={RETO_DIARIO_STEPS}
-        buttonClassName="ml-auto"
-      />
     </div>
   );
 }
@@ -385,7 +380,14 @@ export default function Wordle() {
       <WordleHeader />
       <header className="wordle-page-header">
         <p className="ph-eyebrow">Arcade</p>
-        <h1 className="wordle-theme">{theme}</h1>
+        <div className="wordle-title-row">
+          <h1 className="wordle-theme">{theme}</h1>
+          <GameInstructions
+            title={RETO_DIARIO_TITLE}
+            steps={RETO_DIARIO_STEPS}
+            buttonClassName="wordle-info-button"
+          />
+        </div>
         {!submitted ? (
           <p className="wordle-instructions">Ordena de mayor a menor y confirma tu respuesta</p>
         ) : null}

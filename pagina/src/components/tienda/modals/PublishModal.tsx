@@ -13,7 +13,7 @@ export default function PublishModal({ item, precio, onPrecioChange, onContinue,
   return (
     <div className="t-overlay" style={{ zIndex: 9001 }} onClick={onClose}>
       <div className="t-modal t-modal--sm" onClick={(e) => e.stopPropagation()}>
-        <h3 className="t-modal-title t-modal-title--mb-sm">Publicar en Marketplace</h3>
+        <h3 className="t-modal-title t-modal-title--mb-sm">Publicar en marketplace</h3>
         <p className="t-modal-subtitle">{item.nombre}</p>
         <label className="t-publish-label">Precio (pts)</label>
         <input

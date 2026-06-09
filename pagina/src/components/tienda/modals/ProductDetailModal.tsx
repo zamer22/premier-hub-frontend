@@ -22,7 +22,7 @@ interface ProductDetailModalProps {
   onCheckout: (p: Producto, v: Variante | null) => void;
 }
 
-// Detalle de producto: imagen, tallas, precio, compra. Si es real también muestra reseñas.
+// Detalle de producto: imagen, tallas, precio y compra. Si es real, también muestra reseñas.
 export default function ProductDetailModal({
   producto, saldo, isOwned, selectedVariante, onSelectVariante,
   productComments, loadingComments, userId, newReview, onReviewChange,
@@ -69,7 +69,7 @@ export default function ProductDetailModal({
             <span className="t-detail-tag t-detail-tag--base">{tipoLabel(producto.tipo)}</span>
             {producto.equipo && <span className="t-detail-tag t-detail-tag--team">{producto.equipo}</span>}
             {producto.temporada_nombre && <span className="t-detail-tag t-detail-tag--season">Temporada: {producto.temporada_nombre}</span>}
-            {producto.categoria === "evento" && <span className="t-detail-tag t-detail-tag--event">DROP EXCLUSIVO</span>}
+            {producto.categoria === "evento" && <span className="t-detail-tag t-detail-tag--event">LANZAMIENTO EXCLUSIVO</span>}
           </div>
 
           {producto.descripcion && <p className="t-detail-desc">{producto.descripcion}</p>}
@@ -179,7 +179,7 @@ export default function ProductDetailModal({
               )}
               {!isOwned && (
                 <p className="t-review-login-note">
-                  Tenés que comprar el producto para dejar una reseña.
+                  Tienes que comprar el producto para dejar una reseña.
                 </p>
               )}
 

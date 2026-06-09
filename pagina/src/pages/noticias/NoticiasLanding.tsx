@@ -176,7 +176,7 @@ export default function NoticiasLanding() {
         console.error(requestError);
         setNews([]);
         setHasMore(false);
-        setError("Error conectando con API");
+        setError("Error al conectar con la API");
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -237,7 +237,7 @@ export default function NoticiasLanding() {
       });
     } catch (requestError) {
       console.error(requestError);
-      setError("Error cargando mas noticias desde la API");
+      setError("Error al cargar más noticias desde la API");
     } finally {
       setLoadingMore(false);
     }
@@ -291,7 +291,7 @@ export default function NoticiasLanding() {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar por titular, equipo, o fuente"
+            placeholder="Buscar por titular, equipo o fuente"
             className="noticias-search"
           />
         </label>
@@ -357,7 +357,7 @@ export default function NoticiasLanding() {
                 onClick={() => void handleLoadMore()}
                 disabled={loadingMore}
               >
-                {loadingMore ? "Cargando..." : "Cargar mas"}
+                {loadingMore ? "Cargando..." : "Cargar más"}
               </button>
             </div>
           )}

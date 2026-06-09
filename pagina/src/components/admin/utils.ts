@@ -1,7 +1,7 @@
 const TIPO_LABELS: Record<string, string> = {
   balonazo: "Balón",
-  foto_perfil: "Foto perfil",
-  achievement: "Achievement",
+  foto_perfil: "Foto de perfil",
+  achievement: "Logro",
   jersey: "Jersey",
   ropa: "Ropa",
   accesorio: "Accesorio",

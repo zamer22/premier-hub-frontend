@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import type { PLClub } from "../../components/offseason/types";
-import ClubGrid from "../../components/offseason/ClubGrid";
+import ClubPicker from "../../components/offseason/ClubPicker";
+import PlayerPicker from "../../components/offseason/PlayerPicker";
+import InstructivoModal from "../../components/offseason/InstructivoModal";
+import { useClubPlayers, type ClubPlayer } from "../../hooks/useClubPlayers";
 import { clubInitials, clubHue, posAbbr, posBg, posColor } from "../../components/offseason/utils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type Player   = { id: number; name: string; age: number; position: string };
+const INSTRUCTIVO_PASOS = [
+  { titulo: "Arma un traspaso", detalle: "Elige el club de origen, el jugador y el club destino. Cada selector abre una tarjeta con todos los equipos o jugadores." },
+  { titulo: "Suma hasta 5 fichajes", detalle: "Pulsa “Agregar fichaje” para encadenar varios traspasos en el mismo escenario." },
+  { titulo: "Simula la temporada", detalle: "Corremos miles de partidos simulados para proyectar los puntos finales de cada club." },
+  { titulo: "Lee la tabla", detalle: "Abajo verás la tabla proyectada y cuántas posiciones sube o baja cada equipo respecto a no hacer ningún fichaje." },
+];
+
 type Transfer = {
   playerId: number; playerName: string; position: string;
   fromClubId: number; fromClubName: string;
@@ -23,27 +32,19 @@ export default function SeasonSimulator({
   onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [sourceClubId, setSourceClubId]     = useState<number | "">("");
-  const [players, setPlayers]               = useState<Player[]>([]);
-  const [playersLoading, setPlayersLoading] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<ClubPlayer | null>(null);
   const [targetClubId, setTargetClubId]     = useState<number | "">("");
   const [transfers, setTransfers]           = useState<Transfer[]>([]);
   const [loading, setLoading]               = useState(false);
   const [result, setResult]                 = useState<ClubResult[] | null>(null);
   const [error, setError]                   = useState<string | null>(null);
 
+  const { players, loading: playersLoading } = useClubPlayers(sourceClubId);
+
   useEffect(() => { onLoadingChange(loading); }, [loading, onLoadingChange]);
 
-  useEffect(() => {
-    if (!sourceClubId) { setPlayers([]); setSelectedPlayer(null); return; }
-    setPlayersLoading(true);
-    setSelectedPlayer(null);
-    fetch(`${API_URL}/api/ml/players?club_id=${sourceClubId}`)
-      .then((r) => r.json())
-      .then((data) => setPlayers(data.success ? data.data : []))
-      .catch(() => setPlayers([]))
-      .finally(() => setPlayersLoading(false));
-  }, [sourceClubId]);
+  // Al cambiar de club, el jugador elegido deja de ser válido.
+  useEffect(() => { setSelectedPlayer(null); }, [sourceClubId]);
 
   const usedPlayerIds = new Set(transfers.map((t) => t.playerId));
   const targetClubs   = clubs.filter((c) => c.id !== sourceClubId);
@@ -101,8 +102,8 @@ export default function SeasonSimulator({
     baselineRanking.findIndex((r) => r.club_id === clubId) + 1;
 
   return (
-    <div className="ol-grid">
-      {/* ── Panel izquierdo ─────────────────────────────────────────────── */}
+    <div className="ol-stack">
+      {/* ── Selección ───────────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title">
           <span className="ol-accent" />
@@ -110,36 +111,47 @@ export default function SeasonSimulator({
           {transfers.length > 0 && (
             <span className="ol-count-badge">{transfers.length}/5</span>
           )}
+          <InstructivoModal
+            titulo="Simulador de Temporada"
+            intro="Arma una ventana de fichajes hipotética y mira cómo quedaría la tabla de la Premier League."
+            pasos={INSTRUCTIVO_PASOS}
+          />
         </div>
 
-        <div className="ol-field-group">
+        <div className="ol-picker-row">
           <label className="ol-label">
             Club del jugador
-            <ClubGrid clubs={clubs} selectedId={sourceClubId} onSelect={setSourceClubId} />
+            <ClubPicker
+              clubs={clubs}
+              selectedId={sourceClubId}
+              onSelect={setSourceClubId}
+              title="Club del jugador"
+            />
           </label>
 
           <label className="ol-label">
             Jugador
-            <select
-              className="ol-select"
-              value={selectedPlayer?.id ?? ""}
-              onChange={(e) => setSelectedPlayer(players.find((p) => p.id === Number(e.target.value)) ?? null)}
-              disabled={!sourceClubId || playersLoading}
-            >
-              <option value="">
-                {playersLoading ? "Cargando…" : !sourceClubId ? "Selecciona un club primero" : "Seleccionar jugador…"}
-              </option>
-              {players.map((p) => (
-                <option key={p.id} value={p.id} disabled={usedPlayerIds.has(p.id)}>
-                  {p.name} · {p.position}{usedPlayerIds.has(p.id) ? " (ya agregado)" : ""}
-                </option>
-              ))}
-            </select>
+            <PlayerPicker
+              players={players}
+              loading={playersLoading}
+              selectedId={selectedPlayer?.id ?? ""}
+              onSelect={(id) => setSelectedPlayer(players.find((p) => p.id === id) ?? null)}
+              disabled={!sourceClubId}
+              disabledIds={usedPlayerIds}
+              placeholder={!sourceClubId ? "Elige un club primero" : "Seleccionar jugador"}
+              title="Jugador a fichar"
+            />
           </label>
 
           <label className="ol-label">
             Club destino
-            <ClubGrid clubs={targetClubs} selectedId={targetClubId} onSelect={setTargetClubId} disabled={!selectedPlayer} />
+            <ClubPicker
+              clubs={targetClubs}
+              selectedId={targetClubId}
+              onSelect={setTargetClubId}
+              disabled={!selectedPlayer}
+              title="Club destino"
+            />
           </label>
         </div>
 
@@ -191,19 +203,20 @@ export default function SeasonSimulator({
           </div>
         )}
 
-        <button
-          type="button"
-          className="ol-primary"
-          onClick={handleSimulate}
-          disabled={!transfers.length || loading}
-          style={{ marginTop: "1rem" }}
-        >
-          {loading ? "Calculando…" : "Simular temporada"}
-        </button>
-        {error && <p className="ol-error">{error}</p>}
+        <div className="ol-form-actions">
+          <button
+            type="button"
+            className="ol-primary"
+            onClick={handleSimulate}
+            disabled={!transfers.length || loading}
+          >
+            {loading ? "Calculando..." : "Simular temporada"}
+          </button>
+          {error && <p className="ol-error">{error}</p>}
+        </div>
       </section>
 
-      {/* ── Panel derecho ────────────────────────────────────────────────── */}
+      {/* ── Resultados (abajo) ───────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title ol-section-title--navy">
           <span className="ol-accent ol-accent--navy" />
@@ -219,7 +232,7 @@ export default function SeasonSimulator({
         {loading && (
           <div className="ol-loading">
             <span className="ol-spinner" />
-            <p>Calculando tabla proyectada…</p>
+            <p>Calculando tabla proyectada...</p>
           </div>
         )}
 

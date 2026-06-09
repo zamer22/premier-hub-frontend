@@ -25,7 +25,7 @@ interface CheckoutModalProps {
 }
 
 // Muestra direcciones guardadas (radio) o el form de nueva (DireccionForm).
-// Al confirmar llama onConfirmar que dispara POST /api/tienda/comprar con id_direccion.
+// Al confirmar, llama onConfirmar, que dispara POST /api/tienda/comprar con id_direccion.
 export default function CheckoutModal({
   producto, variante, saldo,
   direcciones, selectedDireccionId, onSelectDireccion, onEliminarDireccion,
@@ -76,7 +76,7 @@ export default function CheckoutModal({
             </div>
 
             {direcciones.length === 0 && !showNewDireccion && (
-              <p className="t-empty-hint">No tienes direcciones guardadas. Agregá una para continuar.</p>
+              <p className="t-empty-hint">No tienes direcciones guardadas. Agrega una para continuar.</p>
             )}
 
             {direcciones.length > 0 && !showNewDireccion && (

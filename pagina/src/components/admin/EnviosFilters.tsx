@@ -23,7 +23,7 @@ export default function EnviosFilters({ filtroEstado, onFiltroChange, search, on
         ))}
       </div>
       <input
-        placeholder="Buscar por # de pedido o tracking..."
+        placeholder="Buscar por pedido o seguimiento..."
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         className="adm-input adm-search"
