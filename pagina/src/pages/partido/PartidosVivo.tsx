@@ -25,7 +25,7 @@ interface PartidosVivoProps {
   onBack: () => void;
   user: any;
 }
-const TABS = ["Alineaciones", "Estadisticas", "H2H"];
+const TABS = ["Alineaciones", "Estadísticas", "H2H"];
 
 function parseGrid(value: string | null): { row: number; col: number } | null {
   if (!value) return null;
@@ -325,15 +325,18 @@ function ChatEmote({
   emoteMap: Map<string, ChatEmoteConfig>;
   compact?: boolean;
 }) {
+  const [failed, setFailed] = useState(false);
   const emote = emoteMap.get(token);
   if (!emote) return <>{token}</>;
+  const className = `pv-emote ${emote.kind === "sticker" && !compact ? "pv-emote--sticker" : ""}${failed ? " pv-emote--failed" : ""}`;
 
   return (
-    <span
-      className={`pv-emote ${emote.kind === "sticker" && !compact ? "pv-emote--sticker" : ""}`}
-      title={emote.label}
-    >
-      <img src={emote.src} alt={emote.label} loading="lazy" />
+    <span className={className} title={emote.label}>
+      {failed ? (
+        <span className="pv-emote__fallback">{token}</span>
+      ) : (
+        <img src={emote.src} alt={emote.label} loading="lazy" onError={() => setFailed(true)} />
+      )}
     </span>
   );
 }
@@ -644,9 +647,9 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
           <span className="pv-score-minute">{currentMatch.minute}</span>
           <div className="pv-stadium">{currentMatch.stadium}</div>
           {isDemo ? (
-            <div className="pv-demo-controls" aria-label="Controles de simulacion">
+            <div className="pv-demo-controls" aria-label="Controles de simulación">
               <button type="button" onClick={() => setDemoRunning(true)} disabled={demoRunning || demoMinute >= 90}>
-                Start
+                Iniciar
               </button>
               <button type="button" onClick={() => setDemoRunning(false)} disabled={!demoRunning}>
                 Pausa
@@ -730,7 +733,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
                       ))}
                     </>
                   ) : (
-                    <span className="pv-pitch__empty">Sin mapa de alineacion desde el API</span>
+                    <span className="pv-pitch__empty">Sin mapa de alineación desde la API</span>
                   )}
                 </div>
 
@@ -745,18 +748,18 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
               </div>
             )}
 
-            {tab === "Estadisticas" && (
+            {tab === "Estadísticas" && (
               <div>
                 {loadingStats || statsError || effectiveStats.length === 0 ? (
                   <StateMessage
                     loading={loadingStats}
                     error={statsError}
-                    loadingText="Cargando estadisticas..."
-                    emptyText="No hay estadisticas disponibles para este partido."
+                    loadingText="Cargando estadísticas..."
+                    emptyText="No hay estadísticas disponibles para este partido."
                   />
                 ) : (
                   <>
-                    <p className="pv-stats-label">Estadisticas del partido</p>
+                    <p className="pv-stats-label">Estadísticas del partido</p>
                     <div className="pv-stat-teams">
                       <span>{currentMatch.homeTeam.name}</span>
                       <span />
@@ -792,7 +795,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
                   />
                 ) : (
                   <>
-                    <p className="pv-stats-label">Ultimos enfrentamientos</p>
+                    <p className="pv-stats-label">Últimos enfrentamientos</p>
                     {h2h.map((item, index) => {
                       const winner = getH2HWinner(item);
                       return (
@@ -918,7 +921,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
                     disabled={activationClaiming}
                     onClick={() => claimActivation(null)}
                   >
-                    {activationClaiming ? "..." : "Claim"}
+                    {activationClaiming ? "..." : "Reclamar"}
                   </button>
                 ) : (
                   <div className="pv-poll-options">
@@ -943,7 +946,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
 
             <div className="pv-activation-history">
               <p className="pv-activation__eyebrow">Historial</p>
-              {activationHistory.length === 0 ? <span>Sin recompensas reclamadas aun.</span> : null}
+              {activationHistory.length === 0 ? <span>Sin recompensas reclamadas aún.</span> : null}
               {activationHistory.slice(-4).reverse().map((activation) => (
                 <div key={activation.id} className="pv-activation-history__item">
                   <strong>{activation.title}</strong>
@@ -966,7 +969,7 @@ export default function PartidosVivo({ match, onBack, user }: PartidosVivoProps)
             <div className="pv-chat__messages" ref={chatListRef}>
               {chatLoading ? <p className="pv-empty">Cargando chat...</p> : null}
               {!chatLoading && chatMessages.length === 0 ? (
-                <p className="pv-empty">Se el primero en comentar este partido.</p>
+                <p className="pv-empty">Sé el primero en comentar este partido.</p>
               ) : null}
               {chatMessages.map((item) => {
                 const isMine = Number(item.id_usuario) === Number(user?.id_usuario);

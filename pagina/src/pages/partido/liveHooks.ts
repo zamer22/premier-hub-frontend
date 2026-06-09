@@ -47,7 +47,7 @@ export function useLiveConfig() {
         if (!cancelled) setConfig(data);
       })
       .catch((err: any) => {
-        if (!cancelled) setError(err?.message || "No se pudo cargar la configuracion live.");
+        if (!cancelled) setError(err?.message || "No se pudo cargar la configuración live.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -137,7 +137,7 @@ export function useLiveDetails(matchId: number, isDemo: boolean, refresh: {
       const data = await liveApi.getStats(matchId);
       setStats({ data, loading: false, error: "" });
     } catch (err: any) {
-      setStats({ data: [], loading: false, error: err?.message || "No se pudieron cargar las estadisticas." });
+      setStats({ data: [], loading: false, error: err?.message || "No se pudieron cargar las estadísticas." });
     }
   }, [matchId]);
 
@@ -241,11 +241,11 @@ export function useLiveActivations(matchId: number, minute: number | null) {
       setError("");
       setToast("");
       const result = await liveApi.claimActivation(matchId, activeActivation.id, selectedOption);
-      setToast(Number(result.reward_points) > 0 ? `Ganaste ${result.reward_points} puntos` : "Participacion registrada");
+      setToast(Number(result.reward_points) > 0 ? `Ganaste ${result.reward_points} puntos` : "Participación registrada");
       setActiveActivation(null);
       await loadActivations(false);
     } catch (err: any) {
-      setError(err?.message || "No se pudo reclamar la activacion.");
+      setError(err?.message || "No se pudo reclamar la activación.");
     } finally {
       setClaiming(false);
     }

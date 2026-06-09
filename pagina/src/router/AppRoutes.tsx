@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AuthenticatedLayout from "../layouts/AuthenticatedLayout";
 import type { InventoryItem } from "../hooks/useProfileCustomization";
 import Arcade from "../pages/arcade/Arcade";
+import Foro from "../pages/foro/Foro";
 import Historia from "../pages/historia/Historia";
 import Noticia from "../pages/noticias/Noticia";
 import Noticias from "../pages/noticias/NoticiasLanding";
@@ -11,6 +12,7 @@ import Perfil from "../pages/perfil/Perfil";
 import Laboratorio from "../pages/offseason/OffseasonLab";
 import Tablero from "../pages/tablero/Tablero";
 import Tienda from "../pages/tienda/Tienda";
+import VrArena from "../pages/vr-arena/VrArena";
 import MissingXI from "../components/arcade/missing-xi/MissingXI";
 import Wordle from "../pages/wordle/Wordle";
 import {
@@ -39,7 +41,7 @@ function ComingSoon({ section }: { section: Section }) {
       <span className="text-[2rem] font-extrabold text-navy/20 tracking-tight">
         {TABS.find((tab) => tab.key === section)?.label.toUpperCase()}
       </span>
-      <span className="text-muted text-sm">Proximamente</span>
+      <span className="text-muted text-sm">Próximamente</span>
     </div>
   );
 }
@@ -98,10 +100,21 @@ export default function AppRoutes({
             />
           }
         />
+        <Route
+          path="laboratorio"
+          element={
+            <Laboratorio
+              user={user}
+              onSaldoChange={(dinero: number) => setUser({ ...user, dinero })}
+            />
+          }
+        />
         <Route path="tablero" element={<Tablero />} />
-        <Route path="laboratorio" element={<Laboratorio user={user} />} />
         <Route path="noticias" element={<Noticias />} />
         <Route path="noticias/:newsId" element={<Noticia />} />
+        <Route path="foro" element={<Foro user={user} />} />
+        <Route path="foro/:postId" element={<Foro user={user} />} />
+        <Route path="vr-arena" element={<VrArena />} />
         <Route path="arcade" element={<Arcade />} />
         <Route path="arcade/wordle" element={<Wordle />} />
         <Route

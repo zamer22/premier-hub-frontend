@@ -479,3 +479,15 @@
     border-bottom: 1px solid #f0f0f0;
   }
 }
+
+.pp-event-icon--var {
+  background: #f8fafc;
+  border-color: #263a55;
+}
+
+.pp-event-var {
+  color: #263a55;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}

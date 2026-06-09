@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./AdminTienda.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "";
@@ -24,6 +24,7 @@ interface Listado {
   id_listado: number;
   id_vendedor: number;
   id_inventario: number | null;
+  id_producto?: number | null;
   precio: number;
   estado: "activo" | "vendido" | "cancelado";
   created_at?: string;
@@ -31,21 +32,40 @@ interface Listado {
   fecha_venta?: string | null;
   id_comprador?: number | null;
   nombre?: string | null;
+  descripcion?: string | null;
+  costo?: number | null;
+  stock?: number | null;
   imagen?: string | null;
   css?: string | null;
   tipo?: string | null;
   rareza?: string | null;
   categoria?: string | null;
   equipo?: string | null;
+  es_nuevo?: boolean | null;
+  es_de_liga?: boolean | null;
+  id_temporada?: number | null;
   vendedor_nickname?: string | null;
 }
 
+interface AdminUser {
+  id_usuario?: number | string | null;
+  id?: number | string | null;
+  usuario?: { id_usuario?: number | string | null } | null;
+  profile?: { id_usuario?: number | string | null } | null;
+  perfil?: { id_usuario?: number | string | null } | null;
+}
+
 interface AdminTiendaProps {
-  user: { id_usuario: number };
+  user: AdminUser | null | undefined;
 }
 
 type EstadoFilter = "todos" | "activo" | "vendido" | "cancelado";
-type CategoriaFilter = "todos" | "perfil" | "real";
+type ToastTone = "success" | "error" | "warning";
+
+type ToastAction = {
+  label: string;
+  id_listado: number;
+};
 
 const EMPTY_NEW_PRODUCT = {
   nombre: "",
@@ -60,6 +80,24 @@ const EMPTY_NEW_PRODUCT = {
   equipo: "",
   rareza: "",
   id_temporada: "",
+  publicarMarketplace: false,
+  precioMarketplace: "",
+};
+
+const EMPTY_EDIT_PRODUCT = {
+  precio: "",
+  nombre: "",
+  descripcion: "",
+  costo: "",
+  stock: "",
+  imagen: "",
+  categoria: "perfil" as "perfil" | "real",
+  tipo: "",
+  equipo: "",
+  rareza: "",
+  id_temporada: "",
+  es_nuevo: false,
+  es_de_liga: false,
 };
 
 const NEW_PRODUCT_TIPOS = [
@@ -86,8 +124,8 @@ function tipoLabel(tipo?: string | null) {
 
   const labels: Record<string, string> = {
     balonazo: "Balón",
-    foto_perfil: "Foto perfil",
-    achievement: "Achievement",
+    foto_perfil: "Foto de perfil",
+    achievement: "Logro",
     jersey: "Jersey",
     ropa: "Ropa",
     accesorio: "Accesorio",
@@ -120,6 +158,18 @@ function getErrorMessage(error: unknown) {
   if (error instanceof TypeError) return "No se pudo conectar con el backend";
   if (error instanceof Error) return error.message;
   return "Error de conexión";
+}
+
+function resolveAdminId(user: AdminUser | null | undefined) {
+  const rawId =
+    user?.id_usuario ??
+    user?.usuario?.id_usuario ??
+    user?.profile?.id_usuario ??
+    user?.perfil?.id_usuario ??
+    user?.id;
+
+  const id = Number(rawId);
+  return Number.isInteger(id) && id > 0 ? id : null;
 }
 
 function ProductThumb({
@@ -177,20 +227,23 @@ function ChipGroup({
 }
 
 export default function AdminTienda({ user }: AdminTiendaProps) {
-  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
+
+  const [toast, setToast] = useState<{
+    msg: string;
+    ok: boolean;
+    title?: string;
+    tone: ToastTone;
+    action?: ToastAction;
+  } | null>(null);
 
   const [listados, setListados] = useState<Listado[]>([]);
   const [productos, setProductos] = useState<Product[]>([]);
   const [loadingMarket, setLoadingMarket] = useState(true);
-  const [loadingCatalog, setLoadingCatalog] = useState(true);
 
   const [marketSearch, setMarketSearch] = useState("");
   const [marketEstado, setMarketEstado] = useState<EstadoFilter>("todos");
   const [marketTipo, setMarketTipo] = useState("todos");
-
-  const [catalogSearch, setCatalogSearch] = useState("");
-  const [catalogCategoria, setCatalogCategoria] = useState<CategoriaFilter>("todos");
-  const [catalogTipo, setCatalogTipo] = useState("todos");
 
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishSearch, setPublishSearch] = useState("");
@@ -201,36 +254,75 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newProduct, setNewProduct] = useState(EMPTY_NEW_PRODUCT);
+  const [newProductImageFile, setNewProductImageFile] = useState<File | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
   const [editingListado, setEditingListado] = useState<Listado | null>(null);
-  const [editPrecio, setEditPrecio] = useState("");
+  const [editProduct, setEditProduct] = useState(EMPTY_EDIT_PRODUCT);
+  const [editProductImageFile, setEditProductImageFile] = useState<File | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState("");
 
   const [confirmCancel, setConfirmCancel] = useState<Listado | null>(null);
   const [canceling, setCanceling] = useState(false);
 
-  const showToast = (msg: string, ok = true) => {
-    setToast({ msg, ok });
-    setTimeout(() => setToast(null), 2800);
-  };
+  const adminId = useMemo(() => resolveAdminId(user), [user]);
+
+  const showToast = useCallback(
+    (
+      msg: string,
+      ok = true,
+      title?: string,
+      tone?: ToastTone,
+      action?: ToastAction,
+    ) => {
+      if (toastTimerRef.current) {
+        window.clearTimeout(toastTimerRef.current);
+      }
+
+      setToast({ msg, ok, title, tone: tone || (ok ? "success" : "error"), action });
+
+      toastTimerRef.current = window.setTimeout(
+        () => setToast(null),
+        action ? 6500 : 2800,
+      );
+    },
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        window.clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
 
   const adminFetch = useCallback(
     async (path: string, init: RequestInit = {}) => {
+      if (!adminId) {
+        throw new Error("No se encontró el ID de usuario del administrador.");
+      }
+
       const joiner = path.includes("?") ? "&" : "?";
       const pathWithAdmin = `${path}${joiner}id_usuario=${encodeURIComponent(
-        String(user.id_usuario),
+        String(adminId),
       )}`;
 
       const headers = new Headers(init.headers);
 
-      if (init.body && !headers.has("Content-Type")) {
+      if (
+        init.body &&
+        !(init.body instanceof FormData) &&
+        !(init.body instanceof File) &&
+        !(init.body instanceof Blob) &&
+        !headers.has("Content-Type")
+      ) {
         headers.set("Content-Type", "application/json");
       }
 
-      headers.set("x-id-usuario", String(user.id_usuario));
+      headers.set("x-id-usuario", String(adminId));
 
       const baseUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
       const url = `${baseUrl}/api/admin${pathWithAdmin}`;
@@ -257,7 +349,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
       return json;
     },
-    [user.id_usuario],
+    [adminId],
   );
 
   const fetchListados = useCallback(async () => {
@@ -271,30 +363,31 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     } finally {
       setLoadingMarket(false);
     }
-  }, [adminFetch]);
+  }, [adminFetch, showToast]);
 
   const fetchCatalogo = useCallback(async () => {
-    setLoadingCatalog(true);
-
     try {
       const json = await adminFetch("/productos");
       setProductos(json.data || []);
     } catch (error) {
       showToast(getErrorMessage(error), false);
-    } finally {
-      setLoadingCatalog(false);
     }
-  }, [adminFetch]);
+  }, [adminFetch, showToast]);
 
   useEffect(() => {
+    if (!adminId) {
+      setLoadingMarket(false);
+      showToast(
+        "No se encontró el ID de usuario del administrador. Revisa que el componente reciba el usuario completo.",
+        false,
+        "Sesión incompleta",
+      );
+      return;
+    }
+
     fetchListados();
     fetchCatalogo();
-  }, [fetchListados, fetchCatalogo]);
-
-  const productTypes = useMemo(() => {
-    const tipos = productos.map((p) => p.tipo).filter(Boolean) as string[];
-    return ["todos", ...Array.from(new Set(tipos))];
-  }, [productos]);
+  }, [adminId, fetchListados, fetchCatalogo, showToast]);
 
   const marketTypes = useMemo(() => {
     const tipos = listados.map((l) => l.tipo).filter(Boolean) as string[];
@@ -319,24 +412,6 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     });
   }, [listados, marketSearch, marketEstado, marketTipo]);
 
-  const filteredProductos = useMemo(() => {
-    const term = catalogSearch.trim().toLowerCase();
-
-    return productos.filter((p) => {
-      const matchesText =
-        !term ||
-        p.nombre.toLowerCase().includes(term) ||
-        (p.descripcion || "").toLowerCase().includes(term) ||
-        (p.equipo || "").toLowerCase().includes(term) ||
-        (p.tipo || "").toLowerCase().includes(term);
-
-      const matchesCategoria = catalogCategoria === "todos" || p.categoria === catalogCategoria;
-      const matchesTipo = catalogTipo === "todos" || p.tipo === catalogTipo;
-
-      return matchesText && matchesCategoria && matchesTipo;
-    });
-  }, [productos, catalogSearch, catalogCategoria, catalogTipo]);
-
   const productosParaPublicar = useMemo(() => {
     const term = publishSearch.trim().toLowerCase();
 
@@ -352,15 +427,18 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   }, [productos, publishSearch]);
 
   const stats = {
-    catalogo: productos.length,
-    perfil: productos.filter((p) => p.categoria === "perfil").length,
-    real: productos.filter((p) => p.categoria === "real").length,
+    publicaciones: listados.length,
     activos: listados.filter((l) => l.estado === "activo").length,
     vendidos: listados.filter((l) => l.estado === "vendido").length,
+    cancelados: listados.filter((l) => l.estado === "cancelado").length,
+    ventasPts: listados
+      .filter((l) => l.estado === "vendido")
+      .reduce((total, l) => total + Number(l.precio || 0), 0),
   };
 
   const openCreate = () => {
     setNewProduct(EMPTY_NEW_PRODUCT);
+    setNewProductImageFile(null);
     setCreateError("");
     setCreateOpen(true);
   };
@@ -373,40 +451,160 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     setPublishOpen(true);
   };
 
+  const openEdit = (listado: Listado) => {
+    setEditingListado(listado);
+    setEditProduct({
+      precio: String(listado.precio || ""),
+      nombre: listado.nombre || "",
+      descripcion: listado.descripcion || "",
+      costo: String(listado.costo ?? ""),
+      stock: String(listado.stock ?? ""),
+      imagen: listado.imagen || "",
+      categoria: listado.categoria === "real" ? "real" : "perfil",
+      tipo: listado.tipo || "",
+      equipo: listado.equipo || "",
+      rareza: listado.rareza || "",
+      id_temporada: listado.id_temporada ? String(listado.id_temporada) : "",
+      es_nuevo: !!listado.es_nuevo,
+      es_de_liga: !!listado.es_de_liga,
+    });
+    setEditProductImageFile(null);
+    setEditError("");
+  };
+
+  const handleToastDeleteListado = async (id_listado: number) => {
+    setCanceling(true);
+
+    try {
+      const json = await adminFetch(`/marketplace/cancelar/${id_listado}`, {
+        method: "DELETE",
+      });
+
+      setListados((prev) =>
+        json.removed
+          ? prev.filter((l) => l.id_listado !== id_listado)
+          : prev.map((l) =>
+              l.id_listado === id_listado ? { ...l, estado: "cancelado" } : l,
+            ),
+      );
+
+      showToast(
+        json.removed
+          ? "Se eliminó el listado y su inventario asociado."
+          : "El listado quedó cancelado.",
+        true,
+        json.removed ? "Listado eliminado" : "Listado cancelado",
+      );
+    } catch (error) {
+      showToast(getErrorMessage(error), false);
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const handleCreateProduct = async () => {
+    const precioMarketplace = Number(newProduct.precioMarketplace);
+
     if (!newProduct.nombre.trim() || newProduct.costo === "" || Number(newProduct.costo) < 0) {
-      setCreateError("Nombre y costo válido son requeridos.");
+      setCreateError("El nombre y un costo válido son obligatorios.");
+      return;
+    }
+
+    if (
+      newProduct.publicarMarketplace &&
+      (!newProduct.precioMarketplace ||
+        !Number.isFinite(precioMarketplace) ||
+        precioMarketplace <= 0)
+    ) {
+      setCreateError("Agrega un precio válido para publicar en el marketplace.");
+      return;
+    }
+
+    if (!adminId) {
+      setCreateError("No se encontró el ID de usuario del administrador.");
       return;
     }
 
     setCreateError("");
     setCreating(true);
 
-    const payload = {
-      nombre: newProduct.nombre.trim(),
-      descripcion: newProduct.descripcion.trim() || null,
-      costo: Number(newProduct.costo),
-      stock: Number(newProduct.stock || 0),
-      imagen: newProduct.imagen.trim() || null,
-      es_nuevo: newProduct.es_nuevo,
-      categoria: newProduct.categoria,
-      tipo: newProduct.tipo || null,
-      equipo: newProduct.equipo.trim() || null,
-      rareza: newProduct.rareza.trim() || null,
-      id_temporada: newProduct.id_temporada ? Number(newProduct.id_temporada) : null,
-      css: null,
-      es_de_liga: newProduct.es_de_liga,
-    };
-
     try {
+      let imagenUrl = newProduct.imagen.trim() || null;
+
+      if (newProductImageFile) {
+        const formData = new FormData();
+        formData.append("imagen", newProductImageFile);
+
+        const uploadJson = await adminFetch("/productos/imagen", {
+          method: "POST",
+          body: formData,
+        });
+
+        imagenUrl = uploadJson.data.publicUrl;
+      }
+
+      const payload = {
+        nombre: newProduct.nombre.trim(),
+        descripcion: newProduct.descripcion.trim() || null,
+        costo: Number(newProduct.costo),
+        stock: Number(newProduct.stock || 0),
+        imagen: imagenUrl,
+        es_nuevo: newProduct.es_nuevo,
+        categoria: newProduct.categoria,
+        tipo: newProduct.tipo || null,
+        equipo: newProduct.equipo.trim() || null,
+        rareza: newProduct.rareza.trim() || null,
+        id_temporada: newProduct.id_temporada ? Number(newProduct.id_temporada) : null,
+        css: null,
+        es_de_liga: newProduct.es_de_liga,
+      };
+
       const json = await adminFetch("/productos", {
         method: "POST",
         body: JSON.stringify(payload),
       });
 
-      setProductos((prev) => [json.data, ...prev]);
+      const createdProduct = json.data as Product;
+      setProductos((prev) => [createdProduct, ...prev]);
+
+      if (newProduct.publicarMarketplace) {
+        try {
+          const publishJson = await adminFetch("/marketplace/publicar", {
+            method: "POST",
+            body: JSON.stringify({
+              id_admin: adminId,
+              id_producto: Number(createdProduct.id_producto),
+              precio: precioMarketplace,
+            }),
+          });
+
+          const publishedListado = publishJson.data as Listado;
+          const publishedId = Number(publishedListado.id_listado);
+
+          setListados((prev) => [publishedListado, ...prev]);
+
+          showToast(
+            "Ya aparece como publicación activa en el marketplace.",
+            true,
+            "Objeto creado y publicado",
+            "success",
+            Number.isInteger(publishedId) && publishedId > 0
+              ? { label: "Borrar listado", id_listado: publishedId }
+              : undefined,
+          );
+        } catch (error) {
+          showToast(
+            `No se pudo publicar: ${getErrorMessage(error)}`,
+            false,
+            "Objeto creado",
+            "warning",
+          );
+        }
+      } else {
+        showToast("Se agregó al catálogo base de la tienda.", true, "Objeto creado");
+      }
+
       setCreateOpen(false);
-      showToast("Objeto creado");
     } catch (error) {
       setCreateError(getErrorMessage(error));
     } finally {
@@ -415,7 +613,20 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   };
 
   const handlePublicar = async () => {
-    if (!selectedProductId || !publishPrice || Number(publishPrice) <= 0) {
+    const productoId = Number(selectedProductId);
+    const precioNum = Number(publishPrice);
+
+    if (!adminId) {
+      setPublishError("No se encontró el ID de usuario del administrador.");
+      return;
+    }
+
+    if (
+      !Number.isInteger(productoId) ||
+      productoId <= 0 ||
+      !Number.isFinite(precioNum) ||
+      precioNum <= 0
+    ) {
       setPublishError("Selecciona un producto y un precio mayor a 0.");
       return;
     }
@@ -427,15 +638,27 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
       const json = await adminFetch("/marketplace/publicar", {
         method: "POST",
         body: JSON.stringify({
-          id_admin: user.id_usuario,
-          id_producto: selectedProductId,
-          precio: Number(publishPrice),
+          id_admin: adminId,
+          id_producto: productoId,
+          precio: precioNum,
         }),
       });
 
-      setListados((prev) => [json.data, ...prev]);
+      const publishedListado = json.data as Listado;
+      const publishedId = Number(publishedListado.id_listado);
+
+      setListados((prev) => [publishedListado, ...prev]);
       setPublishOpen(false);
-      showToast("Producto publicado en marketplace");
+
+      showToast(
+        "El producto ya aparece activo en el marketplace.",
+        true,
+        "Publicado",
+        "success",
+        Number.isInteger(publishedId) && publishedId > 0
+          ? { label: "Borrar listado", id_listado: publishedId }
+          : undefined,
+      );
     } catch (error) {
       setPublishError(getErrorMessage(error));
     } finally {
@@ -443,9 +666,14 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     }
   };
 
-  const handleEditPrecio = async () => {
-    if (!editingListado || !editPrecio || Number(editPrecio) <= 0) {
+  const handleEditProducto = async () => {
+    if (!editingListado || !editProduct.precio || Number(editProduct.precio) <= 0) {
       setEditError("Precio inválido.");
+      return;
+    }
+
+    if (!editProduct.nombre.trim()) {
+      setEditError("El nombre es obligatorio.");
       return;
     }
 
@@ -453,16 +681,45 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     setSavingEdit(true);
 
     try {
+      let imagenUrl = editProduct.imagen.trim() || null;
+
+      if (editProductImageFile) {
+        const formData = new FormData();
+        formData.append("imagen", editProductImageFile);
+
+        const uploadJson = await adminFetch("/productos/imagen", {
+          method: "POST",
+          body: formData,
+        });
+
+        imagenUrl = uploadJson.data.publicUrl;
+      }
+
       const json = await adminFetch(`/marketplace/listados/${editingListado.id_listado}`, {
         method: "PUT",
-        body: JSON.stringify({ precio: Number(editPrecio) }),
+        body: JSON.stringify({
+          precio: Number(editProduct.precio),
+          nombre: editProduct.nombre.trim(),
+          descripcion: editProduct.descripcion.trim() || null,
+          costo: editProduct.costo === "" ? 0 : Number(editProduct.costo),
+          stock: editProduct.stock === "" ? 0 : Number(editProduct.stock),
+          imagen: imagenUrl,
+          categoria: editProduct.categoria,
+          tipo: editProduct.tipo || null,
+          equipo: editProduct.equipo.trim() || null,
+          rareza: editProduct.rareza.trim() || null,
+          id_temporada: editProduct.id_temporada ? Number(editProduct.id_temporada) : null,
+          es_nuevo: editProduct.es_nuevo,
+          es_de_liga: editProduct.es_de_liga,
+        }),
       });
 
       setListados((prev) =>
         prev.map((l) => (l.id_listado === json.data.id_listado ? json.data : l)),
       );
+
       setEditingListado(null);
-      showToast("Precio actualizado");
+      showToast("Datos del listado actualizados", true, "Actualizado");
     } catch (error) {
       setEditError(getErrorMessage(error));
     } finally {
@@ -473,20 +730,34 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
   const handleCancelListado = async () => {
     if (!confirmCancel) return;
 
+    const listadoCancelado = confirmCancel;
+
     setCanceling(true);
 
     try {
-      await adminFetch(`/marketplace/cancelar/${confirmCancel.id_listado}`, {
+      const json = await adminFetch(`/marketplace/cancelar/${listadoCancelado.id_listado}`, {
         method: "DELETE",
       });
 
       setListados((prev) =>
-        prev.map((l) =>
-          l.id_listado === confirmCancel.id_listado ? { ...l, estado: "cancelado" } : l,
-        ),
+        json.removed
+          ? prev.filter((l) => l.id_listado !== listadoCancelado.id_listado)
+          : prev.map((l) =>
+              l.id_listado === listadoCancelado.id_listado
+                ? { ...l, estado: "cancelado" }
+                : l,
+            ),
       );
+
       setConfirmCancel(null);
-      showToast("Listado cancelado");
+
+      showToast(
+        json.removed
+          ? "Se eliminó el listado y su inventario asociado."
+          : "El listado quedó cancelado.",
+        true,
+        json.removed ? "Listado eliminado" : "Listado cancelado",
+      );
     } catch (error) {
       showToast(getErrorMessage(error), false);
     } finally {
@@ -494,20 +765,52 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
     }
   };
 
+  const createButtonText = creating
+    ? newProduct.publicarMarketplace
+      ? "Creando y publicando..."
+      : "Creando..."
+    : newProduct.publicarMarketplace
+      ? "Crear y publicar"
+      : "Crear objeto";
+
   return (
     <div className="adm-store">
       {toast && (
-        <div className={toast.ok ? "adm-store-toast is-ok" : "adm-store-toast is-error"}>
-          {toast.ok ? "✓ " : "✗ "}
-          {toast.msg}
+        <div
+          className={`adm-store-toast is-${toast.tone}`}
+          role={toast.ok ? "status" : "alert"}
+          aria-live="polite"
+        >
+          <span className="adm-store-toast-icon">
+            {toast.tone === "warning" ? "!" : toast.ok ? "✓" : "✕"}
+          </span>
+
+          <div className="adm-store-toast-copy">
+            <b>{toast.title || (toast.ok ? "Listo" : "No se pudo completar")}</b>
+            <small>{toast.msg}</small>
+
+            {toast.action && (
+              <button
+                type="button"
+                className="adm-store-toast-action"
+                onClick={() => {
+                  if (toast.action) {
+                    handleToastDeleteListado(toast.action.id_listado);
+                  }
+                }}
+                disabled={canceling}
+              >
+                {canceling ? "Borrando..." : toast.action.label}
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       <section className="adm-store-hero">
         <div>
-          <p className="adm-store-eyebrow">PremierHub Admin</p>
-          <h2>Tienda y Marketplace</h2>
-          <p>Gestiona el catálogo base y las publicaciones activas desde un solo lugar.</p>
+          <h2>Marketplace</h2>
+          <p>Gestiona publicaciones, precios y estado de los objetos en el marketplace.</p>
         </div>
 
         <div className="adm-store-hero-actions">
@@ -522,24 +825,24 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
       <section className="adm-store-stats">
         <div>
-          <span>Catálogo</span>
-          <b>{stats.catalogo}</b>
+          <span>Publicaciones</span>
+          <b>{stats.publicaciones}</b>
         </div>
         <div>
-          <span>Perfil</span>
-          <b>{stats.perfil}</b>
-        </div>
-        <div>
-          <span>Reales</span>
-          <b>{stats.real}</b>
-        </div>
-        <div>
-          <span>Activos</span>
+          <span>Activas</span>
           <b>{stats.activos}</b>
         </div>
         <div>
-          <span>Vendidos</span>
+          <span>Vendidas</span>
           <b>{stats.vendidos}</b>
+        </div>
+        <div>
+          <span>Canceladas</span>
+          <b>{stats.cancelados}</b>
+        </div>
+        <div>
+          <span>Ventas (pts)</span>
+          <b>{stats.ventasPts.toLocaleString()}</b>
         </div>
       </section>
 
@@ -555,7 +858,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
           <input
             value={marketSearch}
             onChange={(e) => setMarketSearch(e.target.value)}
-            placeholder="Buscar publicación, vendedor, equipo o #id..."
+            placeholder="Buscar publicación, vendedor, equipo o #ID..."
             className="adm-store-input"
           />
 
@@ -626,103 +929,18 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
                   {l.estado === "activo" && (
                     <div className="adm-store-row-actions">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingListado(l);
-                          setEditPrecio(String(l.precio));
-                          setEditError("");
-                        }}
-                      >
+                      <button type="button" onClick={() => openEdit(l)}>
                         Editar
                       </button>
-                      <button type="button" className="is-danger" onClick={() => setConfirmCancel(l)}>
+                      <button
+                        type="button"
+                        className="is-danger"
+                        onClick={() => setConfirmCancel(l)}
+                      >
                         Cancelar
                       </button>
                     </div>
                   )}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="adm-store-section">
-        <div className="adm-store-section-head">
-          <div>
-            <h3>Catálogo de tienda</h3>
-            <p>{filteredProductos.length} objetos encontrados</p>
-          </div>
-        </div>
-
-        <div className="adm-store-toolbar">
-          <input
-            value={catalogSearch}
-            onChange={(e) => setCatalogSearch(e.target.value)}
-            placeholder="Buscar objeto, equipo, tipo..."
-            className="adm-store-input"
-          />
-
-          <ChipGroup
-            value={catalogCategoria}
-            onChange={(v) => setCatalogCategoria(v as CategoriaFilter)}
-            items={[
-              { key: "todos", label: "Todo", count: productos.length },
-              {
-                key: "perfil",
-                label: "Perfil",
-                count: productos.filter((p) => p.categoria === "perfil").length,
-              },
-              {
-                key: "real",
-                label: "Reales",
-                count: productos.filter((p) => p.categoria === "real").length,
-              },
-            ]}
-          />
-
-          <ChipGroup
-            value={catalogTipo}
-            onChange={setCatalogTipo}
-            items={productTypes.map((tipo) => ({
-              key: tipo,
-              label: tipo === "todos" ? "Todos los tipos" : tipoLabel(tipo),
-            }))}
-          />
-        </div>
-
-        {loadingCatalog ? (
-          <p className="adm-store-empty">Cargando catálogo...</p>
-        ) : filteredProductos.length === 0 ? (
-          <p className="adm-store-empty">No hay objetos con esos filtros.</p>
-        ) : (
-          <div className="adm-store-list">
-            {filteredProductos.map((p) => (
-              <article key={p.id_producto} className="adm-store-row">
-                <ProductThumb item={p} />
-
-                <div className="adm-store-row-main">
-                  <div className="adm-store-row-top">
-                    <h4>{p.nombre}</h4>
-                    <div className="adm-store-mini-tags">
-                      {p.es_nuevo && <span>Nuevo</span>}
-                      <span>{categoriaLabel(p.categoria)}</span>
-                    </div>
-                  </div>
-
-                  <p className="adm-store-row-meta">
-                    #{p.id_producto} · {tipoLabel(p.tipo)}
-                    {p.equipo ? ` · ${p.equipo}` : ""}
-                    {p.rareza ? ` · ${p.rareza}` : ""}
-                  </p>
-
-                  <p className="adm-store-row-soft">{p.descripcion || "Sin descripción"}</p>
-                </div>
-
-                <div className="adm-store-row-side">
-                  <strong>{Number(p.costo).toLocaleString()} pts</strong>
-                  <span>Stock: {Number(p.stock || 0)}</span>
                 </div>
               </article>
             ))}
@@ -736,7 +954,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             <div className="adm-store-modal-head">
               <div>
                 <h3>Crear objeto</h3>
-                <p>Agrega un item nuevo al catálogo base de la tienda.</p>
+                <p>Agrega un objeto nuevo al catálogo base de la tienda.</p>
               </div>
               <button type="button" onClick={() => setCreateOpen(false)}>
                 ×
@@ -817,12 +1035,12 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
                 <input
                   value={newProduct.rareza}
                   onChange={(e) => setNewProduct((p) => ({ ...p, rareza: e.target.value }))}
-                  placeholder="Common, Rare, Elite..."
+                  placeholder="Común, Raro, Élite..."
                 />
               </label>
 
               <label className="adm-store-field">
-                <span>Temporada ID</span>
+                <span>ID de temporada</span>
                 <input
                   type="number"
                   value={newProduct.id_temporada}
@@ -845,11 +1063,20 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
               </label>
 
               <label className="adm-store-field is-wide">
-                <span>Imagen URL</span>
+                <span>URL de imagen</span>
                 <input
                   value={newProduct.imagen}
                   onChange={(e) => setNewProduct((p) => ({ ...p, imagen: e.target.value }))}
                   placeholder="https://..."
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Imagen desde computadora</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => setNewProductImageFile(e.target.files?.[0] || null)}
                 />
               </label>
 
@@ -875,13 +1102,48 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
                   />
                   De liga
                 </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newProduct.publicarMarketplace}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({
+                        ...p,
+                        publicarMarketplace: e.target.checked,
+                      }))
+                    }
+                  />
+                  Publicar en el marketplace
+                </label>
               </div>
+
+              {newProduct.publicarMarketplace && (
+                <label className="adm-store-field is-wide">
+                  <span>Precio en el marketplace</span>
+                  <input
+                    type="number"
+                    value={newProduct.precioMarketplace}
+                    onChange={(e) =>
+                      setNewProduct((p) => ({
+                        ...p,
+                        precioMarketplace: e.target.value,
+                      }))
+                    }
+                    placeholder="Ej. 2500"
+                  />
+                </label>
+              )}
             </div>
 
             {createError && <p className="adm-store-error">{createError}</p>}
 
             <div className="adm-store-modal-actions">
-              <button type="button" className="adm-store-btn is-ghost" onClick={() => setCreateOpen(false)}>
+              <button
+                type="button"
+                className="adm-store-btn is-ghost"
+                onClick={() => setCreateOpen(false)}
+              >
                 Cancelar
               </button>
               <button
@@ -890,7 +1152,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
                 onClick={handleCreateProduct}
                 disabled={creating}
               >
-                {creating ? "Creando..." : "Crear objeto"}
+                {createButtonText}
               </button>
             </div>
           </div>
@@ -903,7 +1165,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             <div className="adm-store-modal-head">
               <div>
                 <h3>Publicar producto</h3>
-                <p>Selecciona cualquier objeto del catálogo y publícalo en marketplace.</p>
+                <p>Selecciona cualquier objeto del catálogo y publícalo en el marketplace.</p>
               </div>
               <button type="button" onClick={() => setPublishOpen(false)}>
                 ×
@@ -923,7 +1185,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
                   key={p.id_producto}
                   type="button"
                   onClick={() => setSelectedProductId(p.id_producto)}
-                  className={selectedProductId === p.id_producto ? "adm-store-pick is-selected" : "adm-store-pick"}
+                  className={
+                    selectedProductId === p.id_producto
+                      ? "adm-store-pick is-selected"
+                      : "adm-store-pick"
+                  }
                 >
                   <ProductThumb item={p} />
                   <span>
@@ -938,7 +1204,7 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             </div>
 
             <label className="adm-store-field">
-              <span>Precio en marketplace</span>
+              <span>Precio en el marketplace</span>
               <input
                 type="number"
                 value={publishPrice}
@@ -950,7 +1216,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             {publishError && <p className="adm-store-error">{publishError}</p>}
 
             <div className="adm-store-modal-actions">
-              <button type="button" className="adm-store-btn is-ghost" onClick={() => setPublishOpen(false)}>
+              <button
+                type="button"
+                className="adm-store-btn is-ghost"
+                onClick={() => setPublishOpen(false)}
+              >
                 Cancelar
               </button>
               <button
@@ -968,10 +1238,10 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
 
       {editingListado && (
         <div className="adm-store-modal-backdrop">
-          <div className="adm-store-modal is-small">
+          <div className="adm-store-modal">
             <div className="adm-store-modal-head">
               <div>
-                <h3>Editar precio</h3>
+                <h3>Editar producto</h3>
                 <p>{editingListado.nombre}</p>
               </div>
               <button type="button" onClick={() => setEditingListado(null)}>
@@ -979,28 +1249,169 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
               </button>
             </div>
 
-            <label className="adm-store-field">
-              <span>Nuevo precio</span>
-              <input
-                type="number"
-                value={editPrecio}
-                onChange={(e) => setEditPrecio(e.target.value)}
-              />
-            </label>
+            <div className="adm-store-form-grid">
+              <label className="adm-store-field">
+                <span>Precio en el marketplace</span>
+                <input
+                  type="number"
+                  value={editProduct.precio}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, precio: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Nombre</span>
+                <input
+                  value={editProduct.nombre}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, nombre: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Costo</span>
+                <input
+                  type="number"
+                  value={editProduct.costo}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, costo: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Stock</span>
+                <input
+                  type="number"
+                  value={editProduct.stock}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, stock: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Categoría</span>
+                <select
+                  value={editProduct.categoria}
+                  onChange={(e) =>
+                    setEditProduct((p) => ({
+                      ...p,
+                      categoria: e.target.value as "perfil" | "real",
+                    }))
+                  }
+                >
+                  <option value="perfil">Perfil</option>
+                  <option value="real">Objeto real</option>
+                </select>
+              </label>
+
+              <label className="adm-store-field">
+                <span>Tipo</span>
+                <select
+                  value={editProduct.tipo}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, tipo: e.target.value }))}
+                >
+                  <option value="">Seleccionar</option>
+                  {NEW_PRODUCT_TIPOS.map((tipo) => (
+                    <option key={tipo} value={tipo}>
+                      {tipoLabel(tipo)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="adm-store-field">
+                <span>Equipo</span>
+                <input
+                  value={editProduct.equipo}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, equipo: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>Rareza</span>
+                <input
+                  value={editProduct.rareza}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, rareza: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field">
+                <span>ID de temporada</span>
+                <input
+                  type="number"
+                  value={editProduct.id_temporada}
+                  onChange={(e) =>
+                    setEditProduct((p) => ({ ...p, id_temporada: e.target.value }))
+                  }
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Descripción</span>
+                <textarea
+                  value={editProduct.descripcion}
+                  onChange={(e) =>
+                    setEditProduct((p) => ({ ...p, descripcion: e.target.value }))
+                  }
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>URL de imagen</span>
+                <input
+                  value={editProduct.imagen}
+                  onChange={(e) => setEditProduct((p) => ({ ...p, imagen: e.target.value }))}
+                />
+              </label>
+
+              <label className="adm-store-field is-wide">
+                <span>Nueva imagen desde computadora</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => setEditProductImageFile(e.target.files?.[0] || null)}
+                />
+              </label>
+
+              <div className="adm-store-checks is-wide">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editProduct.es_nuevo}
+                    onChange={(e) =>
+                      setEditProduct((p) => ({ ...p, es_nuevo: e.target.checked }))
+                    }
+                  />
+                  Nuevo
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editProduct.es_de_liga}
+                    onChange={(e) =>
+                      setEditProduct((p) => ({ ...p, es_de_liga: e.target.checked }))
+                    }
+                  />
+                  De liga
+                </label>
+              </div>
+            </div>
 
             {editError && <p className="adm-store-error">{editError}</p>}
 
             <div className="adm-store-modal-actions">
-              <button type="button" className="adm-store-btn is-ghost" onClick={() => setEditingListado(null)}>
+              <button
+                type="button"
+                className="adm-store-btn is-ghost"
+                onClick={() => setEditingListado(null)}
+              >
                 Cancelar
               </button>
               <button
                 type="button"
                 className="adm-store-btn is-primary"
-                onClick={handleEditPrecio}
+                onClick={handleEditProducto}
                 disabled={savingEdit}
               >
-                {savingEdit ? "Guardando..." : "Guardar"}
+                {savingEdit ? "Guardando..." : "Guardar cambios"}
               </button>
             </div>
           </div>
@@ -1021,7 +1432,11 @@ export default function AdminTienda({ user }: AdminTiendaProps) {
             </div>
 
             <div className="adm-store-modal-actions">
-              <button type="button" className="adm-store-btn is-ghost" onClick={() => setConfirmCancel(null)}>
+              <button
+                type="button"
+                className="adm-store-btn is-ghost"
+                onClick={() => setConfirmCancel(null)}
+              >
                 Volver
               </button>
               <button

@@ -1,75 +1,26 @@
 import { useEffect, useState } from "react";
+import { crestUrl } from "../../components/offseason/ClubGrid";
+import type { IconicMatch, MatchPreview, RewindResult } from "../../components/offseason/types";
+import EventRow, { KIND_ABBR } from "../../components/offseason/EventRow";
+import InstructivoModal from "../../components/offseason/InstructivoModal";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type IconicMatch = { fixture_id: number; label: string };
-
-type EventKind =
-  | "goal" | "penalty" | "own_goal" | "red_card"
-  | "missed_penalty" | "yellow_card" | "substitution" | "var";
-
-type MatchEvent = {
-  id: string;
-  minute: number;
-  team: "home" | "away";
-  team_name: string;
-  player_name: string;
-  kind: EventKind;
-  removable: boolean;
-  label: string;
-  detail: string;
-};
-
-type TeamInfo = { id: number; name: string };
-
-type MatchPreview = {
-  fixture_id: number;
-  home_team: TeamInfo;
-  away_team: TeamInfo;
-  score: { home: number; away: number };
-  match_minutes: number;
-  events: MatchEvent[];
-};
-
-type KeyChange = { description: string; xg_delta: number };
-type RewindResult = {
-  original_score: { home: number; away: number };
-  predicted_score: { home: number; away: number };
-  key_changes: KeyChange[];
-  no_change: boolean;
-};
-
-// Abreviatura por tipo de evento (sin emojis)
-const KIND_ABBR: Record<EventKind, string> = {
-  goal:           "GOL",
-  penalty:        "PEN",
-  own_goal:       "PPG",
-  red_card:       "ROJA",
-  missed_penalty: "FALLO",
-  yellow_card:    "AMA",
-  substitution:   "CAM",
-  var:            "VAR",
-};
-
-function clubInitials(name: string) {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("");
-}
-
-function clubHue(name: string) {
-  let h = 5381;
-  for (let i = 0; i < name.length; i++) h = ((h << 5) + h + name.charCodeAt(i)) & 0xfffffff;
-  return h % 360;
-}
+const INSTRUCTIVO_PASOS = [
+  { titulo: "Elige un partido", detalle: "Selecciona uno de los partidos icónicos de la lista para cargar su línea de tiempo." },
+  { titulo: "Quita eventos clave", detalle: "Marca los goles o tarjetas rojas que quieres borrar del partido para construir el escenario hipotético." },
+  { titulo: "Calcula el resultado", detalle: "Recalculamos el marcador como si esos eventos nunca hubieran pasado." },
+  { titulo: "Compara", detalle: "Abajo verás el resultado real contra el alternativo y por qué cambió." },
+];
 
 export default function MatchRewind({
   onLoadingChange,
+  onActionSuccess,
 }: {
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [iconicMatches, setIconicMatches]   = useState<IconicMatch[]>([]);
-  const [fixtureInput, setFixtureInput]     = useState("");
   const [preview, setPreview]               = useState<MatchPreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError]     = useState<string | null>(null);
@@ -87,8 +38,8 @@ export default function MatchRewind({
       .catch(() => {});
   }, []);
 
-  const handleLoadMatch = async (id?: number) => {
-    const fixtureId = id ?? parseInt(fixtureInput);
+  const handleLoadMatch = async (id: number) => {
+    const fixtureId = id;
     if (!fixtureId) return;
     setPreviewLoading(true);
     setPreviewError(null);
@@ -141,6 +92,7 @@ export default function MatchRewind({
       const data = await res.json();
       if (!data.success) { setError(data.message); return; }
       setResult(data.data);
+      onActionSuccess?.("match_rewind", { no_change: data.data.no_change });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {
@@ -154,56 +106,40 @@ export default function MatchRewind({
   const removableCount = homeEvents.length + awayEvents.length;
 
   return (
-    <div className="ol-grid">
-      {/* ── Panel izquierdo ─────────────────────────────────────────────── */}
+    <div className="ol-stack">
+      {/* ── Selección ───────────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title">
           <span className="ol-accent" />
           <h2>Seleccionar partido</h2>
+          <InstructivoModal
+            titulo="Rebobina el Partido"
+            intro="Revive un partido histórico y cambia su desenlace quitando goles o expulsiones clave."
+            pasos={INSTRUCTIVO_PASOS}
+          />
         </div>
 
-        {iconicMatches.length > 0 && (
-          <div className="ol-field-group" style={{ marginBottom: "0.65rem" }}>
-            <label className="ol-label">
-              Partidos icónicos
-              <select
-                className="ol-select"
-                defaultValue=""
-                onChange={(e) => { if (e.target.value) handleLoadMatch(Number(e.target.value)); }}
-              >
-                <option value="">Seleccionar partido icónico…</option>
-                {iconicMatches.map((m) => (
-                  <option key={m.fixture_id} value={m.fixture_id}>{m.label}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-        )}
-
-        <p className="ol-section-minor">{iconicMatches.length > 0 ? "O ingresa un ID manual" : "Fixture ID"}</p>
-        <div className="ol-fixture-row">
-          <input
-            type="number"
-            className="ol-input ol-input--grow"
-            placeholder="Fixture ID de API-Football"
-            value={fixtureInput}
-            onChange={(e) => setFixtureInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") handleLoadMatch(); }}
-          />
-          <button
-            type="button"
-            className="ol-secondary"
-            onClick={() => handleLoadMatch()}
-            disabled={!fixtureInput || previewLoading}
-          >
-            {previewLoading ? "Cargando…" : "Cargar"}
-          </button>
+        <div className="ol-field-group" style={{ marginBottom: "0.65rem" }}>
+          <label className="ol-label">
+            Partidos icónicos
+            <select
+              className="ol-select"
+              defaultValue=""
+              onChange={(e) => { if (e.target.value) handleLoadMatch(Number(e.target.value)); }}
+              disabled={iconicMatches.length === 0 || previewLoading}
+            >
+              <option value="">{iconicMatches.length === 0 ? "Cargando partidos..." : "Seleccionar partido icónico..."}</option>
+              {iconicMatches.map((m) => (
+                <option key={m.fixture_id} value={m.fixture_id}>{m.label}</option>
+              ))}
+            </select>
+          </label>
         </div>
         {previewError && <p className="ol-error">{previewError}</p>}
 
         {!preview && !previewLoading && !previewError && (
           <div className="ol-empty" style={{ minHeight: 140 }}>
-            <p>Elige un partido icónico o ingresa un Fixture ID para ver su línea de tiempo.</p>
+            <p>Elige un partido icónico para ver su línea de tiempo.</p>
           </div>
         )}
 
@@ -211,12 +147,7 @@ export default function MatchRewind({
           <>
             <div className="ol-match-ticket">
               <div className="ol-ticket-team">
-                <div
-                  className="ol-club-badge ol-club-badge--md"
-                  style={{ background: `hsl(${clubHue(preview.home_team.name)},52%,32%)` }}
-                >
-                  {clubInitials(preview.home_team.name)}
-                </div>
+                <img src={crestUrl(preview.home_team.id)} alt={preview.home_team.name} className="ol-crest--md" loading="lazy" />
                 <span className="ol-ticket-team-name">{preview.home_team.name}</span>
               </div>
               <div className="ol-ticket-score">
@@ -226,12 +157,7 @@ export default function MatchRewind({
               </div>
               <div className="ol-ticket-team ol-ticket-team--right">
                 <span className="ol-ticket-team-name">{preview.away_team.name}</span>
-                <div
-                  className="ol-club-badge ol-club-badge--md"
-                  style={{ background: `hsl(${clubHue(preview.away_team.name)},52%,32%)` }}
-                >
-                  {clubInitials(preview.away_team.name)}
-                </div>
+                <img src={crestUrl(preview.away_team.id)} alt={preview.away_team.name} className="ol-crest--md" loading="lazy" />
               </div>
             </div>
 
@@ -248,12 +174,7 @@ export default function MatchRewind({
                 <div className="ol-events-columns">
                   <div className="ol-events-col">
                     <p className="ol-events-col-header">
-                      <span
-                        className="ol-club-badge ol-club-badge--xs"
-                        style={{ background: `hsl(${clubHue(preview.home_team.name)},52%,32%)` }}
-                      >
-                        {clubInitials(preview.home_team.name)}
-                      </span>
+                      <img src={crestUrl(preview.home_team.id)} alt={preview.home_team.name} className="ol-crest--xs" loading="lazy" />
                       {preview.home_team.name}
                     </p>
                     {homeEvents.length === 0 && <p className="ol-events-empty">Sin eventos</p>}
@@ -269,12 +190,7 @@ export default function MatchRewind({
 
                   <div className="ol-events-col">
                     <p className="ol-events-col-header">
-                      <span
-                        className="ol-club-badge ol-club-badge--xs"
-                        style={{ background: `hsl(${clubHue(preview.away_team.name)},52%,32%)` }}
-                      >
-                        {clubInitials(preview.away_team.name)}
-                      </span>
+                      <img src={crestUrl(preview.away_team.id)} alt={preview.away_team.name} className="ol-crest--xs" loading="lazy" />
                       {preview.away_team.name}
                     </p>
                     {awayEvents.length === 0 && <p className="ol-events-empty">Sin eventos</p>}
@@ -294,7 +210,7 @@ export default function MatchRewind({
         )}
       </section>
 
-      {/* ── Panel derecho ────────────────────────────────────────────────── */}
+      {/* ── Resultado (abajo) ────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title ol-section-title--navy">
           <span className="ol-accent ol-accent--navy" />
@@ -303,7 +219,7 @@ export default function MatchRewind({
 
         {preview && selectedList.length > 0 ? (
           <div className="ol-mod-summary-list">
-            <p className="ol-meta-label">Si esto no hubiera pasado…</p>
+            <p className="ol-meta-label">Si esto no hubiera pasado...</p>
             {selectedList.map((e) => (
               <div key={e.id} className="ol-mod-tag">
                 <span className="ol-mod-tag-icon">{KIND_ABBR[e.kind]}</span>
@@ -348,7 +264,7 @@ export default function MatchRewind({
         {loading && (
           <div className="ol-loading">
             <span className="ol-spinner" />
-            <p>Calculando el escenario alternativo…</p>
+            <p>Calculando el escenario alternativo...</p>
           </div>
         )}
 
@@ -380,7 +296,7 @@ export default function MatchRewind({
 
             {result.key_changes.length > 0 && (
               <div className="ol-reasons-block">
-                <p className="ol-meta-label">Cómo lo calcula el modelo</p>
+                <p className="ol-meta-label">Cómo se calculó el resultado</p>
                 <ul className="ol-reasons-list">
                   {result.key_changes.map((kc, i) => (
                     <li key={i}>{kc.description}</li>
@@ -401,45 +317,5 @@ export default function MatchRewind({
         )}
       </section>
     </div>
-  );
-}
-
-function EventRow({
-  event,
-  selected,
-  onToggle,
-}: {
-  event: MatchEvent;
-  selected: boolean;
-  onToggle: (id: string) => void;
-}) {
-  const inner = (
-    <>
-      <span className="ol-event-minute">{event.minute}'</span>
-      <span className="ol-event-icon">{KIND_ABBR[event.kind]}</span>
-      <div className="ol-event-info">
-        <span className="ol-event-player">{event.player_name}</span>
-        <span className="ol-event-type">
-          {event.label}{event.detail ? ` · ${event.detail}` : ""}
-        </span>
-      </div>
-      {event.removable && (
-        <span className="ol-event-check">{selected ? "✕" : "+"}</span>
-      )}
-    </>
-  );
-
-  if (!event.removable) {
-    return <div className="ol-event-card ol-event-card--context">{inner}</div>;
-  }
-
-  return (
-    <button
-      type="button"
-      className={`ol-event-card${selected ? " ol-event-card--selected" : ""}`}
-      onClick={() => onToggle(event.id)}
-    >
-      {inner}
-    </button>
   );
 }

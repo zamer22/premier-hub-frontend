@@ -21,9 +21,9 @@ function keyBg(state: LetterResult | undefined): string {
 
 export default function WordleKeyboard({ letterStates, onKey, compact = false }: Props) {
   return (
-    <div className={`flex flex-col items-center ${compact ? "gap-1 px-1 py-2" : "gap-1.5 px-2 py-3"}`}>
+    <div className={`mx-auto flex w-full max-w-[500px] flex-col items-center ${compact ? "gap-1 px-1 py-2" : "gap-1.5 px-2 py-3"}`}>
       {ROWS.map((row, ri) => (
-        <div key={ri} className={compact ? "flex gap-1" : "flex gap-1.5"}>
+        <div key={ri} className={`flex w-full ${compact ? "gap-1" : "gap-1.5"}`}>
           {row.map((key) => {
             const isSpecial = key === "ENTER" || key === "⌫";
             return (
@@ -31,14 +31,12 @@ export default function WordleKeyboard({ letterStates, onKey, compact = false }:
                 key={key}
                 type="button"
                 onClick={() => onKey(key)}
-                className={`flex select-none items-center justify-center rounded-xl border font-black transition-colors active:scale-95 ${
+                className={`flex min-w-0 select-none items-center justify-center rounded-lg border font-black uppercase transition-colors active:scale-95 ${
                   compact
-                    ? isSpecial
-                      ? "h-10 min-w-[46px] px-1.5 text-[0.56rem]"
-                      : "h-10 w-7 text-[0.68rem]"
-                    : isSpecial
-                      ? "h-[52px] min-w-[56px] px-2 text-[0.65rem]"
-                      : "h-[52px] w-[34px] text-[0.78rem]"
+                    ? "h-[clamp(2.1rem,8vw,2.75rem)]"
+                    : "h-[clamp(2.4rem,9vw,3.25rem)]"
+                } ${
+                  isSpecial ? "flex-[1.6] px-0.5 text-[0.6rem]" : "flex-1 text-[clamp(0.6rem,2.6vw,0.85rem)]"
                 } ${keyBg(isSpecial ? undefined : letterStates[key])}`}
               >
                 {key}

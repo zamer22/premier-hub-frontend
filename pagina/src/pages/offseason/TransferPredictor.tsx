@@ -1,48 +1,38 @@
 import { useEffect, useState } from "react";
 import type { PLClub } from "../../components/offseason/types";
+import ClubPicker from "../../components/offseason/ClubPicker";
+import PlayerPicker from "../../components/offseason/PlayerPicker";
+import InstructivoModal from "../../components/offseason/InstructivoModal";
+import { useClubPlayers, type ClubPlayer } from "../../hooks/useClubPlayers";
+import {
+  clubInitials, clubHue, posAbbr,
+  fitLabel, fitClass, gaugeColor,
+} from "../../components/offseason/utils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const CIRC = 2 * Math.PI * 42; // circunferencia para r=42
 
-type Player = { id: number; name: string; age: number; position: string };
+const INSTRUCTIVO_PASOS = [
+  { titulo: "Elige el equipo y el jugador", detalle: "Selecciona de qué club sacar al jugador y a quién quieres analizar. Cada selector abre una tarjeta con escudos o fotos." },
+  { titulo: "Elige el club destino", detalle: "Indica a qué equipo de la Premier League llegaría el jugador." },
+  { titulo: "Ajusta los detalles (opcional)", detalle: "Puedes escribir su valor de mercado y años de contrato, o dejarlo en automático para estimarlo por ti." },
+  { titulo: "Predice", detalle: "Te damos un porcentaje de aptitud y los factores que más influyen. Mide qué tanto encaja el jugador con el perfil de un fichaje típico de la liga, no si el traspaso se cerrará." },
+];
+
 type PredictResult = { probability: number; fit_score: "Low" | "Medium" | "High"; reasons: string[] };
 type HistoryEntry = { playerName: string; fromClub: string; targetClub: string; result: PredictResult };
-
-function fitClass(s: string) {
-  if (s === "High")   return "ol-fit--high";
-  if (s === "Medium") return "ol-fit--medium";
-  return "ol-fit--low";
-}
-
-function gaugeColor(p: number) {
-  if (p >= 65) return "var(--ph-green-600)";
-  if (p >= 40) return "var(--ph-amber-500)";
-  return "var(--ph-danger-600)";
-}
-
-function clubInitials(name: string) {
-  const words = name.split(" ").filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("");
-}
-
-function clubHue(name: string) {
-  let h = 5381;
-  for (let i = 0; i < name.length; i++) h = ((h << 5) + h + name.charCodeAt(i)) & 0xfffffff;
-  return h % 360;
-}
 
 export default function TransferPredictor({
   clubs,
   onLoadingChange,
+  onActionSuccess,
 }: {
   clubs: PLClub[];
   onLoadingChange: (v: boolean) => void;
+  onActionSuccess?: (accion: string, resultado?: Record<string, unknown>) => void;
 }) {
   const [sourceClubId, setSourceClubId] = useState<number | "">("");
-  const [players, setPlayers]           = useState<Player[]>([]);
-  const [playersLoading, setPlayersLoading] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<ClubPlayer | null>(null);
   const [targetClubId, setTargetClubId] = useState<number | "">("");
   const [marketValue, setMarketValue]   = useState("");
   const [yearsLeft, setYearsLeft]       = useState("");
@@ -51,18 +41,12 @@ export default function TransferPredictor({
   const [error, setError]               = useState<string | null>(null);
   const [history, setHistory]           = useState<HistoryEntry[]>([]);
 
+  const { players, loading: playersLoading } = useClubPlayers(sourceClubId);
+
   useEffect(() => { onLoadingChange(loading); }, [loading, onLoadingChange]);
 
-  useEffect(() => {
-    if (!sourceClubId) { setPlayers([]); setSelectedPlayer(null); return; }
-    setPlayersLoading(true);
-    setSelectedPlayer(null);
-    fetch(`${API_URL}/api/ml/players?club_id=${sourceClubId}`)
-      .then((r) => r.json())
-      .then((data) => setPlayers(data.success ? data.data : []))
-      .catch(() => setPlayers([]))
-      .finally(() => setPlayersLoading(false));
-  }, [sourceClubId]);
+  // Al cambiar de club, el jugador elegido deja de ser válido.
+  useEffect(() => { setSelectedPlayer(null); }, [sourceClubId]);
 
   const targetClubs   = clubs.filter((c) => c.id !== sourceClubId);
   const sourceClub    = clubs.find((c) => c.id === sourceClubId);
@@ -97,6 +81,7 @@ export default function TransferPredictor({
       setHistory((prev) =>
         [{ playerName: selectedPlayer.name, fromClub: fromName, targetClub: targetName, result: data.data }, ...prev].slice(0, 5)
       );
+      onActionSuccess?.("transfer_predict", { probability: data.data.probability });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de red");
     } finally {
@@ -116,12 +101,17 @@ export default function TransferPredictor({
   const arc = result ? (result.probability / 100) * CIRC : 0;
 
   return (
-    <div className="ol-grid">
-      {/* ── Panel izquierdo ─────────────────────────────────────────────── */}
+    <div className="ol-stack">
+      {/* ── Selección ───────────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title">
           <span className="ol-accent" />
           <h2>Jugador y destino</h2>
+          <InstructivoModal
+            titulo="Predictor de Fichajes"
+            intro="Calcula qué tan bien encaja un jugador en el perfil de un fichaje típico de la Premier League."
+            pasos={INSTRUCTIVO_PASOS}
+          />
         </div>
 
         {/* Ruta visual de la transferencia */}
@@ -158,28 +148,39 @@ export default function TransferPredictor({
           </div>
         </div>
 
-        <div className="ol-field-group">
+        <div className="ol-picker-row">
           <label className="ol-label">
             Club del jugador
-            <select className="ol-select" value={sourceClubId} onChange={(e) => setSourceClubId(e.target.value ? Number(e.target.value) : "")}>
-              <option value="">Seleccionar club…</option>
-              {clubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <ClubPicker
+              clubs={clubs}
+              selectedId={sourceClubId}
+              onSelect={setSourceClubId}
+              title="Club del jugador"
+            />
           </label>
 
           <label className="ol-label">
             Jugador
-            <select
-              className="ol-select"
-              value={selectedPlayer?.id ?? ""}
-              onChange={(e) => setSelectedPlayer(players.find((p) => p.id === Number(e.target.value)) ?? null)}
-              disabled={!sourceClubId || playersLoading}
-            >
-              <option value="">
-                {playersLoading ? "Cargando…" : !sourceClubId ? "Selecciona un club primero" : "Seleccionar jugador…"}
-              </option>
-              {players.map((p) => <option key={p.id} value={p.id}>{p.name} · {p.position}</option>)}
-            </select>
+            <PlayerPicker
+              players={players}
+              loading={playersLoading}
+              selectedId={selectedPlayer?.id ?? ""}
+              onSelect={(id) => setSelectedPlayer(players.find((p) => p.id === id) ?? null)}
+              disabled={!sourceClubId}
+              placeholder={!sourceClubId ? "Elige un club primero" : "Seleccionar jugador"}
+              title="Jugador a analizar"
+            />
+          </label>
+
+          <label className="ol-label">
+            Club destino
+            <ClubPicker
+              clubs={targetClubs}
+              selectedId={targetClubId}
+              onSelect={setTargetClubId}
+              disabled={!selectedPlayer}
+              title="Club destino"
+            />
           </label>
         </div>
 
@@ -194,21 +195,6 @@ export default function TransferPredictor({
             </div>
           </div>
         )}
-
-        <div className="ol-field-group">
-          <label className="ol-label">
-            Club destino
-            <select
-              className="ol-select"
-              value={targetClubId}
-              onChange={(e) => setTargetClubId(e.target.value ? Number(e.target.value) : "")}
-              disabled={!selectedPlayer}
-            >
-              <option value="">Seleccionar destino…</option>
-              {targetClubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </label>
-        </div>
 
         <p className="ol-section-minor">Detalles del jugador (opcional)</p>
         <div className="ol-field-row">
@@ -225,7 +211,7 @@ export default function TransferPredictor({
             />
             {mvTooLow && (
               <span className="ol-field-hint ol-field-hint--error">
-                Mínimo €0.5M — deja vacío para usar el estimado del modelo
+                Mínimo €0.5M — deja vacío para usar el estimado automático
               </span>
             )}
           </label>
@@ -250,12 +236,12 @@ export default function TransferPredictor({
           onClick={handlePredict}
           disabled={!canPredict || loading}
         >
-          {loading ? "Analizando transferencia…" : "Predecir transferencia"}
+          {loading ? "Analizando transferencia..." : "Predecir transferencia"}
         </button>
         {error && <p className="ol-error">{error}</p>}
       </section>
 
-      {/* ── Panel derecho ────────────────────────────────────────────────── */}
+      {/* ── Resultado (abajo) ────────────────────────────────────────────── */}
       <section className="ol-panel">
         <div className="ol-section-title ol-section-title--navy">
           <span className="ol-accent ol-accent--navy" />
@@ -263,7 +249,7 @@ export default function TransferPredictor({
         </div>
 
         <p style={{ fontSize: "0.75rem", color: "var(--ph-muted)", margin: "0 0 0.75rem" }}>
-          El modelo mide qué tan bien encaja este jugador en el perfil histórico de un fichaje de la Premier League. No es la probabilidad de que se cierre este traspaso específico.
+          Medimos qué tan bien encaja este jugador en el perfil histórico de un fichaje de la Premier League. No es la probabilidad de que se cierre este traspaso específico.
         </p>
 
         {!result && !loading && (
@@ -285,7 +271,7 @@ export default function TransferPredictor({
         {loading && (
           <div className="ol-loading">
             <span className="ol-spinner" />
-            <p>El modelo ML está analizando la transferencia…</p>
+            <p>Analizando la transferencia...</p>
           </div>
         )}
 
@@ -315,8 +301,8 @@ export default function TransferPredictor({
             </div>
 
             <div className="ol-fit-row">
-              <span className="ol-fit-label">Fit Score</span>
-              <span className={`ol-fit-badge ${fitClass(result.fit_score)}`}>{result.fit_score}</span>
+              <span className="ol-fit-label">Compatibilidad</span>
+              <span className={`ol-fit-badge ${fitClass(result.fit_score)}`}>{fitLabel(result.fit_score)}</span>
             </div>
 
             <div className="ol-reasons-block">
@@ -347,7 +333,7 @@ export default function TransferPredictor({
                     {h.result.probability.toFixed(1)}%
                   </span>
                   <span className={`ol-fit-badge ol-fit-badge--sm ${fitClass(h.result.fit_score)}`}>
-                    {h.result.fit_score}
+                    {fitLabel(h.result.fit_score)}
                   </span>
                 </div>
               </div>
@@ -357,12 +343,4 @@ export default function TransferPredictor({
       </section>
     </div>
   );
-}
-
-function posAbbr(pos: string) {
-  const p = pos.toLowerCase();
-  if (p.includes("goal")) return "POR";
-  if (p.includes("defend")) return "DEF";
-  if (p.includes("midfield")) return "MED";
-  return "DEL";
 }

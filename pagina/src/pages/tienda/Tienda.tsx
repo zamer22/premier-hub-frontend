@@ -10,7 +10,7 @@ import type {
   Producto, InventarioItem, Listado, Direccion, Pedido, Comentario,
   Variante, NewDireccionForm, ConfirmAction, SubTab, MarketView, TiendaUser,
 } from "../../components/tienda/types";
-import { API_URL, EMPTY_DIRECCION, TIPOS_REAL } from "../../components/tienda/constants";
+import { API_URL, EMPTY_DIRECCION, TIPOS_REAL, ESTADO_PEDIDO_LABEL } from "../../components/tienda/constants";
 import { tipoLabel } from "../../components/tienda/utils";
 
 import ProductVisual from "../../components/tienda/ProductVisual";
@@ -100,40 +100,40 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     } catch { } finally { setLoading(false); }
   }, []);
 
-  // /api/tienda/mis-items/:id — excluye avatares
+  // /api/tienda/mis-items — el backend lee el id de usuario de la cookie de sesión; excluye avatares
   const fetchMisItems = useCallback(async () => {
     try {
-      const r = await fetch(`${API_URL}/api/tienda/mis-items/${user.id_usuario}`);
+      const r = await fetch(`${API_URL}/api/tienda/mis-items`, { credentials: "include" });
       const d = await r.json();
       if (d.success) setMisItems((d.data || []).filter((i: InventarioItem) => i.tipo !== "avatar"));
     } catch { }
-  }, [user.id_usuario]);
+  }, []);
 
   // /api/marketplace/listados — filtra los del propio usuario en cliente
   const fetchListados = useCallback(async () => {
     try {
-      const r = await fetch(`${API_URL}/api/marketplace/listados`);
+      const r = await fetch(`${API_URL}/api/marketplace/listados`, { credentials: "include" });
       const d = await r.json();
       if (d.success) setListados(d.data.filter((l: Listado) => l.id_vendedor !== user.id_usuario));
     } catch { }
   }, [user.id_usuario]);
 
-  // /api/marketplace/listados?mios=id
+  // /api/marketplace/listados?mios=true — el backend devuelve los del usuario autenticado
   const fetchMisListados = useCallback(async () => {
     try {
-      const r = await fetch(`${API_URL}/api/marketplace/listados?mios=${user.id_usuario}`);
+      const r = await fetch(`${API_URL}/api/marketplace/listados?mios=true`, { credentials: "include" });
       const d = await r.json();
       if (d.success) setMisListados(d.data);
     } catch { }
-  }, [user.id_usuario]);
+  }, []);
 
   const fetchPedidos = useCallback(async () => {
     try {
-      const r = await fetch(`${API_URL}/api/tienda/pedidos/${user.id_usuario}`);
+      const r = await fetch(`${API_URL}/api/tienda/pedidos`, { credentials: "include" });
       const d = await r.json();
       if (d.success) setPedidos(d.data);
     } catch { }
-  }, [user.id_usuario]);
+  }, []);
 
   // /api/tienda/comentarios/:id — solo se llama cuando productModal es de categoria real
   const fetchComentarios = useCallback(async (id_producto: number) => {
@@ -185,7 +185,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     try {
       const res = await fetch(`${API_URL}/api/tienda/comprar`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, id_producto, id_variante, id_direccion }),
+        credentials: "include",
+        body: JSON.stringify({ id_producto, id_variante, id_direccion }),
       });
       const data = await res.json();
       if (data.success) {
@@ -209,7 +210,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         }
         return true;
       } else { setConfirmAction(null); showToast(data.error, false); return false; }
-    } catch { setConfirmAction(null); showToast("Error de conexion", false); return false; }
+    } catch { setConfirmAction(null); showToast("Error de conexión", false); return false; }
   };
 
   // Abre CheckoutModal y precarga las direcciones. Si no hay ninguna, muestra el form de nueva dirección.
@@ -218,7 +219,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     setShowNewDireccion(false);
     setNewDireccion(EMPTY_DIRECCION);
     try {
-      const r = await fetch(`${API_URL}/api/tienda/direcciones/${user.id_usuario}`);
+      const r = await fetch(`${API_URL}/api/tienda/direcciones`, { credentials: "include" });
       const d = await r.json();
       if (d.success) {
         setDirecciones(d.data);
@@ -240,7 +241,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     try {
       const r = await fetch(`${API_URL}/api/tienda/direcciones`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, ...f }),
+        credentials: "include",
+        body: JSON.stringify(f),
       });
       const d = await r.json();
       if (!d.success) { showToast(d.error || "Error guardando dirección", false); return null; }
@@ -267,7 +269,10 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
   const eliminarDireccion = async (id_direccion: number) => {
     try {
-      const r = await fetch(`${API_URL}/api/tienda/direcciones/${id_direccion}?id_usuario=${user.id_usuario}`, { method: "DELETE" });
+      const r = await fetch(`${API_URL}/api/tienda/direcciones/${id_direccion}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       const d = await r.json();
       if (d.success) {
         setDirecciones(prev => prev.filter(x => x.id_direccion !== id_direccion));
@@ -280,19 +285,20 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     try {
       const res = await fetch(`${API_URL}/api/tienda/bonus`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario }),
+        credentials: "include",
       });
       const data = await res.json();
-      if (data.success) { onSaldoChange(Number(data.dinero)); showToast(`+${data.bonus} pts reclamados!`, true); }
+      if (data.success) { onSaldoChange(Number(data.dinero)); showToast(`¡+${data.bonus} pts reclamados!`, true); }
       else { showToast(data.error, false); }
-    } catch { showToast("Error de conexion", false); }
+    } catch { showToast("Error de conexión", false); }
   };
 
   const comprarMarketplace = async (id_listado: number, nombre: string) => {
     try {
       const res = await fetch(`${API_URL}/api/marketplace/comprar`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_comprador: user.id_usuario, id_listado }),
+        credentials: "include",
+        body: JSON.stringify({ id_listado }),
       });
       const data = await res.json();
       if (data.success) {
@@ -303,7 +309,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         setConfirmAction(null);
         setSuccessMsg(`¡${nombre} comprado en marketplace! Tu nuevo saldo es ${nuevoSaldo.toLocaleString()} pts.`);
       } else { setConfirmAction(null); showToast(data.error, false); }
-    } catch { setConfirmAction(null); showToast("Error de conexion", false); }
+    } catch { setConfirmAction(null); showToast("Error de conexión", false); }
   };
 
   const publicar = async () => {
@@ -311,7 +317,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     try {
       const res = await fetch(`${API_URL}/api/marketplace/publicar`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, id_inventario: confirmAction.item.id_inventario, precio: confirmAction.precio }),
+        credentials: "include",
+        body: JSON.stringify({ id_inventario: confirmAction.item.id_inventario, precio: confirmAction.precio }),
       });
       const data = await res.json();
       if (data.success) {
@@ -319,7 +326,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
         setSuccessMsg(`¡${confirmAction.item.nombre} publicado en el marketplace por ${confirmAction.precio.toLocaleString()} pts!`);
         fetchMisItems(); fetchMisListados();
       } else { setConfirmAction(null); showToast(data.error, false); }
-    } catch { setConfirmAction(null); showToast("Error de conexion", false); }
+    } catch { setConfirmAction(null); showToast("Error de conexión", false); }
   };
 
   const prepararPublicacion = () => {
@@ -333,13 +340,13 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
   const cancelarListado = async (id_listado: number) => {
     try {
       const res = await fetch(`${API_URL}/api/marketplace/cancelar/${id_listado}`, {
-        method: "DELETE", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario }),
+        method: "DELETE",
+        credentials: "include",
       });
       const data = await res.json();
       if (data.success) { showToast("Publicación cancelada", true); fetchMisListados(); fetchMisItems(); }
       else { showToast(data.error, false); }
-    } catch { showToast("Error de conexion", false); }
+    } catch { showToast("Error de conexión", false); }
   };
 
   const enviarReseña = async () => {
@@ -349,7 +356,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     try {
       const r = await fetch(`${API_URL}/api/tienda/comentarios`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, id_producto: productModal.id_producto, calificacion: newReview.calificacion, comentario: newReview.comentario.trim() }),
+        credentials: "include",
+        body: JSON.stringify({ id_producto: productModal.id_producto, calificacion: newReview.calificacion, comentario: newReview.comentario.trim() }),
       });
       const d = await r.json();
       if (d.success) { setProductComments(prev => [d.data, ...prev]); setNewReview({ calificacion: 5, comentario: "" }); showToast("Reseña publicada", true); }
@@ -360,7 +368,10 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
   const eliminarReseña = async (id_comentario: number) => {
     try {
-      const r = await fetch(`${API_URL}/api/tienda/comentarios/${id_comentario}?id_usuario=${user.id_usuario}`, { method: "DELETE" });
+      const r = await fetch(`${API_URL}/api/tienda/comentarios/${id_comentario}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       const d = await r.json();
       if (d.success) { setProductComments(prev => prev.filter(c => c.id_comentario !== id_comentario)); showToast("Reseña eliminada", true); }
       else { showToast(d.error || "Error", false); }
@@ -389,7 +400,8 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
     try {
       const r = await fetch(`${API_URL}/api/tienda/pedido/${pedidoModal.id_pedido}/direccion`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: user.id_usuario, ...f }),
+        credentials: "include",
+        body: JSON.stringify(f),
       });
       const d = await r.json();
       if (d.success) {
@@ -508,7 +520,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           subtitle="Compra con tus puntos"
           actions={
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={reclamarBonus} className="t-bonus-btn">+ 500 pts bonus</button>
+              <button onClick={reclamarBonus} className="t-bonus-btn">+ 500 pts extra</button>
               <div className="t-saldo">{saldo.toLocaleString()} pts</div>
             </div>
           }
@@ -518,25 +530,24 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
           value={subTab}
           onChange={(k) => setSubTab(k as SubTab)}
           items={[
-            { key: "perfil", label: "Objetos de Perfil" },
-            { key: "real", label: "Objetos Reales" },
+            { key: "perfil", label: "Objetos de perfil" },
+            { key: "real", label: "Objetos reales" },
             { key: "marketplace", label: "Marketplace" },
-            { key: "pedidos", label: "Mis Pedidos" },
+            { key: "pedidos", label: "Mis pedidos" },
           ]}
         />
 
         {subTab !== "perfil" && subTab !== "pedidos" && (subTab !== "marketplace" || marketView === "explorar") && (
-          <div className="flex flex-wrap items-center gap-3 mb-5">
+          <div className="flex flex-wrap items-center gap-3 mt-4 mb-5">
             <div className="relative flex-1 min-w-[200px]">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs font-semibold pointer-events-none">&#x2315;</span>
-              <input type="text" placeholder="Buscar por nombre, equipo..." value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)} className="t-input pl-8" />
+              <input type="text" placeholder="Buscar por nombre o equipo..." value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)} className="t-input" />
             </div>
             <div className="flex flex-wrap gap-1">
               {TIPOS_REAL.map(tipo => (
                 <button key={tipo} onClick={() => setFiltroTipo(tipo)}
                   className={filtroTipo === tipo ? "t-chip t-chip--active" : "t-chip"}>
-                  {tipo === "todos" ? "Todos" : tipo === "balonazo" ? "Balón" : tipo === "jersey" ? "Jersey" : tipo === "ropa" ? "Ropa" : "Accesorio"}
+                  {tipo === "todos" ? "Todos" : tipoLabel(tipo)}
                 </button>
               ))}
             </div>
@@ -545,11 +556,10 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
         {subTab === "perfil" && (
           <div>
-            <div className="flex flex-wrap items-center gap-3 mb-8">
+            <div className="flex flex-wrap items-center gap-3 mt-4 mb-8">
               <div className="relative flex-1 min-w-[200px]">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">&#x2315;</span>
                 <input type="text" placeholder="Buscar en toda la tienda..." value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)} className="t-input pl-9" />
+                  onChange={(e) => setBusqueda(e.target.value)} className="t-input" />
               </div>
               {perfilTipos.length > 1 && (
                 <div className="flex flex-wrap gap-1">
@@ -623,7 +633,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
             <div className="t-market-toggle">
               {([
                 { key: "explorar" as MarketView, label: "Explorar" },
-                { key: "mis-items" as MarketView, label: "Mis Items" },
+                { key: "mis-items" as MarketView, label: "Mis objetos" },
               ]).map((v) => (
                 <button key={v.key}
                   onClick={() => { setMarketView(v.key); if (v.key === "mis-items") { fetchMisItems(); fetchMisListados(); } }}
@@ -649,9 +659,9 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
 
             {marketView === "mis-items" && (
               <div>
-                <h3 className="t-text-dark font-bold text-base mb-3">Mi Inventario</h3>
+                <h3 className="t-text-dark font-bold text-base mb-3">Mi inventario</h3>
                 {misItems.length === 0
-                  ? <p className="text-muted text-sm mb-6">No tienes items. Compra algo en la tienda primero.</p>
+                  ? <p className="text-muted text-sm mb-6">No tienes objetos. Compra algo en la tienda primero.</p>
                   : (
                     <div className="t-grid--inv mb-8">
                       {misItems.map(item => (
@@ -674,7 +684,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                     </div>
                   )}
 
-                <h3 className="t-text-dark font-bold text-base mb-3">Mis Publicaciones Activas</h3>
+                <h3 className="t-text-dark font-bold text-base mb-3">Mis publicaciones activas</h3>
                 {misListados.length === 0
                   ? <p className="text-muted text-sm">No tienes publicaciones activas</p>
                   : (
@@ -706,13 +716,12 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
               ? (
                 <EmptyState
                   title="Aún no tienes pedidos"
-                  description='Compra un objeto real desde la pestaña "Objetos Reales" y aparecerá aquí.'
+                  description='Compra un objeto real desde la pestaña "Objetos reales" y aparecerá aquí.'
                 />
               )
               : (
                 <div className="flex flex-col gap-3">
                   {pedidos.map(p => {
-                    const estadoLabel: Record<string, string> = { procesando: "Procesando", enviado: "Enviado", en_camino: "En camino", entregado: "Entregado", cancelado: "Cancelado" };
                     return (
                       <div key={p.id_pedido} onClick={() => setPedidoModal(p)} className="t-card t-card--pedido">
                         <div className="t-pedido-card-thumb"
@@ -727,7 +736,7 @@ export default function Tienda({ user, onSaldoChange }: TiendaProps) {
                               </p>
                             </div>
                             <span className="t-status-badge--pedido" data-estado={p.estado}>
-                              {estadoLabel[p.estado] || p.estado}
+                              {ESTADO_PEDIDO_LABEL[p.estado] || p.estado}
                             </span>
                           </div>
                           <div className="flex justify-between items-center mt-1.5">

@@ -1,0 +1,207 @@
+.vr-page {
+  display: grid;
+  gap: 1.25rem;
+  color: #172033;
+}
+
+.vr-hero {
+  position: relative;
+  min-height: clamp(360px, 46vh, 480px);
+  overflow: hidden;
+  border-radius: 8px;
+  background: #101827;
+  box-shadow: var(--ph-shadow-lg);
+  isolation: isolate;
+}
+
+.vr-hero__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  z-index: -2;
+}
+
+.vr-hero__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(8, 12, 21, 0.92) 0%, rgba(8, 12, 21, 0.68) 36%, rgba(8, 12, 21, 0.14) 72%),
+    linear-gradient(180deg, rgba(8, 12, 21, 0.18) 0%, rgba(8, 12, 21, 0.6) 100%);
+  z-index: -1;
+}
+
+.vr-hero__content {
+  width: min(620px, 100%);
+  min-height: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 4rem);
+}
+
+.vr-hero__title {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.8rem, 5.2vw, 4.9rem);
+  line-height: 0.96;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.vr-hero__lead {
+  margin: 1rem 0 0;
+  max-width: 580px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(0.98rem, 1.35vw, 1.08rem);
+  line-height: 1.6;
+  font-weight: 620;
+}
+
+.vr-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.45rem;
+}
+
+.vr-button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.15rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1;
+  text-decoration: none;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vr-button:hover {
+  transform: translateY(-1px);
+}
+
+.vr-button--primary {
+  color: #fff;
+  background: linear-gradient(135deg, #e90052, #871d54);
+  box-shadow: 0 16px 34px rgba(233, 0, 82, 0.26);
+}
+
+.vr-button--primary.is-disabled {
+  color: rgba(255, 255, 255, 0.66);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.vr-button--primary.is-disabled:hover {
+  transform: none;
+}
+
+.vr-button--secondary {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.vr-button--secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.vr-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.vr-feature {
+  border: 1px solid #dde3ec;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: var(--ph-shadow-xs);
+}
+
+.vr-feature {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  min-height: 188px;
+  padding: 1.25rem;
+}
+
+.vr-feature__label {
+  width: max-content;
+  max-width: 100%;
+  color: #e90052;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vr-feature h2 {
+  margin: 0;
+  color: #0f172a;
+  line-height: 1.12;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.vr-feature h2 {
+  font-size: 1.16rem;
+}
+
+.vr-feature p {
+  margin: 0;
+  color: #667085;
+  line-height: 1.65;
+  font-weight: 620;
+}
+
+.vr-feature p {
+  font-size: 0.88rem;
+}
+
+@media (max-width: 960px) {
+  .vr-feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .vr-page {
+    gap: 0.9rem;
+  }
+
+  .vr-hero {
+    min-height: 420px;
+  }
+
+  .vr-hero__shade {
+    background:
+      linear-gradient(180deg, rgba(8, 12, 21, 0.9) 0%, rgba(8, 12, 21, 0.72) 48%, rgba(8, 12, 21, 0.92) 100%);
+  }
+
+  .vr-hero__content {
+    justify-content: flex-start;
+    padding: 1.5rem 1.15rem 4.25rem;
+  }
+
+  .vr-hero__actions,
+  .vr-button {
+    width: 100%;
+  }
+
+  .vr-feature {
+    padding: 1rem;
+  }
+}
