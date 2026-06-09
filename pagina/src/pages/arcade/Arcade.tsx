@@ -22,41 +22,41 @@ export default function Arcade() {
       />
 
       <section
-        className="mx-auto mt-6 grid w-full max-w-[1500px] grid-cols-1 items-start gap-x-10 gap-y-12 pb-6 md:grid-cols-2 2xl:grid-cols-4"
+        className="mx-auto mt-6 grid w-full max-w-[1180px] grid-cols-1 items-stretch gap-x-8 gap-y-10 pb-6 sm:grid-cols-2"
         aria-label="Juegos disponibles"
       >
         {/* ── Reto Diario ─────────────────────────── */}
         <Link
           to="/arcade/wordle"
-          className="group flex min-h-[620px] flex-col text-inherit no-underline"
+          className="group flex h-full flex-col text-inherit no-underline"
         >
-          <article className="flex h-[490px] flex-col overflow-hidden rounded-xl border border-[#ddd8e6] bg-white shadow-[0_18px_38px_rgba(27,34,61,0.07)] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-[#cf275f]/50 group-hover:shadow-[0_24px_46px_rgba(207,39,95,0.16)]">
+          <article className="@container flex flex-1 flex-col overflow-hidden rounded-xl border border-[#ddd8e6] bg-white shadow-[0_18px_38px_rgba(27,34,61,0.07)] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-[#cf275f]/50 group-hover:shadow-[0_24px_46px_rgba(207,39,95,0.16)]">
             <div className="flex flex-1 flex-col bg-[#f7f8fb] px-8 pb-8 pt-7">
               <div className="mb-5 text-center">
-                <h3 className="m-0 text-[1.05rem] font-black leading-tight text-[#162b4d]">
+                <h3 className="m-0 text-[4cqw] font-black leading-tight text-[#162b4d]">
                   Más ----- en Premier League
                 </h3>
-                <span className="mx-auto mt-2 block h-1 w-[54px] rounded-full bg-[#cf275f]" />
-                <p className="m-0 mt-3 text-[0.76rem] font-medium text-[#7b8494]">
+                <span className="mx-auto mt-2 block h-1 w-[12.7cqw] rounded-full bg-[#cf275f]" />
+                <p className="m-0 mt-3 text-[2.9cqw] font-medium text-[#7b8494]">
                   Ordena de mayor a menor
                 </p>
               </div>
 
               {/* Preview grid — grows to fill */}
               <div className="flex flex-1 flex-col justify-center rounded-xl border border-[#ddd8e6] bg-white p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-[4.5cqw]">
                   {PREVIEW_PLAYERS.map((player) => (
                     <div
                       key={player.rank}
-                      className="relative h-[104px] overflow-hidden rounded-lg border border-[#e5e7ee] bg-[#eef1f5]"
+                      className="relative flex aspect-[4/5] flex-col overflow-hidden rounded-lg border border-[#e5e7ee] bg-[#eef1f5]"
                     >
-                      <span className="absolute left-1.5 top-1.5 z-10 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#162b4d]/85 px-1 text-[0.64rem] font-extrabold text-white">
+                      <span className="absolute left-1.5 top-1.5 z-10 flex h-[4.7cqw] min-w-[4.7cqw] items-center justify-center rounded-full bg-[#162b4d]/85 px-1 text-[2.4cqw] font-extrabold text-white">
                         {player.rank}
                       </span>
-                      <div className="flex h-[76px] items-center justify-center bg-gradient-to-br from-[#263a55] to-[#314762] text-[1.15rem] font-black text-white">
+                      <div className="flex flex-1 items-center justify-center bg-gradient-to-br from-[#263a55] to-[#314762] text-[4.3cqw] font-black text-white">
                         {player.initials}
                       </div>
-                      <div className="absolute inset-x-0 bottom-0 truncate bg-[#871d54] px-1.5 py-1 text-center text-[0.55rem] font-extrabold text-white">
+                      <div className="truncate bg-[#871d54] px-1.5 py-1 text-center text-[2.1cqw] font-extrabold text-white">
                         {player.name}
                       </div>
                     </div>
@@ -80,16 +80,16 @@ export default function Arcade() {
         {/* ── Missing XI ──────────────────────────── */}
         <Link
           to="/arcade/missing-xi"
-          className="group flex min-h-[620px] flex-col text-inherit no-underline"
+          className="group flex h-full flex-col text-inherit no-underline"
         >
-          <article className="flex h-[490px] flex-col overflow-hidden rounded-xl border border-[#ddd8e6] bg-white shadow-[0_18px_38px_rgba(27,34,61,0.07)] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-[#cf275f]/50 group-hover:shadow-[0_24px_46px_rgba(207,39,95,0.16)]">
+          <article className="@container flex flex-1 flex-col overflow-hidden rounded-xl border border-[#ddd8e6] bg-white shadow-[0_18px_38px_rgba(27,34,61,0.07)] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-[#cf275f]/50 group-hover:shadow-[0_24px_46px_rgba(207,39,95,0.16)]">
             <div className="relative flex flex-1 flex-col bg-[#f7f8fb] px-8 pb-8 pt-7">
               <div className="mb-4 text-center">
                 <h3 className="m-0 text-[1.05rem] font-black leading-tight text-[#162b4d]">
                   Adivina la alineación
                 </h3>
-                <span className="mx-auto mt-2 block h-1 w-[54px] rounded-full bg-[#cf275f]" />
-                <p className="m-0 mt-3 text-[0.76rem] font-medium text-[#7b8494]">
+                <span className="mx-auto mt-2 block h-1 w-[12.7cqw] rounded-full bg-[#cf275f]" />
+                <p className="m-0 mt-3 text-[2.9cqw] font-medium text-[#7b8494]">
                   Partido histórico de Premier League
                 </p>
               </div>
@@ -99,46 +99,46 @@ export default function Arcade() {
                 <div className="pointer-events-none absolute inset-[5px] rounded border border-white/30" />
                 <div className="pointer-events-none absolute left-[5px] right-[5px] top-1/2 h-px bg-white/25" />
 
-                <div className="flex flex-1 flex-col items-center justify-center gap-2.5 px-3 py-4">
+                <div className="flex flex-1 flex-col items-center justify-between px-[5cqw] py-[7cqw]">
                   {/* Attack */}
-                  <div className="flex gap-10">
+                  <div className="flex gap-[8cqw]">
                     {(["LW", "ST", "RW"] as const).map((pos) => (
                       <div key={pos} className="flex flex-col items-center gap-0.5">
-                        <div className="flex h-11 w-10 items-center justify-center rounded bg-gradient-to-b from-[#6f7b8d] to-[#374151] shadow-sm">
-                          <span className="text-[0.6rem] font-black text-white">?</span>
+                        <div className="flex aspect-[10/11] w-[8.6cqw] items-center justify-center rounded bg-gradient-to-b from-[#6f7b8d] to-[#374151] shadow-sm">
+                          <span className="text-[2.3cqw] font-black text-white">?</span>
                         </div>
-                        <span className="text-[0.45rem] font-bold text-white/60">{pos}</span>
+                        <span className="text-[1.7cqw] font-bold text-white/60">{pos}</span>
                       </div>
                     ))}
                   </div>
                   {/* Midfield */}
-                  <div className="flex gap-10">
+                  <div className="flex gap-[8cqw]">
                     {(["CM", "CDM", "CM"] as const).map((pos, i) => (
                       <div key={i} className="flex flex-col items-center gap-0.5">
-                        <div className="flex h-11 w-10 items-center justify-center rounded bg-gradient-to-b from-[#6f7b8d] to-[#374151] shadow-sm">
-                          <span className="text-[0.6rem] font-black text-white">?</span>
+                        <div className="flex aspect-[10/11] w-[8.6cqw] items-center justify-center rounded bg-gradient-to-b from-[#6f7b8d] to-[#374151] shadow-sm">
+                          <span className="text-[2.3cqw] font-black text-white">?</span>
                         </div>
-                        <span className="text-[0.45rem] font-bold text-white/60">{pos}</span>
+                        <span className="text-[1.7cqw] font-bold text-white/60">{pos}</span>
                       </div>
                     ))}
                   </div>
                   {/* Defense */}
-                  <div className="flex gap-7">
+                  <div className="flex gap-[4.5cqw]">
                     {(["LB", "CB", "CB", "RB"] as const).map((pos, i) => (
                       <div key={i} className="flex flex-col items-center gap-0.5">
-                        <div className="flex h-11 w-10 items-center justify-center rounded bg-gradient-to-b from-[#6f7b8d] to-[#374151] shadow-sm">
-                          <span className="text-[0.6rem] font-black text-white">?</span>
+                        <div className="flex aspect-[10/11] w-[8.6cqw] items-center justify-center rounded bg-gradient-to-b from-[#6f7b8d] to-[#374151] shadow-sm">
+                          <span className="text-[2.3cqw] font-black text-white">?</span>
                         </div>
-                        <span className="text-[0.45rem] font-bold text-white/60">{pos}</span>
+                        <span className="text-[1.7cqw] font-bold text-white/60">{pos}</span>
                       </div>
                     ))}
                   </div>
                   {/* GK */}
                   <div className="flex flex-col items-center gap-0.5">
-                    <div className="flex h-11 w-10 items-center justify-center rounded bg-gradient-to-b from-[#6f7b8d] to-[#374151] shadow-sm">
-                      <span className="text-[0.6rem] font-black text-white">?</span>
+                    <div className="flex aspect-[10/11] w-[8.6cqw] items-center justify-center rounded bg-gradient-to-b from-[#6f7b8d] to-[#374151] shadow-sm">
+                      <span className="text-[2.3cqw] font-black text-white">?</span>
                     </div>
-                    <span className="text-[0.45rem] font-bold text-white/60">GK</span>
+                    <span className="text-[1.7cqw] font-bold text-white/60">GK</span>
                   </div>
                 </div>
               </div>
