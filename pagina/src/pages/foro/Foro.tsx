@@ -41,11 +41,12 @@ type ForumComment = {
 };
 type SortMode = "hot" | "recent" | "top" | "commented";
 type NormalizedImage = { dataUrl: string; width: number; height: number };
+type ReportTarget = { type: "post" | "comment"; id: number };
 
 const SORTS: Array<{ key: SortMode; label: string }> = [
-  { key: "hot", label: "Hot" },
+  { key: "hot", label: "Populares" },
   { key: "recent", label: "Recientes" },
-  { key: "top", label: "Top" },
+  { key: "top", label: "Más votados" },
   { key: "commented", label: "Comentados" },
 ];
 
@@ -121,6 +122,9 @@ export default function Foro({ user }: { user: User }) {
   const [commentText, setCommentText] = useState("");
   const [commenting, setCommenting] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   const currentSubforum = useMemo(
     () => subforums.find((subforum) => subforum.slug === selectedSubforum) || subforums[0],
@@ -169,7 +173,7 @@ export default function Foro({ user }: { user: User }) {
       setSelectedPost(json.data.post);
       setComments(json.data.comments || []);
     } catch (error) {
-      showNotice(error instanceof Error ? error.message : "No se pudo cargar la discusion", false);
+      showNotice(error instanceof Error ? error.message : "No se pudo cargar la discusión", false);
       setSelectedPostId(null);
     } finally {
       setDetailLoading(false);
@@ -189,7 +193,7 @@ export default function Foro({ user }: { user: User }) {
   const submitPost = async () => {
     if (!currentSubforum) return;
     if (postForm.title.trim().length < 4 || postForm.body.trim().length < 1) {
-      showNotice("Completa titulo y contenido", false);
+      showNotice("Completa título y contenido", false);
       return;
     }
 
@@ -206,9 +210,9 @@ export default function Foro({ user }: { user: User }) {
       });
       setPostForm({ title: "", body: "" });
       setImage(null);
-      if (json.pendingReview) showNotice("Tu publicacion quedo pendiente de revision");
+      if (json.pendingReview) showNotice("Tu publicación quedó pendiente de revisión");
       else {
-        showNotice("Publicacion creada");
+        showNotice("Publicación creada");
         await loadPosts();
         setCreateOpen(false);
         navigate(`/foro/${json.data.id}`);
@@ -229,7 +233,7 @@ export default function Foro({ user }: { user: User }) {
         body: JSON.stringify({ body: commentText.trim() }),
       });
       setCommentText("");
-      if (json.pendingReview) showNotice("Tu comentario quedo pendiente de revision");
+      if (json.pendingReview) showNotice("Tu comentario quedó pendiente de revisión");
       else setComments((prev) => [...prev, json.data]);
       await loadPosts();
     } catch (error) {
@@ -251,24 +255,58 @@ export default function Foro({ user }: { user: User }) {
     }
   };
 
-  const report = async (targetType: "post" | "comment", targetId: number) => {
-    const reason = window.prompt("Motivo del reporte");
-    if (!reason?.trim()) return;
+  const openReport = (type: ReportTarget["type"], id: number) => {
+    setReportReason("");
+    setReportTarget({ type, id });
+  };
+
+  const closeReport = () => {
+    if (reporting) return;
+    setReportTarget(null);
+    setReportReason("");
+  };
+
+  useEffect(() => {
+    if (!reportTarget) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !reporting) {
+        setReportTarget(null);
+        setReportReason("");
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [reportTarget, reporting]);
+
+  const report = async () => {
+    const reason = reportReason.trim();
+    if (!reportTarget || reason.length < 3) return;
+    setReporting(true);
     try {
       await api("/api/foro/reports", {
         method: "POST",
-        body: JSON.stringify({ target_type: targetType, target_id: targetId, reason: reason.trim() }),
+        body: JSON.stringify({
+          target_type: reportTarget.type,
+          target_id: reportTarget.id,
+          reason,
+        }),
       });
+      setReportTarget(null);
+      setReportReason("");
       showNotice("Reporte enviado");
     } catch (error) {
       showNotice(error instanceof Error ? error.message : "No se pudo reportar", false);
+    } finally {
+      setReporting(false);
     }
   };
 
   const removeOwn = async (kind: "post" | "comment", id: number) => {
     try {
       await api(kind === "post" ? `/api/foro/posts/${id}` : `/api/foro/comments/${id}`, { method: "DELETE" });
-      showNotice(kind === "post" ? "Post eliminado" : "Comentario eliminado");
+      showNotice(kind === "post" ? "Publicación eliminada" : "Comentario eliminado");
       if (kind === "post") {
         navigate("/foro");
         await loadPosts();
@@ -289,7 +327,7 @@ export default function Foro({ user }: { user: User }) {
     try {
       setImage(await normalizeImage(file));
     } catch (error) {
-      setImageError(error instanceof Error ? error.message : "Imagen invalida");
+      setImageError(error instanceof Error ? error.message : "Imagen inválida");
       setImage(null);
     }
   };
@@ -301,7 +339,7 @@ export default function Foro({ user }: { user: User }) {
             <div className="forum-create-head">
               <div>
                 <Badge tone="accent">/{currentSubforum?.slug || "foro"}</Badge>
-                <h2>Nueva discusion</h2>
+                <h2>Nueva discusión</h2>
               </div>
               <button type="button" aria-label="Cerrar" onClick={() => setCreateOpen(false)}>×</button>
             </div>
@@ -309,13 +347,13 @@ export default function Foro({ user }: { user: User }) {
               className="ph-input"
               value={postForm.title}
               onChange={(event) => setPostForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Titulo de la discusion"
+              placeholder="Título de la discusión"
               maxLength={160}
             />
             <textarea
               value={postForm.body}
               onChange={(event) => setPostForm((prev) => ({ ...prev, body: event.target.value }))}
-              placeholder="Que quieres debatir?"
+              placeholder="¿Qué quieres debatir?"
               rows={5}
             />
             <div className="forum-image-row">
@@ -326,7 +364,7 @@ export default function Foro({ user }: { user: User }) {
               {image && <button type="button" onClick={() => setImage(null)}>Quitar imagen</button>}
               {imageError && <span>{imageError}</span>}
             </div>
-            {image && <img src={image.dataUrl} alt="Preview" className="forum-preview" />}
+            {image && <img src={image.dataUrl} alt="Vista previa" className="forum-preview" />}
             <div className="forum-composer-actions">
               <span>{postForm.title.length}/160</span>
               <Button type="button" onClick={submitPost} disabled={posting}>{posting ? "Publicando..." : "Publicar"}</Button>
@@ -337,9 +375,66 @@ export default function Foro({ user }: { user: User }) {
       )
     : null;
 
+  const reportModal = reportTarget
+    ? createPortal(
+        <div className="forum-report-backdrop" onClick={closeReport}>
+          <form
+            className="forum-report-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forum-report-title"
+            onClick={(event) => event.stopPropagation()}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void report();
+            }}
+          >
+            <div className="forum-report-icon" aria-hidden="true">!</div>
+            <div className="forum-report-copy">
+              <span className="forum-report-eyebrow">Ayuda a cuidar la comunidad</span>
+              <h2 id="forum-report-title">
+                Reportar {reportTarget.type === "post" ? "publicación" : "comentario"}
+              </h2>
+              <p>Cuéntanos brevemente qué sucede. El equipo de moderación revisará el contenido.</p>
+            </div>
+
+            <label className="forum-report-field">
+              <span>Motivo del reporte</span>
+              <textarea
+                autoFocus
+                value={reportReason}
+                onChange={(event) => setReportReason(event.target.value)}
+                placeholder="Ej. Contiene insultos, spam o información inapropiada..."
+                rows={4}
+                minLength={3}
+                maxLength={800}
+                disabled={reporting}
+              />
+              <span className="forum-report-counter">{reportReason.length}/800</span>
+            </label>
+
+            <div className="forum-report-actions">
+              <button type="button" className="forum-report-cancel" onClick={closeReport} disabled={reporting}>
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="forum-report-submit"
+                disabled={reporting || reportReason.trim().length < 3}
+              >
+                {reporting ? "Enviando..." : "Enviar reporte"}
+              </button>
+            </div>
+          </form>
+        </div>,
+        document.body,
+      )
+    : null;
+
   return (
     <div className="forum-page">
       {createPostModal}
+      {reportModal}
       {notice && <div className={notice.ok ? "forum-toast is-ok" : "forum-toast is-error"}>{notice.text}</div>}
       {!detailPostId && (
         <div className="forum-topbar">
@@ -349,7 +444,7 @@ export default function Foro({ user }: { user: User }) {
             subtitle="Publica, vota y comenta con la comunidad. El contenido sensible se revisa antes de aparecer."
           />
           <button type="button" className="forum-create-btn" onClick={() => setCreateOpen(true)}>
-            Crear post
+            Crear publicación
           </button>
         </div>
       )}
@@ -387,12 +482,12 @@ export default function Foro({ user }: { user: User }) {
                           <button type="button" className={comment.my_vote === 1 ? "is-active" : ""} onClick={() => void vote("comment", comment.id, comment.my_vote, 1)}>▲</button>
                           <strong>{comment.score}</strong>
                           <button type="button" className={comment.my_vote === -1 ? "is-active" : ""} onClick={() => void vote("comment", comment.id, comment.my_vote, -1)}>▼</button>
-                          <button type="button" onClick={() => void report("comment", comment.id)}>Reportar</button>
+                          <button type="button" onClick={() => openReport("comment", comment.id)}>Reportar</button>
                           {comment.id_usuario === user.id_usuario && <button type="button" onClick={() => void removeOwn("comment", comment.id)}>Borrar</button>}
                         </div>
                       </article>
                     ))}
-                    {comments.length === 0 && <p className="forum-muted">Sin comentarios todavia.</p>}
+                    {comments.length === 0 && <p className="forum-muted">Sin comentarios todavía.</p>}
                   </div>
                 </div>
               )}
@@ -426,7 +521,7 @@ export default function Foro({ user }: { user: User }) {
           </div>
 
           {loading ? <p className="forum-muted">Cargando discusiones...</p> : posts.length === 0 ? (
-            <EmptyState title="Aun no hay discusiones" description="Se el primero en abrir una conversacion en este subforo." />
+            <EmptyState title="Aún no hay discusiones" description="Sé el primero en abrir una conversación en este subforo." />
           ) : (
             <div className="forum-feed">
               {posts.map((post) => (
@@ -446,12 +541,12 @@ export default function Foro({ user }: { user: User }) {
                     <p>{post.body}</p>
                     {post.image_url && <img src={post.image_url} alt="" className="forum-post-image" />}
                     <div className="forum-post-footer">
-                      <span>{post.comments_count} comentarios</span>
-                      <span>Ver discusion</span>
+                      <span>{post.comments_count} comentario{post.comments_count === 1 ? "" : "s"}</span>
+                      <span>Ver discusión</span>
                     </div>
                   </button>
                   <div className="forum-post-actions">
-                    <button type="button" onClick={() => void report("post", post.id)}>Reportar</button>
+                    <button type="button" onClick={() => openReport("post", post.id)}>Reportar</button>
                     {post.id_usuario === user.id_usuario && <button type="button" onClick={() => void removeOwn("post", post.id)}>Borrar</button>}
                   </div>
                 </article>

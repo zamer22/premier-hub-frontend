@@ -70,7 +70,7 @@ export default function ClubPicker({
               <button type="button" className="ol-picker-close" onClick={() => setOpen(false)} aria-label="Cerrar">×</button>
             </div>
             <div className="ol-picker-grid">
-              {clubs.length === 0 && <p className="ol-picker-empty">Cargando clubes…</p>}
+              {clubs.length === 0 && <p className="ol-picker-empty">Cargando clubes...</p>}
               {clubs.map((c) => (
                 <button
                   key={c.id}

@@ -78,7 +78,7 @@ export default function PlayerPicker({
           </>
         ) : (
           <span className="ol-picker-trigger-placeholder">
-            {loading ? "Cargando…" : placeholder}
+            {loading ? "Cargando..." : placeholder}
           </span>
         )}
         <span className="ol-picker-trigger-chevron" aria-hidden>▾</span>
@@ -92,7 +92,7 @@ export default function PlayerPicker({
               <button type="button" className="ol-picker-close" onClick={() => setOpen(false)} aria-label="Cerrar">×</button>
             </div>
             <div className="ol-picker-grid">
-              {loading && <p className="ol-picker-empty">Cargando jugadores…</p>}
+              {loading && <p className="ol-picker-empty">Cargando jugadores...</p>}
               {!loading && players.length === 0 && <p className="ol-picker-empty">No hay jugadores disponibles.</p>}
               {!loading && players.map((p) => {
                 const used = disabledIds?.has(p.id) ?? false;

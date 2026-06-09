@@ -36,7 +36,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isRegister && password !== confirmPassword) {
-      alert("Las contrasenas no coinciden");
+      alert("Las contraseñas no coinciden");
       return;
     }
 
@@ -79,13 +79,13 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           <h1 className="auth-title">{isRegister ? "Crear cuenta" : "Bienvenido"}</h1>
           <p className="auth-subtitle">
             {isRegister
-              ? "Crea tu perfil para competir, comprar items y seguir tu progreso."
+              ? "Crea tu perfil para competir, comprar objetos y seguir tu progreso."
               : "Entra a tu hub para seguir partidos, puntos y coleccionables."}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          <Field label="Correo electronico">
+          <Field label="Correo electrónico">
             <Input
               type="email"
               required
@@ -107,7 +107,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             </Field>
           )}
 
-          <Field label="Contrasena">
+          <Field label="Contraseña">
             <PasswordInput
               value={password}
               onChange={setPassword}
@@ -117,7 +117,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           </Field>
 
           {isRegister && (
-            <Field label="Confirmar contrasena">
+            <Field label="Confirmar contraseña">
               <PasswordInput
                 value={confirmPassword}
                 onChange={setConfirmPassword}
@@ -129,12 +129,12 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
           {!isRegister && (
             <button type="button" className="auth-forgot">
-              Olvidaste tu contrasena?
+              ¿Olvidaste tu contraseña?
             </button>
           )}
 
           <Button type="submit" disabled={loading}>
-            {loading ? "Cargando..." : isRegister ? "Crear cuenta" : "Iniciar sesion"}
+            {loading ? "Cargando..." : isRegister ? "Crear cuenta" : "Iniciar sesión"}
           </Button>
 
           <div className="auth-divider">
@@ -149,13 +149,13 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           </Button>
 
           <p className="auth-switch-copy">
-            {isRegister ? "Ya tienes cuenta? " : "No tienes cuenta? "}
+            {isRegister ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
             <button
               type="button"
               className="auth-switch-button"
               onClick={() => setIsRegister(!isRegister)}
             >
-              {isRegister ? "Inicia sesion" : "Registrate"}
+              {isRegister ? "Inicia sesión" : "Regístrate"}
             </button>
           </p>
         </form>
@@ -189,7 +189,7 @@ function PasswordInput({
         type="button"
         onClick={onToggle}
         className="auth-password-toggle"
-        aria-label={show ? "Ocultar contrasena" : "Mostrar contrasena"}
+        aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
       >
         {show ? <EyeOpen /> : <EyeOff />}
       </button>

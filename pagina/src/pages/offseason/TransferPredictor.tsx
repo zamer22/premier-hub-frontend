@@ -15,8 +15,8 @@ const CIRC = 2 * Math.PI * 42; // circunferencia para r=42
 const INSTRUCTIVO_PASOS = [
   { titulo: "Elige el equipo y el jugador", detalle: "Selecciona de qué club sacar al jugador y a quién quieres analizar. Cada selector abre una tarjeta con escudos o fotos." },
   { titulo: "Elige el club destino", detalle: "Indica a qué equipo de la Premier League llegaría el jugador." },
-  { titulo: "Ajusta los detalles (opcional)", detalle: "Puedes escribir su valor de mercado y años de contrato, o dejarlo en automático para que el modelo lo estime." },
-  { titulo: "Predice", detalle: "El modelo te da un porcentaje de aptitud y los factores que más influyen. Mide qué tanto encaja el jugador con el perfil de un fichaje típico de la liga, no si el traspaso se cerrará." },
+  { titulo: "Ajusta los detalles (opcional)", detalle: "Puedes escribir su valor de mercado y años de contrato, o dejarlo en automático para estimarlo por ti." },
+  { titulo: "Predice", detalle: "Te damos un porcentaje de aptitud y los factores que más influyen. Mide qué tanto encaja el jugador con el perfil de un fichaje típico de la liga, no si el traspaso se cerrará." },
 ];
 
 type PredictResult = { probability: number; fit_score: "Low" | "Medium" | "High"; reasons: string[] };
@@ -108,7 +108,7 @@ export default function TransferPredictor({
           <span className="ol-accent" />
           <h2>Jugador y destino</h2>
           <InstructivoModal
-            titulo="Transfer Predictor"
+            titulo="Predictor de Fichajes"
             intro="Calcula qué tan bien encaja un jugador en el perfil de un fichaje típico de la Premier League."
             pasos={INSTRUCTIVO_PASOS}
           />
@@ -211,7 +211,7 @@ export default function TransferPredictor({
             />
             {mvTooLow && (
               <span className="ol-field-hint ol-field-hint--error">
-                Mínimo €0.5M — deja vacío para usar el estimado del modelo
+                Mínimo €0.5M — deja vacío para usar el estimado automático
               </span>
             )}
           </label>
@@ -236,7 +236,7 @@ export default function TransferPredictor({
           onClick={handlePredict}
           disabled={!canPredict || loading}
         >
-          {loading ? "Analizando transferencia…" : "Predecir transferencia"}
+          {loading ? "Analizando transferencia..." : "Predecir transferencia"}
         </button>
         {error && <p className="ol-error">{error}</p>}
       </section>
@@ -249,7 +249,7 @@ export default function TransferPredictor({
         </div>
 
         <p style={{ fontSize: "0.75rem", color: "var(--ph-muted)", margin: "0 0 0.75rem" }}>
-          El modelo mide qué tan bien encaja este jugador en el perfil histórico de un fichaje de la Premier League. No es la probabilidad de que se cierre este traspaso específico.
+          Medimos qué tan bien encaja este jugador en el perfil histórico de un fichaje de la Premier League. No es la probabilidad de que se cierre este traspaso específico.
         </p>
 
         {!result && !loading && (
@@ -271,7 +271,7 @@ export default function TransferPredictor({
         {loading && (
           <div className="ol-loading">
             <span className="ol-spinner" />
-            <p>El modelo ML está analizando la transferencia…</p>
+            <p>Analizando la transferencia...</p>
           </div>
         )}
 

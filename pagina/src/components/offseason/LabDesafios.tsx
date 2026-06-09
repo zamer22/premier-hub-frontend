@@ -107,6 +107,17 @@ export default function LabDesafios({ refreshKey = 0, onSaldoChange, showTitle =
   const diarios   = desafios.filter((d) => d.tipo === "diario");
   const semanales = desafios.filter((d) => d.tipo === "semanal");
 
+  const estaListo = (d: Desafio) =>
+    d.usuario_progreso >= d.condicion.cantidad && !d.usuario_completado;
+
+  const resumen = {
+    total:        desafios.length,
+    completados:  desafios.filter((d) => d.usuario_completado).length,
+    porReclamar:  desafios.filter(estaListo).length,
+    ptsGanados:   desafios.filter((d) => d.usuario_completado).reduce((s, d) => s + d.puntos, 0),
+    ptsDisponibles: desafios.filter((d) => !d.usuario_completado).reduce((s, d) => s + d.puntos, 0),
+  };
+
   const renderGroup = (items: Desafio[]) => {
     if (!items.length) return null;
     const tipo = items[0].tipo;
@@ -133,9 +144,6 @@ export default function LabDesafios({ refreshKey = 0, onSaldoChange, showTitle =
               >
                 <div className="lab-desafio-card-top">
                   <div className="lab-desafio-card-text">
-                    {estado === "completado" && (
-                      <span className="lab-desafio-check">✓</span>
-                    )}
                     <p className="lab-desafio-titulo">{d.titulo}</p>
                     <p className="lab-desafio-desc">{d.descripcion}</p>
                   </div>
@@ -165,7 +173,7 @@ export default function LabDesafios({ refreshKey = 0, onSaldoChange, showTitle =
                     disabled={reclamando.has(d.id)}
                     onClick={() => handleReclamar(d)}
                   >
-                    {reclamando.has(d.id) ? "Reclamando…" : `Reclamar ${d.puntos} pts`}
+                    {reclamando.has(d.id) ? "Reclamando..." : `Reclamar ${d.puntos} pts`}
                   </button>
                 )}
               </div>
@@ -177,17 +185,52 @@ export default function LabDesafios({ refreshKey = 0, onSaldoChange, showTitle =
   };
 
   return (
-    <div className="ol-panel lab-desafios">
-      {showTitle && (
-        <div className="ol-section-title">
-          <span className="ol-accent" />
-          <h2>Desafíos</h2>
-          <span className="lab-desafios-hint">Completa acciones en el Lab y gana puntos</span>
+    <div className="lab-desafios-stack">
+      <div className="ol-panel lab-desafios-resumen-card">
+        <div className="lab-desafios-summary">
+        <div className="lab-desafios-progress">
+          <div className="lab-desafios-progress-head">
+            <span className="lab-desafios-progress-label">Progreso de hoy</span>
+            <span className="lab-desafios-progress-count">
+              {resumen.completados}/{resumen.total}
+            </span>
+          </div>
+          <div className="lab-desafios-progress-track">
+            <div
+              className="lab-desafios-progress-fill"
+              style={{ width: `${resumen.total ? (resumen.completados / resumen.total) * 100 : 0}%` }}
+            />
+          </div>
         </div>
-      )}
-      <div className="lab-desafios-content">
-        {renderGroup(diarios)}
-        {renderGroup(semanales)}
+        <div className="lab-desafios-stats">
+          <div className="lab-desafios-stat">
+            <span className="lab-desafios-stat-value">{resumen.ptsGanados}</span>
+            <span className="lab-desafios-stat-label">Pts ganados</span>
+          </div>
+          <div className="lab-desafios-stat">
+            <span className="lab-desafios-stat-value">{resumen.ptsDisponibles}</span>
+            <span className="lab-desafios-stat-label">Por ganar</span>
+          </div>
+          <div className={`lab-desafios-stat${resumen.porReclamar ? " lab-desafios-stat--alert" : ""}`}>
+            <span className="lab-desafios-stat-value">{resumen.porReclamar}</span>
+            <span className="lab-desafios-stat-label">Por reclamar</span>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div className="ol-panel lab-desafios">
+        {showTitle && (
+          <div className="ol-section-title">
+            <span className="ol-accent" />
+            <h2>Desafíos</h2>
+            <span className="lab-desafios-hint">Completa acciones en el Lab y gana puntos</span>
+          </div>
+        )}
+        <div className="lab-desafios-content">
+          {renderGroup(diarios)}
+          {renderGroup(semanales)}
+        </div>
       </div>
     </div>
   );

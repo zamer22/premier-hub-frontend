@@ -32,7 +32,7 @@ export default function OrderList({ pedidos, selectedId, onSelect, loading }: Pr
             </div>
             <p className="adm-order__name">{p.producto?.nombre || `Producto #${p.id_producto}`}</p>
             <p className="adm-order__user">
-              {p.usuario?.nickname || p.usuario?.correo || `User #${p.id_usuario}`}
+              {p.usuario?.nickname || p.usuario?.correo || `Usuario #${p.id_usuario}`}
               {p.variante ? ` · talla ${p.variante.talla}` : ""}
             </p>
             <p className="adm-order__date">{new Date(p.fecha_pedido).toLocaleString("es-MX")}</p>

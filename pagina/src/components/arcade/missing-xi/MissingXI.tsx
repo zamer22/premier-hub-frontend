@@ -11,16 +11,16 @@ import GameInstructions, { type InstructionStep } from "../GameInstructions";
 // Instrucciones del juego "Missing XI".
 const MISSING_XI_TITLE = "Cómo jugar Missing XI";
 const MISSING_XI_STEPS: InstructionStep[] = [
-  { icon: "⚽", text: "Debes descubrir a los 11 titulares del equipo ganador de un partido histórico." },
-  { icon: "🎽", text: "Selecciona una camiseta de la cancha para comenzar a adivinar al jugador." },
-  { icon: "6️⃣", text: "Tienes hasta 6 intentos para descubrir cada jugador." },
-  { icon: "🟩", text: "Las letras verdes están en la posición correcta." },
-  { icon: "🟨", text: "Las letras amarillas pertenecen al nombre, pero están en otra posición." },
-  { icon: "⬛", text: "Las letras oscuras no aparecen en el nombre." },
-  { icon: "💯", text: "Adivinar sin pista otorga 100 puntos." },
-  { icon: "💡", text: "Usar la pista muestra una imagen del jugador y reduce la recompensa a 50 puntos." },
-  { icon: "🏳️", text: "Rendirse o agotar los intentos otorga 0 puntos para ese jugador." },
-  { icon: "🏁", text: "El reto termina cuando todos los jugadores estén acertados o fallados." },
+  { titulo: "Objetivo", detalle: "Descubre a los 11 titulares del equipo ganador de un partido histórico." },
+  { titulo: "Elige una camiseta", detalle: "Selecciona una camiseta de la cancha para empezar a adivinar al jugador." },
+  { titulo: "6 intentos", detalle: "Tienes hasta 6 intentos para descubrir cada jugador." },
+  { titulo: "Letra verde", detalle: "La letra está en la posición correcta." },
+  { titulo: "Letra amarilla", detalle: "La letra pertenece al nombre, pero está en otra posición." },
+  { titulo: "Letra oscura", detalle: "La letra no aparece en el nombre." },
+  { titulo: "Sin pista: 100 puntos", detalle: "Adivinar sin usar la pista otorga 100 puntos." },
+  { titulo: "Con pista: 50 puntos", detalle: "Usar la pista muestra una imagen del jugador y reduce la recompensa a 50 puntos." },
+  { titulo: "Sin acertar: 0 puntos", detalle: "Rendirse o agotar los intentos otorga 0 puntos para ese jugador." },
+  { titulo: "Fin del reto", detalle: "El reto termina cuando todos los jugadores estén acertados o fallados." },
 ];
 
 const PUBLIC_LOAD_ERROR =
@@ -217,13 +217,13 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
       })
       .catch((error: Error & { status?: number }) => {
         if (error.status === 409) {
-          setSaveMsg("Este Missing XI ya habia sido guardado.");
+          setSaveMsg("Este Missing XI ya había sido guardado.");
           setMatch((prev) => (prev ? { ...prev, played: true } : prev));
           return;
         }
 
         console.error("[MissingXI] Error al guardar puntos", error);
-        setSaveMsg("No se pudieron guardar los puntos. Tu avance quedo en cache.");
+        setSaveMsg("No se pudieron guardar los puntos. Tu avance quedó en caché.");
       });
   }, [gameOver, match, onSaldoChange, players]);
 
@@ -278,15 +278,17 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
         <div className="relative mb-4 grid justify-items-start gap-2">
-          <GameInstructions
-            title={MISSING_XI_TITLE}
-            steps={MISSING_XI_STEPS}
-            buttonClassName="absolute right-0 top-0"
-          />
           <BackButton />
-          <div>
+          <div className="w-full">
             <p className="ph-eyebrow">Arcade</p>
-            <h1 className="ph-title">Missing XI</h1>
+            <div className="flex w-full items-center gap-4">
+              <h1 className="ph-title min-w-0 flex-1">Missing XI</h1>
+              <GameInstructions
+                title={MISSING_XI_TITLE}
+                steps={MISSING_XI_STEPS}
+                buttonClassName="ml-auto"
+              />
+            </div>
             <p className="ph-subtitle">Cargando reto diario desde Premier Hub</p>
           </div>
         </div>
@@ -307,15 +309,17 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
         <div className="relative mb-4 grid justify-items-start gap-2">
-          <GameInstructions
-            title={MISSING_XI_TITLE}
-            steps={MISSING_XI_STEPS}
-            buttonClassName="absolute right-0 top-0"
-          />
           <BackButton />
-          <div>
+          <div className="w-full">
             <p className="ph-eyebrow">Arcade</p>
-            <h1 className="ph-title">Missing XI</h1>
+            <div className="flex w-full items-center gap-4">
+              <h1 className="ph-title min-w-0 flex-1">Missing XI</h1>
+              <GameInstructions
+                title={MISSING_XI_TITLE}
+                steps={MISSING_XI_STEPS}
+                buttonClassName="ml-auto"
+              />
+            </div>
             <p className="ph-subtitle">No se pudo cargar el reto diario</p>
           </div>
         </div>
@@ -341,15 +345,17 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
     return (
       <main className="ph-page min-w-0 overflow-x-clip">
         <div className="relative mb-5 grid justify-items-start gap-3">
-          <GameInstructions
-            title={MISSING_XI_TITLE}
-            steps={MISSING_XI_STEPS}
-            buttonClassName="absolute right-0 top-0"
-          />
           <BackButton />
-          <div>
+          <div className="w-full">
             <p className="ph-eyebrow">Arcade</p>
-            <h1 className="ph-title">Missing XI</h1>
+            <div className="flex w-full items-center gap-4">
+              <h1 className="ph-title min-w-0 flex-1">Missing XI</h1>
+              <GameInstructions
+                title={MISSING_XI_TITLE}
+                steps={MISSING_XI_STEPS}
+                buttonClassName="ml-auto"
+              />
+            </div>
           </div>
         </div>
         <GameSummary
@@ -370,17 +376,19 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
 
       {/* Back button + title */}
       <div className="relative mb-[clamp(0.5rem,1.4vh,1rem)] grid justify-items-start gap-2 [@media_(min-width:841px)_and_(max-height:700px)]:mb-[0.35rem]">
-        <GameInstructions
-          title={MISSING_XI_TITLE}
-          steps={MISSING_XI_STEPS}
-          buttonClassName="absolute right-0 top-0 z-10"
-        />
         <BackButton />
-        <div>
+        <div className="w-full">
           <p className="ph-eyebrow">Arcade</p>
-          <h1 className="ph-title [@media_(min-width:841px)_and_(max-height:780px)]:text-[clamp(1.35rem,2vw,1.8rem)]">
-            Missing XI
-          </h1>
+          <div className="flex w-full items-center gap-4">
+            <h1 className="ph-title min-w-0 flex-1 [@media_(min-width:841px)_and_(max-height:780px)]:text-[clamp(1.35rem,2vw,1.8rem)]">
+              Missing XI
+            </h1>
+            <GameInstructions
+              title={MISSING_XI_TITLE}
+              steps={MISSING_XI_STEPS}
+              buttonClassName="ml-auto"
+            />
+          </div>
           <p className="ph-subtitle [@media_(min-width:841px)_and_(max-height:780px)]:mt-1 [@media_(min-width:841px)_and_(max-height:780px)]:leading-[1.35]">
             Adivina la alineación del equipo ganador
           </p>
@@ -388,7 +396,7 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
       </div>
 
       {/* Pitch + match info layout */}
-      <div className="mx-auto grid w-full max-w-[min(100%,520px)] grid-cols-[minmax(0,1fr)] gap-4 max-[520px]:gap-[0.85rem] min-[981px]:max-w-[min(100%,1120px)] min-[981px]:grid-cols-[minmax(260px,clamp(300px,32vw,380px))_minmax(0,1fr)] min-[981px]:items-start min-[981px]:gap-[clamp(1rem,2vw,1.75rem)]">
+      <div className="mx-auto grid w-full max-w-[min(100%,520px)] grid-cols-[minmax(0,1fr)] gap-4 max-[520px]:gap-[0.85rem] min-[981px]:max-w-[min(100%,1120px)] min-[981px]:grid-cols-[minmax(260px,clamp(300px,32vw,380px))_minmax(0,1fr)] min-[981px]:items-stretch min-[981px]:gap-[clamp(1rem,2vw,1.75rem)]">
 
         {/* LEFT — pitch */}
         <div className="flex justify-center">
@@ -398,7 +406,7 @@ export default function MissingXI({ onSaldoChange }: MissingXIProps) {
         </div>
 
         {/* RIGHT — info */}
-        <div className="flex min-w-0 flex-col gap-[clamp(0.75rem,1.4vh,1rem)] pt-[0.15rem]">
+        <div className="flex min-h-0 min-w-0 flex-col gap-[clamp(0.75rem,1.4vh,1rem)] pt-[0.15rem]">
 
           {selectedPlayer ? (
             <PlayerWordle

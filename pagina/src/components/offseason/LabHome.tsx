@@ -17,23 +17,23 @@ type ModuleCard = {
 const MODULE_CARDS: ModuleCard[] = [
   {
     key: "transfer",
-    title: "Transfer Predictor",
+    title: "Predictor de Fichajes",
     description: "Predice la probabilidad de que un jugador sea fichado por un club de la Premier League, considerando su valor de mercado, estadísticas y la posición del club destino.",
-    meta: "XGBoost · 73% de precisión · Transfermarkt",
+    meta: "Basado en fichajes reales de la Premier",
     visual: <TransferVisual />,
   },
   {
     key: "simulator",
-    title: "Season Simulator",
-    description: "Diseña una ventana de fichajes hipotética — hasta 5 traspasos — y simula cómo cambiaría la tabla de posiciones de la Premier League temporada completa.",
-    meta: "Monte Carlo · 1 000 iteraciones · Poisson",
+    title: "Simulador de Temporada",
+    description: "Diseña una ventana de fichajes hipotética — hasta 5 traspasos — y simula cómo cambiaría la tabla de posiciones de la Premier League durante una temporada completa.",
+    meta: "Simula la temporada completa miles de veces",
     visual: <SimulatorVisual />,
   },
   {
     key: "rewind",
-    title: "Match Rewind",
+    title: "Rebobina el Partido",
     description: "Elige un partido histórico, elimina goles o expulsiones clave y descubre cómo habría terminado si esos eventos nunca hubieran ocurrido.",
-    meta: "xG Proxy · Poisson 5 000 iter. · API-Football",
+    meta: "Revive partidos históricos y cambia la historia",
     visual: <RewindVisual />,
   },
 ];
@@ -49,7 +49,7 @@ export default function LabHome({ onSelect, refreshKey = 0 }: Props) {
       <PageHeader
         eyebrow="Laboratorio"
         title="Laboratorio Premier"
-        subtitle="Explora escenarios hipotéticos de la Premier League con modelos de ML. Predice fichajes, simula temporadas completas y revive partidos históricos."
+        subtitle="Explora escenarios hipotéticos de la Premier League. Predice fichajes, simula temporadas completas y revive partidos históricos."
         actions={<LabDesafiosBanner onOpen={() => onSelect("desafios")} refreshKey={refreshKey} />}
       />
 

@@ -40,7 +40,7 @@ export default function DireccionForm({ form, onChange, onSave, onCancel, saving
           <label className="t-section-title">Ubicación en mapa</label>
           <button type="button" onClick={handleGeolocate} className="t-dir-geo-btn">Usar mi ubicación</button>
         </div>
-        <p className="t-dir-hint">Hacé click en el mapa para fijar la ubicación.</p>
+        <p className="t-dir-hint">Haz clic en el mapa para fijar la ubicación.</p>
         <LocationPicker lat={form.lat} lng={form.lng} onChange={(lat, lng) => onChange({ ...form, lat, lng })} />
         {form.lat != null && form.lng != null && (
           <p className="t-dir-coords">{form.lat.toFixed(5)}, {form.lng.toFixed(5)}</p>

@@ -36,7 +36,7 @@ function flaggedCategories(item: ModerationItem) {
   return Object.entries(item.categories || {})
     .filter(([, value]) => value)
     .map(([key]) => key)
-    .join(", ") || "flagged";
+    .join(", ") || "marcado";
 }
 
 export default function AdminForum({ user }: { user: AdminUser }) {
@@ -120,11 +120,11 @@ export default function AdminForum({ user }: { user: AdminUser }) {
       {toast && <div className="adm-toast adm-toast--ok">{toast}</div>}
       <section className="adm-forum-hero">
         <div>
-          <p>Moderacion</p>
+          <p>Moderación</p>
           <h2>Foro PremierHub</h2>
           <span>Revisa alertas, reportes y comunidades.</span>
         </div>
-        <strong>{moderation.length} pendientes</strong>
+        <strong>{moderation.length} pendiente{moderation.length === 1 ? "" : "s"}</strong>
       </section>
 
       <section className="adm-forum-grid">
@@ -133,7 +133,7 @@ export default function AdminForum({ user }: { user: AdminUser }) {
           <div className="adm-forum-form">
             <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Nombre" />
             <input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value })} placeholder="slug-opcional" />
-            <input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Descripcion" />
+            <input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Descripción" />
             <button onClick={createSubforum} disabled={!form.name.trim()}>Crear</button>
           </div>
           <div className="adm-forum-list">
@@ -150,7 +150,7 @@ export default function AdminForum({ user }: { user: AdminUser }) {
         </div>
 
         <div className="adm-forum-panel">
-          <h3>Cola de revision AI</h3>
+          <h3>Cola de revisión IA</h3>
           <div className="adm-forum-list">
             {moderation.map((item) => (
               <article key={item.id}>

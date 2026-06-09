@@ -20,7 +20,7 @@ export default function CreateProductModal({ form, onChange, error, saving, onCl
         <div className="adm-store-modal-head">
           <div>
             <h3>Crear objeto</h3>
-            <p>Agrega un item nuevo al catálogo base de la tienda.</p>
+            <p>Agrega un objeto nuevo al catálogo base de la tienda.</p>
           </div>
           <button type="button" onClick={onClose}>×</button>
         </div>
@@ -89,12 +89,12 @@ export default function CreateProductModal({ form, onChange, error, saving, onCl
             <input
               value={form.rareza}
               onChange={(e) => patch({ rareza: e.target.value })}
-              placeholder="Common, Rare, Elite..."
+              placeholder="Común, Raro, Élite..."
             />
           </label>
 
           <label className="adm-store-field">
-            <span>Temporada ID</span>
+            <span>ID de temporada</span>
             <input
               type="number"
               value={form.id_temporada}
@@ -113,7 +113,7 @@ export default function CreateProductModal({ form, onChange, error, saving, onCl
           </label>
 
           <label className="adm-store-field is-wide">
-            <span>Imagen URL</span>
+            <span>URL de imagen</span>
             <input
               value={form.imagen}
               onChange={(e) => patch({ imagen: e.target.value })}
